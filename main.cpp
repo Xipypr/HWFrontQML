@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "hwconnector.h"
+#include <hwconnector.h>
 
 int main(int argc, char *argv[])
 {
@@ -20,7 +20,8 @@ int main(int argc, char *argv[])
 //    }, Qt::QueuedConnection);
 //    engine.load(url);
 
-    HWConnector connector;
+    HWConnector connector("", 0);
+    connector.makeGetRequest();
 
     return app.exec();
 }
