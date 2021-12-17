@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Window 2.12
 
 ApplicationWindow {
     width: 640
@@ -7,6 +8,14 @@ ApplicationWindow {
     visible: true
     title: qsTr("Tabs")
     id: root
+
+    Connections{
+        target: connector
+
+        function onTestSignal() {
+            console.log("ПРИГШЛО");
+        }
+    }
 
     header: TabBar {
         id: tabBar

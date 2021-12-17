@@ -33,7 +33,7 @@ Page {
 
         function addDevice()
         {
-            console.log("AAAAAAAA")
+            console.log("Adding deivce")
             listModel.append({"index": listView.count})
             console.log(listView.count)
         }

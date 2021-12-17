@@ -48,6 +48,7 @@ RowLayout {
                 else
                 {
                     console.log(textField.text)
+                    connector.makeGetRequest(textField.text)
                     connectButton.text = "Stop connecting"
                     connectingIndicator.running = true
                 }
