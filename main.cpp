@@ -2,7 +2,12 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
+#include <QObject>
+
 #include <hwconnector.h>
+#include <devicebuilder.h>
+
+#include "core.h"
 
 int main(int argc, char *argv[])
 {
@@ -12,11 +17,14 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-    HWConnector connector("", 0);
+    Core core;
+
+//    HWConnector connector("", 0);
+//    DeviceBuilder deviceBuilder;
 
     QQmlApplicationEngine engine;
     QQmlContext * context = engine.rootContext();
-    context->setContextProperty("connector", &connector);
+    context->setContextProperty("core", &core);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

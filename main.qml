@@ -10,7 +10,7 @@ ApplicationWindow {
     id: root
 
     Connections{
-        target: connector
+        target: core
 
         function onTestSignal() {
             console.log("ПРИГШЛО");

@@ -21,7 +21,8 @@ RowLayout {
         TextField {
             id: textField
             focus: true
-            placeholderText: qsTr("192.168.1.1")
+            text: "192.168.1.68"
+//            placeholderText: qsTr("192.168.1.1")
 //            inputMask: "000.000.000.000"
 //            validator: RegularExpressionValidator {
 //                regularExpression:  /^((?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){0,3}(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/
@@ -48,7 +49,7 @@ RowLayout {
                 else
                 {
                     console.log(textField.text)
-                    connector.makeGetRequest(textField.text)
+                    core.onMakeGetRequest(textField.text)
                     connectButton.text = "Stop connecting"
                     connectingIndicator.running = true
                 }
@@ -66,5 +67,14 @@ RowLayout {
             text: "Delete Device"
             onClicked: root.removeThisObject(root.index)
         }
+
+        Connections{
+            target: core
+
+            function onTestSignal() {
+                console.log("ПРИГШЛО")
+            }
+        }
+
     }
 }
