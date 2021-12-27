@@ -7,6 +7,8 @@ Item {
 
     property int index
 
+    property int connectionInitialized: 0
+
     signal removeThisObject(int index)
 
 RowLayout {
@@ -35,31 +37,37 @@ RowLayout {
         Button{
             id: connectButton
             text: "Connect Device"
-            onClicked: sendRequest()
+            onClicked: clickConnectButton()
 
-            function sendRequest(){
-                console.log(root.index)
-                //!!! TODO Переделать
+            function clickConnectButton(){
                 if (connectingIndicator.running)
                 {
-                    console.log(textField.text)
-                    connectButton.text = "Connect Device"
-                    connectingIndicator.running = false
+                    stopSendingRequests()
                 }
                 else
                 {
-                    console.log(textField.text)
-                    core.onMakeGetRequest(textField.text)
-                    connectButton.text = "Stop connecting"
-                    connectingIndicator.running = true
+                    sendRequest()
                 }
             }
+
+            function sendRequest(){
+                core.onMakeGetRequest(textField.text)
+                connectButton.text = "Stop connecting"
+                connectingIndicator.running = true
+            }
+
+            function stopSendingRequests(){
+                connectButton.text = "Connect Device"
+                connectingIndicator.running = false
+            }
+
         }
 
         BusyIndicator{
             id: connectingIndicator
             visible: true
             running: false
+
         }
 
         Button{
@@ -71,10 +79,10 @@ RowLayout {
         Connections{
             target: core
 
-            function onTestSignal() {
-                console.log("ПРИГШЛО")
+            function onDeviceCreated() {
+                connectingIndicator.running = false
+                connectButton.text = "Reconnect"
             }
         }
-
     }
 }
