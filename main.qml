@@ -9,12 +9,19 @@ ApplicationWindow {
     title: qsTr("Tabs")
     id: root
 
+    Loader {
+            id: pagesLoader
+
+            anchors.fill: parent
+            asynchronous: true
+//            source: "Background_1.qml"
+
+//            onStatusChanged: console.log("status", status,  "item", item)
+//            onLoaded: item.color = "green"
+        }
+
     Connections{
         target: core
-
-        function onTestSignal() {
-            console.log("ПРИГШЛО");
-        }
     }
 
     header: TabBar {
