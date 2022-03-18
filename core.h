@@ -10,11 +10,16 @@ class Core : public QObject
 {
     Q_OBJECT
 public:
-    explicit Core(QObject *parent = nullptr);
+    explicit Core();
+    ~Core();
 
 public slots:
     void onStartMonitoring();
     void onMakeGetRequest(const QString & target);
+
+    void onDeviceCreated(DesktopDevice * device);
+
+    Q_INVOKABLE QObject * getDevice();
 
 signals:
     void deviceCreated(DesktopDevice * device);
@@ -24,6 +29,7 @@ signals:
 private:
     HWConnector * m_connector;
     DeviceBuilder * m_deviceCreator;
+    Device * tmpDevice;
 
 };
 

@@ -5,5 +5,21 @@
         <file>PageAuthForm.qml</file>
         <file>AddIpForm.qml</file>
         <file>RawLayioutConnection.qml</file>
+        <file>progbarstyles/Cir_1.qml</file>
+        <file>progbarstyles/Cir_2.qml</file>
+        <file>progbarstyles/Cir_3.qml</file>
+        <file>progbarstyles/Cir_4.qml</file>
+        <file>progbarstyles/Cir_5.qml</file>
+        <file>progbarstyles/Cir_6.qml</file>
+        <file>progbarstyles/Cir_7.qml</file>
+        <file>progbarstyles/Cir_8.qml</file>
+        <file>progbarstyles/Cir_9.qml</file>
+        <file>progbarstyles/Hor_1.qml</file>
+        <file>progbarstyles/Hor_2.qml</file>
+        <file>progbarstyles/Hor_3.qml</file>
+        <file>progbarstyles/Hor_4.qml</file>
+        <file>progbarstyles/Ver_1.qml</file>
+        <file>CustomItem.qml</file>
+        <file>PageDevicesInfo.qml</file>
     </qresource>
 </RCC>

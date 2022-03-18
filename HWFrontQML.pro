@@ -23,14 +23,14 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-HWConnector-Desktop_Qt_6_1_3_MinGW_64_bit-Debug/release/ -lHWConnector
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-HWConnector-Desktop_Qt_6_1_3_MinGW_64_bit-Debug/debug/ -lHWConnector
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-HWConnector-Desktop_Qt_6_2_3_MinGW_64_bit-Release/release/ -lHWConnector
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-HWConnector-Desktop_Qt_6_2_3_MinGW_64_bit-Debug/debug/ -lHWConnector
 
 INCLUDEPATH += $$PWD/../HWConnector
 DEPENDPATH += $$PWD/../HWConnector
 
-win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-DeviceBuilder-Desktop_Qt_6_1_3_MinGW_64_bit-Debug/release/ -lDeviceBuilder
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-DeviceBuilder-Desktop_Qt_6_1_3_MinGW_64_bit-Debug/debug/ -lDeviceBuilder
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build-DeviceBuilder-Desktop_Qt_6_2_3_MinGW_64_bit-Release/release/ -lDeviceBuilder
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build-DeviceBuilder-Desktop_Qt_6_2_3_MinGW_64_bit-Debug/debug/ -lDeviceBuilder
 
 INCLUDEPATH += $$PWD/../DeviceBuilder/src
 DEPENDPATH += $$PWD/../DeviceBuilder/src
