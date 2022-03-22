@@ -2,11 +2,14 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import "progbarstyles"
+import DeviceData 1.0
 
 Page {
     id: root
 
     property var objectsArray: []
+    property var desktop_device: ({})
+    property string destop_name: "My_device"
 
     ColumnLayout {
         spacing: 0
@@ -66,58 +69,14 @@ Page {
             target: core
 
             function onDeviceCreated() {
-//                test.titleText = "AAAA"
-                objectsArray.push(core.getDevice)
+                desktop_device = core.device();
+                if ( desktop_device.type === Device.DESKTOP )
+                {
+                    destop_name = desktop_device.name;
+                    objectsArray = desktop_device.devicesList();
+                    console.log(objectsArray[0].name)
+                }
             }
         }
-
-        /*
-            RowLayout {
-                spacing: 0
-                Layout.preferredHeight: 40
-                Rectangle {
-                    implicitWidth: 40
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    color: "darkBlue"
-                }
-                Rectangle {
-                    implicitWidth: 20
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    color: "blue"
-                }
-                Rectangle {
-                    implicitWidth: 40
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    color: "lightBlue"
-                }
-                Rectangle {
-                    implicitWidth: 40
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    color: "darkBlue"
-                }
-                Rectangle {
-                    implicitWidth: 40
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    color: "blue"
-                }
-
-                Rectangle {
-                    implicitWidth: 40
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    color: "lightBlue"
-                }
-                Rectangle {
-                    implicitWidth: 40
-                    Layout.fillHeight: true
-                    Layout.fillWidth: true
-                    color: "blue"
-                }
-            }*/
     }
 }

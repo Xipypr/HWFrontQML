@@ -9,7 +9,7 @@ Item {
     property int p_actualFPS: 0
 
     signal fps(int target, int actual)
-
+/*
     Timer {
         id: id_timer
         repeat: true
@@ -36,7 +36,7 @@ Item {
             fps(getTargetFPS(), getActualFPS())
         }
     }
-
+*/
     function getTargetFPS(){
         return 1000 / p_interval;
     }

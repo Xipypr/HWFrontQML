@@ -18,13 +18,17 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     Core core;
-
-//    HWConnector connector("", 0);
-//    DeviceBuilder deviceBuilder;
+    Device device;
+    DesktopDevice desktopDevice;
 
     QQmlApplicationEngine engine;
     QQmlContext * context = engine.rootContext();
+
+    qmlRegisterUncreatableType<Device>("DeviceData", 1, 0, "Device", "Access to devices Id");
+
     context->setContextProperty("core", &core);
+    context->setContextProperty("device", &device);
+    context->setContextProperty("desktopDevice", &desktopDevice);
 
     const QUrl url(QStringLiteral("qrc:/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

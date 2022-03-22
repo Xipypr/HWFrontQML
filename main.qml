@@ -34,7 +34,7 @@ ApplicationWindow {
             text: qsTr("Page 1")
         }
         TabButton {
-            text: qsTr("Page 2")
+            text: qsTr(pageDeviceInfo.destop_name)
         }
     }
 
@@ -48,6 +48,7 @@ ApplicationWindow {
         }
 
         PageDevicesInfo {
+            id: pageDeviceInfo
         }
     }
 }

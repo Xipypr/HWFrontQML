@@ -13,24 +13,24 @@ public:
     explicit Core();
     ~Core();
 
+    Q_INVOKABLE QObject *device() const;
+
 public slots:
     void onStartMonitoring();
     void onMakeGetRequest(const QString & target);
 
     void onDeviceCreated(DesktopDevice * device);
 
-    Q_INVOKABLE QObject * getDevice();
 
 signals:
-    void deviceCreated(DesktopDevice * device);
+    void deviceCreated();
 
     void testSignal();
 
 private:
     HWConnector * m_connector;
     DeviceBuilder * m_deviceCreator;
-    Device * tmpDevice;
-
+    DesktopDevice * m_device;
 };
 
 #endif // CORE_H
