@@ -4,6 +4,8 @@ import "../"
 CustomItem {
     id: id_root
 
+    property string prcnt: "0"
+
     Canvas {
         id: id_canvas
 
@@ -21,13 +23,23 @@ CustomItem {
             var context = id_canvas.getContext('2d');
 
             context.clearRect(0, 0, id_canvas.width, id_canvas.height);
-            context.strokeStyle = "#1DE9B6";
+            context.strokeStyle = "#1d86e9";
             context.lineWidth = id_canvas.height / 2;
             context.beginPath();
             context.arc(id_canvas.height / 2, id_canvas.height / 2, id_canvas.height / 4, 0, Math.PI * 2 * id_root.p_cur / id_root.p_max, false);
             context.stroke();
 
             p_curFPS++;
+        }
+
+        Text {
+            id: percent
+            text: prcnt + " %"
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.verticalCenter: parent.verticalCenter
+            rotation: 90
+            font.pixelSize: id_root.height * 0.2
+            color: "black"
         }
     }
 

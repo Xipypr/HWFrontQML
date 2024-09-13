@@ -4,8 +4,11 @@
 
 #include <QObject>
 
-#include <hwconnector.h>
-#include <devicebuilder.h>
+//#include <hwconnector.h>
+//#include <devicebuilder.h>
+#include "devicebuilder.h"
+#include "hwconnector.h"
+#include "storages/ram.h"
 
 #include "core.h"
 
@@ -20,6 +23,7 @@ int main(int argc, char *argv[])
     Core core;
     Device device;
     DesktopDevice desktopDevice;
+    Ram ram;
 
     QQmlApplicationEngine engine;
     QQmlContext * context = engine.rootContext();
