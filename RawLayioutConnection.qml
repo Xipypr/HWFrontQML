@@ -34,7 +34,9 @@ Item {
             TextField {
                 id: textField
                 focus: true
-                Layout.fillWidth: true
+                Layout.fillWidth: root.compactMode
+                Layout.preferredWidth: 240
+                Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
                 verticalAlignment: TextInput.AlignVCenter
                 validator: RegularExpressionValidator {
                     regularExpression: /^((?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/
