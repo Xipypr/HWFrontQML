@@ -128,30 +128,46 @@ Rectangle {
             implicitWidth: 56
 
             Canvas {
+                id: ringCanvas
                 anchors.centerIn: parent
                 width: 56
                 height: 56
+                antialiasing: true
+                smooth: true
+                renderTarget: Canvas.FramebufferObject
+
+                property real progress: card.safeValue / 100
 
                 onPaint: {
                     var ctx = getContext("2d");
-                    ctx.clearRect(0, 0, width, height);
+                    var lineWidth = 8;
+                    var radius = 20;
+                    var centerX = width / 2;
+                    var centerY = height / 2;
 
-                    ctx.lineWidth = 8;
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.lineWidth = lineWidth;
+                    ctx.lineCap = "round";
+
                     ctx.strokeStyle = "#334155";
                     ctx.beginPath();
-                    ctx.arc(width / 2, height / 2, 20, 0, Math.PI * 2);
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
                     ctx.stroke();
 
                     ctx.strokeStyle = card.accentColor;
                     ctx.beginPath();
-                    ctx.arc(width / 2, height / 2, 20, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * card.safeValue / 100);
+                    ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress, false);
                     ctx.stroke();
                 }
 
+                onProgressChanged: requestPaint()
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+
                 Connections {
                     target: card
-                    function onSafeValueChanged() { parent.requestPaint(); }
-                    function onAccentColorChanged() { parent.requestPaint(); }
+                    function onAccentColorChanged() { ringCanvas.requestPaint(); }
                 }
 
                 Component.onCompleted: requestPaint()
