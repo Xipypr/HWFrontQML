@@ -7,6 +7,28 @@ Page {
     signal connectedDeviceDeleted()
     signal connectionStateChanged(bool allowDevicePageActivation)
 
+    header: ToolBar {
+        RowLayout {
+            anchors.fill: parent
+
+            Label {
+                text: qsTr("Settings")
+                Layout.leftMargin: 12
+                font.bold: true
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
+
+            ToolButton {
+                text: "⋮"
+                Layout.rightMargin: 8
+                onClicked: console.log("Settings button clicked")
+            }
+        }
+    }
+
     footer: Button{
                 text: "Add Device"
                 onClicked: addDevice()
@@ -31,6 +53,7 @@ Page {
             }
         }
 
+        Component.onCompleted: addDevice()
 
         function addDevice()
         {
