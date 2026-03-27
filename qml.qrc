@@ -9,5 +9,6 @@
         <file>CustomItem.qml</file>
         <file>PageDevicesInfo.qml</file>
         <file>MetricCard.qml</file>
+        <file>DeviceStatusHeader.qml</file>
     </qresource>
 </RCC>

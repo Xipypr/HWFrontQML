@@ -33,28 +33,10 @@ ApplicationWindow {
         }
     }
 
-    header: TabBar {
-        id: tabBar
-        currentIndex: swipeView.currentIndex
-
-        TabButton {
-            text: qsTr("Page 1")
-        }
-        TabButton {
-            visible: devicePageVisible
-            text: devicePageVisible && pageDeviceInfoLoader.item
-                  && pageDeviceInfoLoader.item.destop_name !== ""
-                  && pageDeviceInfoLoader.item.destop_name !== "Unknown device"
-                  ? qsTr(pageDeviceInfoLoader.item.destop_name)
-                  : qsTr("Device")
-        }
-    }
-
-
     SwipeView {
         id: swipeView
         anchors.fill: parent
-        currentIndex: tabBar.currentIndex
+        currentIndex: 0
         interactive: devicePageVisible
 
         PageAuthForm {
@@ -81,7 +63,9 @@ ApplicationWindow {
     }
 
     onDevicePageVisibleChanged: {
-        if (!devicePageVisible && swipeView.currentIndex > 0) {
+        if (devicePageVisible && swipeView.currentIndex === 0) {
+            swipeView.currentIndex = 1
+        } else if (!devicePageVisible && swipeView.currentIndex > 0) {
             swipeView.currentIndex = 0
         }
     }
