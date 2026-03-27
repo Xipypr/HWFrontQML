@@ -5,7 +5,7 @@
 #include <QDebug>
 
 Core::Core()
-    : m_device(new DesktopDevice())
+    : m_device(new DesktopDevice(this))
 {
 //    qDebug() << m_device->name();
     m_connector = new HWConnector(this);
@@ -31,6 +31,19 @@ void Core::onMakeGetRequest(const QString &target)
 
 void Core::onDeviceCreated(DesktopDevice *device)
 {
+    const bool replacingCurrent = (m_device && m_device != device);
+    const bool coreOwnsCurrent = replacingCurrent && (m_device->parent() == this);
+
+    if (coreOwnsCurrent) {
+        // Delete only objects that Core owns via QObject parent-child relation.
+        m_device->deleteLater();
+    }
+
+    if (device && !device->parent()) {
+        // Take ownership when builder returns an orphan object.
+        device->setParent(this);
+    }
+
     m_device = device;
     emit deviceCreated();
 }

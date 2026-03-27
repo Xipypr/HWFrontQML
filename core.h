@@ -5,6 +5,7 @@
 #include "devicebuilder.h"
 
 #include <QObject>
+#include <QPointer>
 
 class Core : public QObject
 {
@@ -30,7 +31,8 @@ signals:
 private:
     HWConnector * m_connector;
     DeviceBuilder * m_deviceCreator;
-    DesktopDevice * m_device;
+    // Guarded pointer: becomes nullptr automatically if DesktopDevice is deleted elsewhere.
+    QPointer<DesktopDevice> m_device;
 };
 
 #endif // CORE_H
