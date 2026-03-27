@@ -1,5 +1,6 @@
 QT += quick
 
+TEMPLATE = app
 CONFIG += c++17
 
 # You can make your code fail to compile if it uses deprecated APIs.
@@ -34,8 +35,8 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../build/lib/ -lHWConnector
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../build/lib/ -lHWConnector
 
-android:CONFIG(release, debug|release): LIBS += -L../build/lib/ -lHWConnector
-else:android:CONFIG(debug, debug|release): LIBS += -L../build/lib/ -lHWConnector
+android:CONFIG(release, debug|release): LIBS += "-L$$PWD/../build/lib/" -lHWConnector
+else:android:CONFIG(debug, debug|release): LIBS += "-L$$PWD/../build/lib/" -lHWConnector
 
 INCLUDEPATH += $$PWD/../HWConnector
 DEPENDPATH += $$PWD/../HWConnector
@@ -49,8 +50,8 @@ DEPENDPATH += $$PWD/../HWConnector
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../build/lib// -lDeviceBuilder
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../build/lib/ -lDeviceBuilder
 
-android:CONFIG(release, debug|release): LIBS += -L../../build/lib/ -lDeviceBuilder
-else:android:CONFIG(debug, debug|release): LIBS += -L../../build/lib/ -lDeviceBuilder
+android:CONFIG(release, debug|release): LIBS += "-L$$PWD/../build/lib/" -lDeviceBuilder
+else:android:CONFIG(debug, debug|release): LIBS += "-L$$PWD/../build/lib/" -lDeviceBuilder
 
 INCLUDEPATH += $$PWD/../DeviceBuilder/src
 DEPENDPATH += $$PWD/../DeviceBuilder/src
@@ -66,7 +67,8 @@ DISTFILES += \
     android/gradle/wrapper/gradle-wrapper.properties \
     android/gradlew \
     android/gradlew.bat \
-    android/res/values/libs.xml
+    android/res/values/libs.xml \
+    android/res/xml/qtprovider_paths.xml
 
 contains(ANDROID_TARGET_ARCH,armeabi-v7a) {
     ANDROID_PACKAGE_SOURCE_DIR = \

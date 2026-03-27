@@ -8,9 +8,9 @@
 build/
 build-*/
 */build/
+.qtc_clangd*
 
 # Android build/deployment artifacts
-android/
 android-build/
 android-*/
 *.apk
