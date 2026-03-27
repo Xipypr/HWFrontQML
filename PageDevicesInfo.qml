@@ -10,19 +10,15 @@ Page {
     property var desktop_device: ({})
     property string destop_name: core.device().name
 
-    Rectangle {
-        anchors.fill: parent
-        color: "#0F172A"
+    header: DeviceStatusHeader {
+        width: root.width
+        deviceName: destop_name
     }
 
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
         spacing: 12
-
-        DeviceStatusHeader {
-            deviceName: destop_name
-        }
 
         GridLayout {
             Layout.fillWidth: true

@@ -6,12 +6,18 @@ Item {
     id: root
     property string deviceName: ""
     property color indicatorColor: "#22C55E"
+    property int horizontalPadding: 16
+    property int verticalPadding: 8
 
     Layout.fillWidth: true
-    implicitHeight: Math.max(nameLabel.implicitHeight, statusDot.height)
+    implicitHeight: Math.max(nameLabel.implicitHeight, statusDot.height) + (verticalPadding * 2)
 
     RowLayout {
         anchors.fill: parent
+        anchors.leftMargin: horizontalPadding
+        anchors.rightMargin: horizontalPadding
+        anchors.topMargin: verticalPadding
+        anchors.bottomMargin: verticalPadding
         spacing: 12
 
         Label {
