@@ -53,7 +53,7 @@ Item {
 
             function sendRequest(){
                 core.onMakeGetRequest(textField.text)
-                connectButton.text = "Stop connecting"
+                connectButton.text = "Stop"
                 connectingIndicator.running = true
             }
 
