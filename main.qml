@@ -51,6 +51,7 @@ ApplicationWindow {
         id: swipeView
         anchors.fill: parent
         currentIndex: tabBar.currentIndex
+        interactive: false
 
         PageAuthForm {
             id: pageAuth
