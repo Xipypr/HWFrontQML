@@ -11,7 +11,7 @@ Item {
 
     signal removeThisObject(int index)
 
-RowLayout {
+    RowLayout {
         id: layout
         anchors.margins: 10
         anchors.fill: parent

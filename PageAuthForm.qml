@@ -17,6 +17,7 @@ Page {
             anchors.fill: parent
             delegate: RawLayioutConnection{
                 id: delegate
+                width: listView.width
                 height: 60
 
                 Component.onCompleted: {
