@@ -21,5 +21,6 @@
         <file>progbarstyles/Ver_1.qml</file>
         <file>CustomItem.qml</file>
         <file>PageDevicesInfo.qml</file>
+        <file>MetricCard.qml</file>
     </qresource>
 </RCC>
