@@ -12,30 +12,6 @@ ApplicationWindow {
     property bool devicePageVisible: false
     property bool allowDevicePageActivation: false
 
-    Component {
-        id: authPageComponent
-
-        PageAuthForm {
-            onConnectedDeviceDeleted: {
-                devicePageVisible = false
-            }
-
-            onConnectionStateChanged: (allowDevicePageActivationValue) => {
-                allowDevicePageActivation = allowDevicePageActivationValue
-                if (!allowDevicePageActivation) {
-                    devicePageVisible = false
-                }
-            }
-        }
-    }
-
-    Component {
-        id: devicePageComponent
-
-        PageDevicesInfo {
-        }
-    }
-
     Loader {
             id: pagesLoader
 
@@ -66,7 +42,11 @@ ApplicationWindow {
         }
         TabButton {
             visible: devicePageVisible
-            text: qsTr(core.device().name)
+            text: devicePageVisible && pageDeviceInfoLoader.item
+                  && pageDeviceInfoLoader.item.destop_name !== ""
+                  && pageDeviceInfoLoader.item.destop_name !== "Unknown device"
+                  ? qsTr(pageDeviceInfoLoader.item.destop_name)
+                  : qsTr("Device")
         }
     }
 
@@ -75,14 +55,28 @@ ApplicationWindow {
         id: swipeView
         anchors.fill: parent
         currentIndex: tabBar.currentIndex
-        interactive: true
+        interactive: devicePageVisible
 
-        Repeater {
-            model: devicePageVisible ? 2 : 1
+        PageAuthForm {
+            id: pageAuth
 
-            Loader {
-                sourceComponent: index === 0 ? authPageComponent : devicePageComponent
+            onConnectedDeviceDeleted: {
+                devicePageVisible = false
             }
+
+            onConnectionStateChanged: (allowDevicePageActivationValue) => {
+                allowDevicePageActivation = allowDevicePageActivationValue
+                if (!allowDevicePageActivation) {
+                    devicePageVisible = false
+                }
+            }
+        }
+
+        Loader {
+            id: pageDeviceInfoLoader
+            active: devicePageVisible
+            source: "PageDevicesInfo.qml"
+            visible: devicePageVisible
         }
     }
 
