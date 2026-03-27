@@ -20,7 +20,7 @@ Page {
             delegate: RawLayioutConnection{
                 id: delegate
                 width: listView.width
-                height: 60
+                height: implicitHeight
                 onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
                 onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
             }
