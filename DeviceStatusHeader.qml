@@ -23,9 +23,7 @@ Item {
         Label {
             id: nameLabel
             Layout.fillWidth: true
-            text: root.deviceName !== "" && root.deviceName !== "Unknown device"
-                  ? root.deviceName
-                  : qsTr("Unknown device")
+            text: root.deviceName
             color: "#E2E8F0"
             font.pixelSize: 16
             font.bold: true
