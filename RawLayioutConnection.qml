@@ -34,7 +34,6 @@ Item {
             TextField {
                 id: textField
                 focus: true
-                placeholderText: qsTr("192.168.1.1")
                 Layout.fillWidth: true
                 verticalAlignment: TextInput.AlignVCenter
                 validator: RegularExpressionValidator {
