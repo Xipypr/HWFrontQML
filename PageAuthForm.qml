@@ -6,8 +6,13 @@ Page {
     id: root
     signal connectedDeviceDeleted()
     signal connectionStateChanged(bool allowDevicePageActivation)
+    signal settingsRequested()
 
     header: ToolBar {
+        TapHandler {
+            onTapped: root.settingsRequested()
+        }
+
         RowLayout {
             anchors.fill: parent
 
@@ -24,7 +29,7 @@ Page {
             ToolButton {
                 text: "⋮"
                 Layout.rightMargin: 8
-                onClicked: console.log("Settings button clicked")
+                onClicked: root.settingsRequested()
             }
         }
     }
