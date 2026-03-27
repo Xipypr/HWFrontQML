@@ -9,6 +9,7 @@ ApplicationWindow {
     visible: true
     title: qsTr("Hardware Monitor")
     id: root
+    property bool devicePageVisible: false
 
     Loader {
             id: pagesLoader
@@ -23,6 +24,10 @@ ApplicationWindow {
 
     Connections{
         target: core
+
+        function onDeviceCreated() {
+            devicePageVisible = true
+        }
     }
 
     header: TabBar {
@@ -33,7 +38,8 @@ ApplicationWindow {
             text: qsTr("Page 1")
         }
         TabButton {
-            text: qsTr(pageDeviceInfo.destop_name)
+            visible: devicePageVisible
+            text: devicePageVisible && pageDeviceInfoLoader.item ? qsTr(pageDeviceInfoLoader.item.destop_name) : qsTr("Device")
         }
     }
 
@@ -44,10 +50,24 @@ ApplicationWindow {
         currentIndex: tabBar.currentIndex
 
         PageAuthForm {
+            id: pageAuth
+
+            onConnectedDeviceDeleted: {
+                devicePageVisible = false
+            }
         }
 
-        PageDevicesInfo {
-            id: pageDeviceInfo
+        Loader {
+            id: pageDeviceInfoLoader
+            active: devicePageVisible
+            source: "PageDevicesInfo.qml"
+            visible: devicePageVisible
+        }
+    }
+
+    onDevicePageVisibleChanged: {
+        if (!devicePageVisible && swipeView.currentIndex > 0) {
+            swipeView.currentIndex = 0
         }
     }
 }

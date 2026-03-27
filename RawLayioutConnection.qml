@@ -7,7 +7,7 @@ Item {
 
     property int connectionInitialized: 0
 
-    signal removeThisObject()
+    signal removeThisObject(bool removeConnectedDevicePage)
 
     RowLayout {
         id: layout
@@ -84,7 +84,11 @@ Item {
         Button{
             id: deleteDevice
             text: "Delete Device"
-            onClicked: root.removeThisObject()
+            onClicked: {
+                const removeConnectedDevicePage = connectionInitialized === 1
+                connectionInitialized = 0
+                root.removeThisObject(removeConnectedDevicePage)
+            }
         }
 
         Connections{
@@ -93,6 +97,7 @@ Item {
             function onDeviceCreated() {
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
+                connectionInitialized = 1
             }
         }
     }
