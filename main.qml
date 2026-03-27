@@ -10,6 +10,7 @@ ApplicationWindow {
     title: qsTr("Hardware Monitor")
     id: root
     property bool devicePageVisible: false
+    property bool allowDevicePageActivation: false
 
     Loader {
             id: pagesLoader
@@ -26,7 +27,9 @@ ApplicationWindow {
         target: core
 
         function onDeviceCreated() {
-            devicePageVisible = true
+            if (allowDevicePageActivation) {
+                devicePageVisible = true
+            }
         }
     }
 
@@ -54,6 +57,13 @@ ApplicationWindow {
 
             onConnectedDeviceDeleted: {
                 devicePageVisible = false
+            }
+
+            onConnectionStateChanged: (allowDevicePageActivationValue) => {
+                allowDevicePageActivation = allowDevicePageActivationValue
+                if (!allowDevicePageActivation) {
+                    devicePageVisible = false
+                }
             }
         }
 

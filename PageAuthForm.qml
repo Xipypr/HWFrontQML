@@ -5,6 +5,7 @@ import QtQuick.Layouts 1.0
 Page {
     id: root
     signal connectedDeviceDeleted()
+    signal connectionStateChanged(bool allowDevicePageActivation)
 
     footer: Button{
                 text: "Add Device"
@@ -21,6 +22,7 @@ Page {
                 width: listView.width
                 height: 60
                 onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
+                onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
             }
 
             // Сама модель, в которой будут содержаться все элементы

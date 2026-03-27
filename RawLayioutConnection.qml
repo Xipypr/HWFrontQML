@@ -8,6 +8,7 @@ Item {
     property int connectionInitialized: 0
 
     signal removeThisObject(bool removeConnectedDevicePage)
+    signal connectionStateChanged(bool allowDevicePageActivation)
 
     RowLayout {
         id: layout
@@ -50,12 +51,14 @@ Item {
             }
 
             function sendRequest(){
+                root.connectionStateChanged(true)
                 core.onMakeGetRequest(textField.text)
                 connectButton.text = "Stop"
                 connectingIndicator.running = true
             }
 
             function stopSendingRequests(){
+                root.connectionStateChanged(false)
                 connectButton.text = "Connect Device"
                 connectingIndicator.running = false
             }
@@ -87,6 +90,7 @@ Item {
             onClicked: {
                 const removeConnectedDevicePage = connectionInitialized === 1
                 connectionInitialized = 0
+                root.connectionStateChanged(false)
                 root.removeThisObject(removeConnectedDevicePage)
             }
         }
