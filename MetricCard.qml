@@ -1,7 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
-import QtQuick.Shapes 1.15
 
 Rectangle {
     id: card
@@ -128,44 +127,50 @@ Rectangle {
             implicitHeight: 56
             implicitWidth: 56
 
-            Shape {
-                id: ringShape
+            Canvas {
+                id: ringCanvas
                 anchors.centerIn: parent
                 width: 56
                 height: 56
                 antialiasing: true
+                smooth: true
+                renderTarget: Canvas.FramebufferObject
 
-                ShapePath {
-                    strokeWidth: 8
-                    strokeColor: "#334155"
-                    fillColor: "transparent"
-                    capStyle: ShapePath.RoundCap
+                property real progress: card.safeValue / 100
 
-                    PathAngleArc {
-                        centerX: ringShape.width / 2
-                        centerY: ringShape.height / 2
-                        radiusX: 20
-                        radiusY: 20
-                        startAngle: -90
-                        sweepAngle: 360
-                    }
+                onPaint: {
+                    var ctx = getContext("2d");
+                    var lineWidth = 8;
+                    var radius = 20;
+                    var centerX = width / 2;
+                    var centerY = height / 2;
+
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.lineWidth = lineWidth;
+                    ctx.lineCap = "round";
+
+                    ctx.strokeStyle = "#334155";
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
+                    ctx.stroke();
+
+                    ctx.strokeStyle = card.accentColor;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * progress, false);
+                    ctx.stroke();
                 }
 
-                ShapePath {
-                    strokeWidth: 8
-                    strokeColor: card.accentColor
-                    fillColor: "transparent"
-                    capStyle: ShapePath.RoundCap
+                onProgressChanged: requestPaint()
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
 
-                    PathAngleArc {
-                        centerX: ringShape.width / 2
-                        centerY: ringShape.height / 2
-                        radiusX: 20
-                        radiusY: 20
-                        startAngle: -90
-                        sweepAngle: 360 * card.safeValue / 100
-                    }
+                Connections {
+                    target: card
+                    function onAccentColorChanged() { ringCanvas.requestPaint(); }
                 }
+
+                Component.onCompleted: requestPaint()
             }
         }
     }
