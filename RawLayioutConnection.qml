@@ -36,6 +36,7 @@ Item {
                 focus: true
                 placeholderText: qsTr("192.168.1.1")
                 Layout.fillWidth: true
+                verticalAlignment: TextInput.AlignVCenter
                 validator: RegularExpressionValidator {
                     regularExpression: /^((?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/
                 }
