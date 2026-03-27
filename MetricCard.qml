@@ -5,12 +5,15 @@ import QtQuick.Layouts 1.3
 Rectangle {
     id: card
 
-    property string title: "CPU"
+    property string title: "N/A"
     property int value: 0
-    property string subtitle: "Realtime Load"
+    // segments | ring | linear
+    property string variant: "segments"
 
-    readonly property color accentColor: value >= 90 ? "#EF4444" : value >= 70 ? "#F59E0B" : "#22C55E"
-    readonly property string statusText: value >= 90 ? "CRITICAL" : value >= 70 ? "WARNING" : "NORMAL"
+    readonly property int safeValue: Math.max(0, Math.min(100, value))
+    readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
+    readonly property string statusText: safeValue >= 90 ? "CRITICAL" : safeValue >= 70 ? "WARNING" : "NORMAL"
+    readonly property int valueFontSize: variant === "ring" ? 34 : 42
 
     radius: 16
     color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
@@ -29,7 +32,7 @@ Rectangle {
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 14
-        spacing: 10
+        spacing: variant === "ring" ? 8 : 10
 
         RowLayout {
             Layout.fillWidth: true
@@ -40,6 +43,8 @@ Rectangle {
                 color: "#BFDBFE"
                 font.pixelSize: 14
                 font.bold: true
+                elide: Text.ElideRight
+                Layout.fillWidth: true
             }
 
             Rectangle {
@@ -55,8 +60,6 @@ Rectangle {
                 }
             }
 
-            Item { Layout.fillWidth: true }
-
             Text {
                 text: card.statusText
                 color: card.accentColor
@@ -66,32 +69,93 @@ Rectangle {
         }
 
         Text {
-            text: card.value + "%"
+            text: card.safeValue + "%"
             color: "#F8FAFC"
-            font.pixelSize: 42
+            font.pixelSize: card.valueFontSize
             font.bold: true
         }
 
+        Loader {
+            Layout.fillWidth: true
+            Layout.fillHeight: false
+            Layout.alignment: Qt.AlignHCenter
+            Layout.preferredHeight: card.variant === "ring" ? 56 : 12
+            sourceComponent: card.variant === "ring" ? ringViz : (card.variant === "linear" ? linearViz : segmentsViz)
+        }
+
+    }
+
+    Component {
+        id: segmentsViz
+
         RowLayout {
             spacing: 4
-            Layout.fillWidth: true
-
             Repeater {
                 model: 10
-
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 10
                     radius: 3
-                    color: index < Math.ceil(card.value / 10) ? card.accentColor : "#334155"
+                    color: index < Math.ceil(card.safeValue / 10) ? card.accentColor : "#334155"
                 }
             }
         }
+    }
 
-        Text {
-            text: card.subtitle
-            color: "#94A3B8"
-            font.pixelSize: 11
+    Component {
+        id: linearViz
+
+        Rectangle {
+            implicitHeight: 12
+            radius: 6
+            color: "#334155"
+
+            Rectangle {
+                width: parent.width * card.safeValue / 100
+                height: parent.height
+                radius: 6
+                color: card.accentColor
+                Behavior on width { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
+            }
+        }
+    }
+
+    Component {
+        id: ringViz
+
+        Item {
+            implicitHeight: 56
+            implicitWidth: 56
+
+            Canvas {
+                anchors.centerIn: parent
+                width: 56
+                height: 56
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    ctx.clearRect(0, 0, width, height);
+
+                    ctx.lineWidth = 8;
+                    ctx.strokeStyle = "#334155";
+                    ctx.beginPath();
+                    ctx.arc(width / 2, height / 2, 20, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    ctx.strokeStyle = card.accentColor;
+                    ctx.beginPath();
+                    ctx.arc(width / 2, height / 2, 20, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * card.safeValue / 100);
+                    ctx.stroke();
+                }
+
+                Connections {
+                    target: card
+                    function onSafeValueChanged() { parent.requestPaint(); }
+                    function onAccentColorChanged() { parent.requestPaint(); }
+                }
+
+                Component.onCompleted: requestPaint()
+            }
         }
     }
 

@@ -20,14 +20,6 @@ Page {
         anchors.margins: 16
         spacing: 12
 
-        Text {
-            Layout.fillWidth: true
-            text: "System Metrics"
-            color: "#E2E8F0"
-            font.pixelSize: 20
-            font.bold: true
-        }
-
         GridLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -38,40 +30,35 @@ Page {
             MetricCard {
                 id: cpu
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: 170
+                Layout.fillHeight: false
+                Layout.preferredHeight: 160
+                Layout.minimumHeight: 150
                 title: "CPU"
-                subtitle: "Processor load"
                 value: 45
+                variant: "segments"
             }
 
             MetricCard {
                 id: ram
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: 170
+                Layout.fillHeight: false
+                Layout.preferredHeight: 160
+                Layout.minimumHeight: 150
                 title: "RAM"
-                subtitle: "Memory usage"
                 value: 76
+                variant: "ring"
             }
 
             MetricCard {
                 id: gpu
                 Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.minimumHeight: 170
+                Layout.fillHeight: false
+                Layout.preferredHeight: 160
+                Layout.minimumHeight: 150
                 title: "GPU"
-                subtitle: "Graphics load"
                 value: 68
+                variant: "linear"
             }
-        }
-
-        Text {
-            id: txt
-            Layout.fillWidth: true
-            color: "#94A3B8"
-            font.pixelSize: 12
-            text: destop_name
         }
 
         Connections {
