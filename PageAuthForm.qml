@@ -1,6 +1,5 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.0
 
 Page {
     id: root
@@ -9,28 +8,30 @@ Page {
     signal settingsRequested()
 
     header: ToolBar {
+        id: settingsHeader
+        implicitHeight: 56
+
+        background: Rectangle {
+            id: headerBackground
+            color: headerTap.pressed ? "#223150" : "#17233A"
+
+            Behavior on color {
+                ColorAnimation { duration: 120 }
+            }
+        }
+
         TapHandler {
+            id: headerTap
             onTapped: root.settingsRequested()
         }
 
-        RowLayout {
+        Label {
             anchors.fill: parent
-
-            Label {
-                text: qsTr("Settings")
-                Layout.leftMargin: 12
-                font.bold: true
-            }
-
-            Item {
-                Layout.fillWidth: true
-            }
-
-            ToolButton {
-                text: "⋮"
-                Layout.rightMargin: 8
-                onClicked: root.settingsRequested()
-            }
+            anchors.leftMargin: 12
+            verticalAlignment: Text.AlignVCenter
+            text: qsTr("Settings")
+            font.bold: true
+            color: "#E2E8F0"
         }
     }
 
