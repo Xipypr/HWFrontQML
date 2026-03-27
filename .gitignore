@@ -1,2 +1,40 @@
+# Qt Creator user-specific files
+*.pro.user
+*.pro.user.*
+*.qbs.user
+*.qws
 
-HWFrontQML.pro.user
+# Build directories (local out-of-source and in-source)
+build/
+build-*/
+*/build/
+
+# Android build/deployment artifacts
+android/
+android-build/
+android-*/
+*.apk
+*.aab
+*.ap_
+
+# Common generated artifacts
+*.o
+*.obj
+*.so
+*.dll
+*.dylib
+*.exe
+moc_*.cpp
+qrc_*.cpp
+ui_*.h
+Makefile*
+
+# CMake artifacts (if CMake is used)
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+
+# macOS / Windows metadata
+.DS_Store
+Thumbs.db
