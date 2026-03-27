@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import QtQuick.Shapes 1.15
 
 Rectangle {
     id: card
@@ -127,38 +128,43 @@ Rectangle {
             implicitHeight: 56
             implicitWidth: 56
 
-            Canvas {
+            Shape {
                 anchors.centerIn: parent
                 width: 56
                 height: 56
+                antialiasing: true
 
-                onPaint: {
-                    var ctx = getContext("2d");
-                    ctx.clearRect(0, 0, width, height);
+                ShapePath {
+                    strokeWidth: 8
+                    strokeColor: "#334155"
+                    fillColor: "transparent"
+                    capStyle: ShapePath.RoundCap
 
-                    ctx.lineWidth = 8;
-                    ctx.lineCap = "round";
-                    ctx.strokeStyle = "#334155";
-                    ctx.beginPath();
-                    ctx.arc(width / 2, height / 2, 20, 0, Math.PI * 2);
-                    ctx.stroke();
-
-                    ctx.strokeStyle = card.accentColor;
-                    ctx.beginPath();
-                    ctx.arc(width / 2, height / 2, 20, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * card.safeValue / 100);
-                    ctx.stroke();
+                    PathAngleArc {
+                        centerX: width / 2
+                        centerY: height / 2
+                        radiusX: 20
+                        radiusY: 20
+                        startAngle: -90
+                        sweepAngle: 360
+                    }
                 }
 
-                Connections {
-                    target: card
+                ShapePath {
+                    strokeWidth: 8
+                    strokeColor: card.accentColor
+                    fillColor: "transparent"
+                    capStyle: ShapePath.RoundCap
 
-                    function onValueChanged() { parent.requestPaint(); }
-                    function onAccentColorChanged() { parent.requestPaint(); }
+                    PathAngleArc {
+                        centerX: width / 2
+                        centerY: height / 2
+                        radiusX: 20
+                        radiusY: 20
+                        startAngle: -90
+                        sweepAngle: 360 * card.safeValue / 100
+                    }
                 }
-
-                onWidthChanged: requestPaint()
-                onHeightChanged: requestPaint()
-                Component.onCompleted: requestPaint()
             }
         }
     }
