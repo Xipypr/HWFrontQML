@@ -5,6 +5,7 @@
         <file>PageAuthForm.qml</file>
         <file>AddIpForm.qml</file>
         <file>RawLayioutConnection.qml</file>
+        <file>LinearBusyIndicator.qml</file>
         <file>CustomItem.qml</file>
         <file>PageDevicesInfo.qml</file>
         <file>MetricCard.qml</file>

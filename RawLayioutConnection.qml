@@ -37,6 +37,7 @@ Item {
         Button{
             id: connectButton
             text: "Connect Device"
+            Layout.preferredWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width) + leftPadding + rightPadding
             onClicked: clickConnectButton()
 
             function clickConnectButton(){
@@ -63,11 +64,23 @@ Item {
 
         }
 
-        BusyIndicator{
-            id: connectingIndicator
-            visible: true
-            running: false
+        TextMetrics {
+            id: connectTextMetrics
+            font: connectButton.font
+            text: "Connect Device"
+        }
 
+        TextMetrics {
+            id: stopTextMetrics
+            font: connectButton.font
+            text: "Stop connecting"
+        }
+
+        LinearBusyIndicator {
+            id: connectingIndicator
+            running: false
+            Layout.preferredWidth: implicitWidth
+            Layout.preferredHeight: implicitHeight
         }
 
         Button{
