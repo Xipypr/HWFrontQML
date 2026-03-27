@@ -8,15 +8,17 @@ Item {
     property int connectionInitialized: 0
     property bool compactMode: width < 560
 
-    implicitHeight: contentLayout.implicitHeight + contentLayout.anchors.margins * 2
+    implicitHeight: contentLayout.implicitHeight + 20
 
     signal removeThisObject(bool removeConnectedDevicePage)
     signal connectionStateChanged(bool allowDevicePageActivation)
 
     ColumnLayout {
         id: contentLayout
-        anchors.margins: 10
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.topMargin: 10
+        anchors.horizontalCenter: parent.horizontalCenter
+        width: Math.max(0, Math.min(parent.width - 20, 760))
         spacing: 8
 
         Label {
