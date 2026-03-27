@@ -1,7 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
-import "progbarstyles"
 import DeviceData 1.0
 
 Page {
@@ -11,80 +10,63 @@ Page {
     property var desktop_device: ({})
     property string destop_name: core.device().name
 
-    ColumnLayout {
-        spacing: 0
+    Rectangle {
         anchors.fill: parent
-        RowLayout {
-            spacing: 0
-            Layout.preferredHeight: 20
-            Cir_1 {
+        color: "#0F172A"
+    }
+
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 16
+        spacing: 12
+
+        GridLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            columns: width > 900 ? 3 : width > 580 ? 2 : 1
+            columnSpacing: 12
+            rowSpacing: 12
+
+            MetricCard {
                 id: cpu
-                implicitWidth: 20
-                Layout.fillHeight: true
                 Layout.fillWidth: true
-                titleText: "CPU"
-                titleColor: "red"
-                p_cur: 45
-
+                Layout.fillHeight: false
+                Layout.preferredHeight: 160
+                Layout.minimumHeight: 150
+                title: "CPU"
+                value: 45
+                variant: "segments"
             }
 
-            Cir_3 {
+            MetricCard {
                 id: ram
-                implicitWidth: 20
-                Layout.fillHeight: true
                 Layout.fillWidth: true
-                p_cur: 76
+                Layout.fillHeight: false
+                Layout.preferredHeight: 160
+                Layout.minimumHeight: 150
+                title: "RAM"
+                value: 76
+                variant: "ring"
             }
 
-            Cir_1 {
+            MetricCard {
                 id: gpu
-                implicitWidth: 20
-                Layout.fillHeight: true
                 Layout.fillWidth: true
-                titleText: "GPU"
-                titleColor: "green"
-                p_cur: 68
-            }
-
-            Text {
-                id: txt
+                Layout.fillHeight: false
+                Layout.preferredHeight: 160
+                Layout.minimumHeight: 150
+                title: "GPU"
+                value: 68
+                variant: "linear"
             }
         }
 
-        RowLayout {
-            spacing: 0
-            Layout.preferredHeight: 20
-            Ver_1 {
-                implicitWidth: 20
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                p_cur: 80
-            }
-            Ver_1 {
-                implicitWidth: 20
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-            }
-            Ver_1 {
-                implicitWidth: 20
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                p_cur: 80
-            }
-            Ver_1 {
-                implicitWidth: 20
-                Layout.fillHeight: true
-                Layout.fillWidth: true
-                p_cur: 12
-            }
-        }
-
-        Connections{
+        Connections {
             target: core
 
             function onDeviceCreated() {
                 desktop_device = core.device();
-                if ( desktop_device.type === Device.DESKTOP )
+                if (desktop_device.type === Device.DESKTOP)
                 {
                     destop_name = desktop_device.name;
                     objectsArray = desktop_device.devicesList();
@@ -120,39 +102,33 @@ Page {
 
             function parseMotherBoard(iter)
             {
-//                console.log(objectsArray[iter].name)
+                //console.log(objectsArray[iter].name)
             }
 
             function parseProc(iter)
             {
-//                console.log(objectsArray[iter].name)
                 let procObject = objectsArray[iter]
-                cpu.titleText = procObject.name.substring(0, 3)
-                cpu.p_cur = procObject.loading
+                cpu.title = procObject.name.substring(0, 12)
+                cpu.value = procObject.loading
             }
 
             function parseMemory(iter)
             {
-//                console.log(objectsArray[iter].name)
                 let memObject = objectsArray[iter]
-                ram.prcnt = memObject.loading
+                ram.value = memObject.loading
             }
 
             function parseVideocard(iter)
             {
-//                console.log(objectsArray[iter].name)
                 let videoObject = objectsArray[iter]
-                gpu.titleText = videoObject.name.substring(0, 6)
-                gpu.p_cur = videoObject.loading
+                gpu.title = videoObject.name.substring(0, 12)
+                gpu.value = videoObject.loading
             }
 
             function parseHdd(iter)
             {
-//                console.log(objectsArray[iter].name)
+                //console.log(objectsArray[iter].name)
             }
-
-
-
         }
     }
 }
