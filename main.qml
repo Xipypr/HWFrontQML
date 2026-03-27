@@ -12,6 +12,30 @@ ApplicationWindow {
     property bool devicePageVisible: false
     property bool allowDevicePageActivation: false
 
+    Component {
+        id: authPageComponent
+
+        PageAuthForm {
+            onConnectedDeviceDeleted: {
+                devicePageVisible = false
+            }
+
+            onConnectionStateChanged: (allowDevicePageActivationValue) => {
+                allowDevicePageActivation = allowDevicePageActivationValue
+                if (!allowDevicePageActivation) {
+                    devicePageVisible = false
+                }
+            }
+        }
+    }
+
+    Component {
+        id: devicePageComponent
+
+        PageDevicesInfo {
+        }
+    }
+
     Loader {
             id: pagesLoader
 
@@ -42,7 +66,7 @@ ApplicationWindow {
         }
         TabButton {
             visible: devicePageVisible
-            text: devicePageVisible && pageDeviceInfoLoader.item ? qsTr(pageDeviceInfoLoader.item.destop_name) : qsTr("Device")
+            text: qsTr(core.device().name)
         }
     }
 
@@ -51,28 +75,14 @@ ApplicationWindow {
         id: swipeView
         anchors.fill: parent
         currentIndex: tabBar.currentIndex
-        interactive: false
+        interactive: true
 
-        PageAuthForm {
-            id: pageAuth
+        Repeater {
+            model: devicePageVisible ? 2 : 1
 
-            onConnectedDeviceDeleted: {
-                devicePageVisible = false
+            Loader {
+                sourceComponent: index === 0 ? authPageComponent : devicePageComponent
             }
-
-            onConnectionStateChanged: (allowDevicePageActivationValue) => {
-                allowDevicePageActivation = allowDevicePageActivationValue
-                if (!allowDevicePageActivation) {
-                    devicePageVisible = false
-                }
-            }
-        }
-
-        Loader {
-            id: pageDeviceInfoLoader
-            active: devicePageVisible
-            source: "PageDevicesInfo.qml"
-            visible: devicePageVisible
         }
     }
 
