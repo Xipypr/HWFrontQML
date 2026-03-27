@@ -5,11 +5,9 @@ import QtQuick.Layouts 1.0
 Item {
     id: root
 
-    property int index
-
     property int connectionInitialized: 0
 
-    signal removeThisObject(int index)
+    signal removeThisObject()
 
     RowLayout {
         id: layout
@@ -86,7 +84,7 @@ Item {
         Button{
             id: deleteDevice
             text: "Delete Device"
-            onClicked: root.removeThisObject(root.index)
+            onClicked: root.removeThisObject()
         }
 
         Connections{
