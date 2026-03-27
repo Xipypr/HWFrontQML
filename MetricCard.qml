@@ -129,6 +129,7 @@ Rectangle {
             implicitWidth: 56
 
             Shape {
+                id: ringShape
                 anchors.centerIn: parent
                 width: 56
                 height: 56
@@ -141,8 +142,8 @@ Rectangle {
                     capStyle: ShapePath.RoundCap
 
                     PathAngleArc {
-                        centerX: width / 2
-                        centerY: height / 2
+                        centerX: ringShape.width / 2
+                        centerY: ringShape.height / 2
                         radiusX: 20
                         radiusY: 20
                         startAngle: -90
@@ -157,8 +158,8 @@ Rectangle {
                     capStyle: ShapePath.RoundCap
 
                     PathAngleArc {
-                        centerX: width / 2
-                        centerY: height / 2
+                        centerX: ringShape.width / 2
+                        centerY: ringShape.height / 2
                         radiusX: 20
                         radiusY: 20
                         startAngle: -90
