@@ -34,8 +34,11 @@ Item {
             TextField {
                 id: textField
                 focus: true
-                text: "192.168.1.68"
+                placeholderText: qsTr("192.168.1.1")
                 Layout.fillWidth: true
+                validator: RegularExpressionValidator {
+                    regularExpression: /^((?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/
+                }
                 Component.onCompleted: {
                     textField.forceActiveFocus()
                 }
@@ -46,6 +49,7 @@ Item {
                 text: "Connect Device"
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width) + leftPadding + rightPadding
+                enabled: textField.acceptableInput || connectingIndicator.running
                 onClicked: clickConnectButton()
 
                 function clickConnectButton(){
