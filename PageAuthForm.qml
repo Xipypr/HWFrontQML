@@ -4,6 +4,8 @@ import QtQuick.Layouts 1.0
 
 Page {
     id: root
+    signal connectedDeviceDeleted()
+    signal connectionStateChanged(bool allowDevicePageActivation)
 
     footer: Button{
                 text: "Add Device"
@@ -19,7 +21,8 @@ Page {
                 id: delegate
                 width: listView.width
                 height: 60
-                onRemoveThisObject: removeDevice(index)
+                onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
+                onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
             }
 
             // Сама модель, в которой будут содержаться все элементы
@@ -36,7 +39,7 @@ Page {
             console.log(listView.count)
         }
 
-        function removeDevice(index)
+        function removeDevice(index, removeConnectedDevicePage)
         {
             console.log("Deleting " + index)
             if (index < 0 || index >= listModel.count) {
@@ -44,6 +47,10 @@ Page {
                 return
             }
             listModel.remove(index)
+            if (removeConnectedDevicePage)
+            {
+                connectedDeviceDeleted()
+            }
             console.log(listView.count)
         }
 }
