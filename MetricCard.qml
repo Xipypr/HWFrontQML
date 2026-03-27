@@ -137,6 +137,7 @@ Rectangle {
                     ctx.clearRect(0, 0, width, height);
 
                     ctx.lineWidth = 8;
+                    ctx.lineCap = "round";
                     ctx.strokeStyle = "#334155";
                     ctx.beginPath();
                     ctx.arc(width / 2, height / 2, 20, 0, Math.PI * 2);
@@ -150,10 +151,13 @@ Rectangle {
 
                 Connections {
                     target: card
-                    function onSafeValueChanged() { parent.requestPaint(); }
+
+                    function onValueChanged() { parent.requestPaint(); }
                     function onAccentColorChanged() { parent.requestPaint(); }
                 }
 
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
                 Component.onCompleted: requestPaint()
             }
         }
