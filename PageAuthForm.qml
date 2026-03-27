@@ -19,10 +19,7 @@ Page {
                 id: delegate
                 width: listView.width
                 height: 60
-
-                Component.onCompleted: {
-                        delegate.removeThisObject.connect(removeDevice)
-                    }
+                onRemoveThisObject: removeDevice(index)
             }
 
             // Сама модель, в которой будут содержаться все элементы
@@ -35,14 +32,18 @@ Page {
         function addDevice()
         {
             console.log("Adding deivce")
-            listModel.append({"index": listView.count})
+            listModel.append({})
             console.log(listView.count)
         }
 
         function removeDevice(index)
         {
             console.log("Deleting " + index)
-            listModel.remove({index})
+            if (index < 0 || index >= listModel.count) {
+                console.warn("Skip delete: invalid index " + index + ", count=" + listModel.count)
+                return
+            }
+            listModel.remove(index)
             console.log(listView.count)
         }
 }
