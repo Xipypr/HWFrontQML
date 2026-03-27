@@ -20,6 +20,10 @@ Page {
         anchors.margins: 16
         spacing: 12
 
+        DeviceStatusHeader {
+            deviceName: destop_name
+        }
+
         GridLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
