@@ -9,6 +9,7 @@ Item {
     property int horizontalMargin: 10
     property bool compactMode: width < 560
     property string connectedDeviceName: ""
+    property bool awaitingDeviceCreation: false
 
     implicitHeight: contentLayout.implicitHeight + 20
 
@@ -70,6 +71,7 @@ Item {
                 }
 
                 function sendRequest(){
+                    awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
                     core.onMakeGetRequest(hostInfo.inputText)
                     connectButton.text = "Stop"
@@ -77,6 +79,7 @@ Item {
                 }
 
                 function stopSendingRequests(){
+                    awaitingDeviceCreation = false
                     root.connectionStateChanged(false)
                     connectButton.text = "Connect Device"
                     connectingIndicator.running = false
@@ -111,6 +114,7 @@ Item {
                 onClicked: {
                     const removeConnectedDevicePage = connectionInitialized === 1
                     connectionInitialized = 0
+                    awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
@@ -122,6 +126,10 @@ Item {
             target: core
 
             function onDeviceCreated() {
+                if (!awaitingDeviceCreation)
+                    return
+
+                awaitingDeviceCreation = false
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
                 connectionInitialized = 1

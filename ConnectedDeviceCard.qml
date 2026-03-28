@@ -36,11 +36,29 @@ Item {
             id: deviceNameLabel
             anchors.fill: parent
             anchors.leftMargin: 12
-            anchors.rightMargin: 12
+            anchors.rightMargin: 28
             verticalAlignment: Text.AlignVCenter
             color: "#FFFFFF"
             elide: Text.ElideRight
             text: root.deviceName
+        }
+
+        Rectangle {
+            id: statusDot
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            width: 10
+            height: 10
+            radius: width / 2
+            color: "#22C55E"
+
+            SequentialAnimation on opacity {
+                running: true
+                loops: Animation.Infinite
+                NumberAnimation { to: 0.35; duration: 700; easing.type: Easing.InOutQuad }
+                NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
+            }
         }
 
         MouseArea {
