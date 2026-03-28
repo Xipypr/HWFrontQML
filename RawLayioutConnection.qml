@@ -6,6 +6,7 @@ Item {
     id: root
 
     property int connectionInitialized: 0
+    property int horizontalMargin: 10
     property bool compactMode: width < 560
 
     implicitHeight: contentLayout.implicitHeight + 20
@@ -17,13 +18,18 @@ Item {
         id: contentLayout
         anchors.top: parent.top
         anchors.topMargin: 10
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: Math.max(0, Math.min(parent.width - 20, 760))
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: root.horizontalMargin
+        anchors.rightMargin: root.horizontalMargin
         spacing: 8
 
         Label {
             text: "Введите IP-адрес"
-            Layout.fillWidth: true
+            Layout.fillWidth: root.compactMode
+            Layout.preferredWidth: controlsLayout.implicitWidth
+            Layout.alignment: root.compactMode ? Qt.AlignLeft : Qt.AlignHCenter
+            horizontalAlignment: Text.AlignLeft
         }
 
         GridLayout {
@@ -31,7 +37,8 @@ Item {
             columns: root.compactMode ? 1 : 4
             columnSpacing: 8
             rowSpacing: 8
-            Layout.fillWidth: true
+            Layout.fillWidth: root.compactMode
+            Layout.alignment: root.compactMode ? Qt.AlignLeft : Qt.AlignHCenter
 
             TextField {
                 id: textField
