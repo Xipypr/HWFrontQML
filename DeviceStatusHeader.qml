@@ -7,7 +7,6 @@ ToolBar {
     property string headerText: ""
     property bool showIndicator: true
     property color indicatorColor: "#22C55E"
-    property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
     signal clicked()
 
@@ -16,7 +15,7 @@ ToolBar {
     verticalPadding: 8
 
     background: Rectangle {
-        color: headerTap.pressed ? root.pressedBackgroundColor : root.backgroundColor
+        color: headerTap.pressed ? root.pressedBackgroundColor : root.palette.window
 
         Behavior on color {
             ColorAnimation { duration: 120 }
