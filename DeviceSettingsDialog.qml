@@ -17,13 +17,6 @@ Dialog {
     padding: 20
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-    background: Rectangle {
-        radius: 14
-        color: "#111827"
-        border.color: "#334155"
-        border.width: 1
-    }
-
     contentItem: ColumnLayout {
         spacing: 10
 
