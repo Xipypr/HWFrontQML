@@ -6,11 +6,23 @@ Item {
     id: root
     property string deviceName: ""
     property color indicatorColor: "#22C55E"
+    property color backgroundColor: "#17233A"
+    property color pressedBackgroundColor: "#223150"
     property int horizontalPadding: 16
     property int verticalPadding: 8
+    signal clicked()
 
     Layout.fillWidth: true
     implicitHeight: Math.max(nameLabel.implicitHeight, statusDot.height) + (verticalPadding * 2)
+
+    Rectangle {
+        anchors.fill: parent
+        color: headerTap.pressed ? root.pressedBackgroundColor : root.backgroundColor
+
+        Behavior on color {
+            ColorAnimation { duration: 120 }
+        }
+    }
 
     RowLayout {
         anchors.fill: parent
@@ -45,5 +57,12 @@ Item {
                 NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
             }
         }
+    }
+
+    MouseArea {
+        id: headerTap
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.clicked()
     }
 }
