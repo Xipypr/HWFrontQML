@@ -23,12 +23,7 @@ ToolBar {
         }
     }
 
-    RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: root.horizontalPadding
-        anchors.rightMargin: root.horizontalPadding
-        anchors.topMargin: root.verticalPadding
-        anchors.bottomMargin: root.verticalPadding
+    contentItem: RowLayout {
         spacing: 12
 
         Label {
