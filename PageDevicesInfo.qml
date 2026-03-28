@@ -14,7 +14,18 @@ Page {
         width: root.width
         headerText: destop_name
         onClicked: {
-            // TODO: Open device settings popup window.
+            deviceSettingsDialog.open()
+        }
+    }
+
+    DeviceSettingsDialog {
+        id: deviceSettingsDialog
+        onSetDeviceNameSelected: {
+            console.log("Device settings: set device name clicked")
+        }
+
+        onChangeLayoutSelected: {
+            console.log("Device settings: change layout clicked")
         }
     }
 
