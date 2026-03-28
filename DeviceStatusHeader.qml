@@ -8,6 +8,7 @@ Item {
     property color indicatorColor: "#22C55E"
     property int horizontalPadding: 16
     property int verticalPadding: 8
+    signal clicked()
 
     Layout.fillWidth: true
     implicitHeight: Math.max(nameLabel.implicitHeight, statusDot.height) + (verticalPadding * 2)
@@ -45,5 +46,11 @@ Item {
                 NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
             }
         }
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        cursorShape: Qt.PointingHandCursor
+        onClicked: root.clicked()
     }
 }

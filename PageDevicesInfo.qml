@@ -9,10 +9,60 @@ Page {
     property var objectsArray: []
     property var desktop_device: ({})
     property string destop_name: core.device().name
+    property bool cpuCardVisible: true
+    property bool ramCardVisible: true
+    property bool gpuCardVisible: true
 
     header: DeviceStatusHeader {
         width: root.width
         deviceName: destop_name
+        onClicked: cardsEditDialog.open()
+    }
+
+    Dialog {
+        id: cardsEditDialog
+        x: (root.width - width) / 2
+        y: (root.height - height) / 2
+        width: Math.min(root.width - 32, 420)
+        modal: true
+        title: "Редактирование набора карточек"
+        standardButtons: Dialog.Ok
+
+        contentItem: ColumnLayout {
+            spacing: 10
+
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: "Выберите карточки, которые нужно показывать в окне обзора устройства."
+                color: "#CBD5E1"
+            }
+
+            CheckBox {
+                text: "CPU"
+                checked: root.cpuCardVisible
+                onToggled: root.cpuCardVisible = checked
+            }
+
+            CheckBox {
+                text: "RAM"
+                checked: root.ramCardVisible
+                onToggled: root.ramCardVisible = checked
+            }
+
+            CheckBox {
+                text: "GPU"
+                checked: root.gpuCardVisible
+                onToggled: root.gpuCardVisible = checked
+            }
+
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                text: "Позже сюда можно добавить действия, связанные с конкретным устройством."
+                color: "#94A3B8"
+            }
+        }
     }
 
     ColumnLayout {
@@ -29,6 +79,7 @@ Page {
 
             MetricCard {
                 id: cpu
+                visible: root.cpuCardVisible
                 Layout.fillWidth: true
                 Layout.fillHeight: false
                 Layout.preferredHeight: 160
@@ -40,6 +91,7 @@ Page {
 
             MetricCard {
                 id: ram
+                visible: root.ramCardVisible
                 Layout.fillWidth: true
                 Layout.fillHeight: false
                 Layout.preferredHeight: 160
@@ -51,6 +103,7 @@ Page {
 
             MetricCard {
                 id: gpu
+                visible: root.gpuCardVisible
                 Layout.fillWidth: true
                 Layout.fillHeight: false
                 Layout.preferredHeight: 160
