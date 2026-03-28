@@ -33,7 +33,8 @@ Item {
             columns: root.compactMode ? 1 : 4
             columnSpacing: 8
             rowSpacing: 8
-            Layout.fillWidth: true
+            Layout.fillWidth: root.compactMode
+            Layout.alignment: root.compactMode ? Qt.AlignLeft : Qt.AlignHCenter
 
             TextField {
                 id: textField
