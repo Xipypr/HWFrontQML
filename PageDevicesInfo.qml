@@ -2,7 +2,6 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import DeviceData 1.0
-import Qt.labs.settings 1.1
 
 Page {
     id: root
@@ -15,13 +14,6 @@ Page {
 
     ListModel {
         id: selectedWidgetsModel
-    }
-
-    Settings {
-        id: aliasSettings
-        category: "DeviceAliases"
-        fileName: "device_aliases.ini"
-        property string aliasesJson: "{}"
     }
 
     Component.onCompleted: ensureInitialWidgets()
@@ -43,7 +35,7 @@ Page {
         aliasValue: deviceAlias
         onAliasSaved: function(newAlias) {
             deviceAlias = newAlias
-            persistDeviceAlias(destop_name, newAlias)
+            core.setDeviceAlias(destop_name, newAlias)
         }
     }
 
@@ -92,7 +84,7 @@ Page {
                     destop_name = desktop_device.name;
                     objectsArray = desktop_device.devicesList();
                     rebuildAvailableSensors();
-                    deviceAlias = resolveDeviceAlias(destop_name);
+                    deviceAlias = core.deviceAlias(destop_name);
                     if (hasOnlyPlaceholderWidgets()) {
                         selectedWidgetsModel.clear()
                     }
@@ -252,35 +244,6 @@ Page {
         default:
             return "ring"
         }
-    }
-
-    function parseAliases() {
-        try {
-            return JSON.parse(aliasSettings.aliasesJson)
-        } catch (err) {
-            return {}
-        }
-    }
-
-    function persistDeviceAlias(deviceName, aliasValue) {
-        if (!deviceName || deviceName.length === 0)
-            return
-
-        let aliases = parseAliases()
-        if (aliasValue && aliasValue.length > 0) {
-            aliases[deviceName] = aliasValue
-        } else {
-            delete aliases[deviceName]
-        }
-        aliasSettings.aliasesJson = JSON.stringify(aliases)
-    }
-
-    function resolveDeviceAlias(deviceName) {
-        if (!deviceName || deviceName.length === 0)
-            return ""
-
-        let aliases = parseAliases()
-        return aliases[deviceName] || ""
     }
 
 }

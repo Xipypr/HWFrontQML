@@ -3,6 +3,7 @@
 #include "storages/desktopdevice.h"
 
 #include <QDebug>
+#include <QSettings>
 
 Core::Core()
     : m_device(new DesktopDevice())
@@ -38,4 +39,33 @@ void Core::onDeviceCreated(DesktopDevice *device)
 QObject *Core::device() const
 {
     return m_device;
+}
+
+
+QString Core::deviceAlias(const QString &deviceName) const
+{
+    if (deviceName.isEmpty())
+        return QString();
+
+    QSettings settings;
+    settings.beginGroup("DeviceAliases");
+    const QString alias = settings.value(deviceName).toString();
+    settings.endGroup();
+    return alias;
+}
+
+void Core::setDeviceAlias(const QString &deviceName, const QString &alias)
+{
+    if (deviceName.isEmpty())
+        return;
+
+    QSettings settings;
+    settings.beginGroup("DeviceAliases");
+    if (alias.isEmpty())
+        settings.remove(deviceName);
+    else
+        settings.setValue(deviceName, alias);
+    settings.endGroup();
+
+    emit deviceAliasChanged(deviceName, alias);
 }

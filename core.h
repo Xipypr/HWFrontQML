@@ -14,6 +14,8 @@ public:
     ~Core();
 
     Q_INVOKABLE QObject *device() const;
+    Q_INVOKABLE QString deviceAlias(const QString &deviceName) const;
+    Q_INVOKABLE void setDeviceAlias(const QString &deviceName, const QString &alias);
 
 public slots:
     void onStartMonitoring();
@@ -26,6 +28,7 @@ signals:
     void deviceCreated();
 
     void testSignal();
+    void deviceAliasChanged(const QString &deviceName, const QString &alias);
 
 private:
     HWConnector * m_connector;

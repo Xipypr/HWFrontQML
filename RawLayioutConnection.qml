@@ -1,7 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.0
-import Qt.labs.settings 1.1
 
 Item {
     id: root
@@ -10,19 +9,13 @@ Item {
     property int horizontalMargin: 10
     property bool compactMode: width < 560
     property string connectedDeviceName: ""
+    property string connectedDeviceRawName: ""
     property bool awaitingDeviceCreation: false
 
     implicitHeight: contentLayout.implicitHeight + 20
 
     signal removeThisObject(bool removeConnectedDevicePage)
     signal connectionStateChanged(bool allowDevicePageActivation)
-
-    Settings {
-        id: aliasSettings
-        category: "DeviceAliases"
-        fileName: "device_aliases.ini"
-        property string aliasesJson: "{}"
-    }
 
     ColumnLayout {
         id: contentLayout
@@ -124,6 +117,7 @@ Item {
                     connectionInitialized = 0
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
+                    root.connectedDeviceRawName = ""
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
                 }
@@ -141,36 +135,23 @@ Item {
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
                 connectionInitialized = 1
-                root.connectedDeviceName = resolveDeviceAlias(core.device().name)
+                root.connectedDeviceRawName = core.device().name
+                const alias = core.deviceAlias(root.connectedDeviceRawName)
+                root.connectedDeviceName = alias.length > 0 ? alias : root.connectedDeviceRawName
             }
         }
     }
 
 
-
-
     Connections {
-        target: aliasSettings
+        target: core
 
-        function onAliasesJsonChanged() {
-            if (connectionInitialized === 1)
-                root.connectedDeviceName = resolveDeviceAlias(core.device().name)
+        function onDeviceAliasChanged(deviceName, alias) {
+            if (connectionInitialized !== 1 || deviceName !== root.connectedDeviceRawName)
+                return
+
+            root.connectedDeviceName = alias.length > 0 ? alias : root.connectedDeviceRawName
         }
-    }
-function parseAliases() {
-        try {
-            return JSON.parse(aliasSettings.aliasesJson)
-        } catch (err) {
-            return {}
-        }
-    }
-
-    function resolveDeviceAlias(deviceName) {
-        if (!deviceName || deviceName.length === 0)
-            return ""
-
-        let aliases = parseAliases()
-        return aliases[deviceName] || deviceName
     }
 
 }
