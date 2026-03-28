@@ -8,6 +8,8 @@ Item {
     property int connectionInitialized: 0
     property int horizontalMargin: 10
     property bool compactMode: width < 560
+    property string connectedDeviceName: ""
+    property bool awaitingDeviceCreation: false
 
     implicitHeight: contentLayout.implicitHeight + 20
 
@@ -40,19 +42,13 @@ Item {
             Layout.fillWidth: root.compactMode
             Layout.alignment: root.compactMode ? Qt.AlignLeft : Qt.AlignHCenter
 
-            TextField {
-                id: textField
-                focus: true
+            ConnectedDeviceCard {
+                id: hostInfo
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: 240
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
-                verticalAlignment: TextInput.AlignVCenter
-                validator: RegularExpressionValidator {
-                    regularExpression: /^((?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/
-                }
-                Component.onCompleted: {
-                    textField.forceActiveFocus()
-                }
+                connected: root.connectionInitialized === 1
+                deviceName: root.connectedDeviceName
             }
 
             Button{
@@ -60,7 +56,7 @@ Item {
                 text: "Connect Device"
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width) + leftPadding + rightPadding
-                enabled: textField.acceptableInput || connectingIndicator.running
+                enabled: hostInfo.acceptableInput || connectingIndicator.running
                 onClicked: clickConnectButton()
 
                 function clickConnectButton(){
@@ -75,13 +71,15 @@ Item {
                 }
 
                 function sendRequest(){
+                    awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
-                    core.onMakeGetRequest(textField.text)
+                    core.onMakeGetRequest(hostInfo.inputText)
                     connectButton.text = "Stop"
                     connectingIndicator.running = true
                 }
 
                 function stopSendingRequests(){
+                    awaitingDeviceCreation = false
                     root.connectionStateChanged(false)
                     connectButton.text = "Connect Device"
                     connectingIndicator.running = false
@@ -116,6 +114,8 @@ Item {
                 onClicked: {
                     const removeConnectedDevicePage = connectionInitialized === 1
                     connectionInitialized = 0
+                    awaitingDeviceCreation = false
+                    root.connectedDeviceName = ""
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
                 }
@@ -126,9 +126,14 @@ Item {
             target: core
 
             function onDeviceCreated() {
+                if (!awaitingDeviceCreation)
+                    return
+
+                awaitingDeviceCreation = false
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
                 connectionInitialized = 1
+                root.connectedDeviceName = core.device().name
             }
         }
     }

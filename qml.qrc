@@ -10,5 +10,6 @@
         <file>PageDevicesInfo.qml</file>
         <file>MetricCard.qml</file>
         <file>DeviceStatusHeader.qml</file>
+        <file>ConnectedDeviceCard.qml</file>
     </qresource>
 </RCC>
