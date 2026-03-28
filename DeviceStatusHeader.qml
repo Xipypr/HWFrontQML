@@ -2,28 +2,34 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 
-Item {
+ToolBar {
     id: root
-    property string deviceName: ""
+    property string headerText: ""
+    property bool showIndicator: true
     property color indicatorColor: "#22C55E"
-    property int horizontalPadding: 16
-    property int verticalPadding: 8
+    property color backgroundColor: "#17233A"
+    property color pressedBackgroundColor: "#223150"
+    signal clicked()
 
-    Layout.fillWidth: true
-    implicitHeight: Math.max(nameLabel.implicitHeight, statusDot.height) + (verticalPadding * 2)
+    implicitHeight: 56
+    horizontalPadding: 16
+    verticalPadding: 8
 
-    RowLayout {
-        anchors.fill: parent
-        anchors.leftMargin: horizontalPadding
-        anchors.rightMargin: horizontalPadding
-        anchors.topMargin: verticalPadding
-        anchors.bottomMargin: verticalPadding
+    background: Rectangle {
+        color: headerTap.pressed ? root.pressedBackgroundColor : root.backgroundColor
+
+        Behavior on color {
+            ColorAnimation { duration: 120 }
+        }
+    }
+
+    contentItem: RowLayout {
         spacing: 12
 
         Label {
             id: nameLabel
             Layout.fillWidth: true
-            text: root.deviceName
+            text: root.headerText
             color: "#E2E8F0"
             font.pixelSize: 16
             font.bold: true
@@ -33,6 +39,7 @@ Item {
 
         Rectangle {
             id: statusDot
+            visible: root.showIndicator
             width: 10
             height: 10
             radius: width / 2
@@ -45,5 +52,10 @@ Item {
                 NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
             }
         }
+    }
+
+    TapHandler {
+        id: headerTap
+        onTapped: root.clicked()
     }
 }
