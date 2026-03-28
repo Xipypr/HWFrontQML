@@ -4,7 +4,7 @@ import QtQuick.Layouts 1.3
 
 ToolBar {
     id: root
-    property string title: ""
+    property string headerText: ""
     property bool showIndicator: true
     property color indicatorColor: "#22C55E"
     property color backgroundColor: "#17233A"
@@ -29,7 +29,7 @@ ToolBar {
         Label {
             id: nameLabel
             Layout.fillWidth: true
-            text: root.title
+            text: root.headerText
             color: "#E2E8F0"
             font.pixelSize: 16
             font.bold: true
@@ -54,10 +54,12 @@ ToolBar {
         }
     }
 
-    MouseArea {
+    TapHandler {
         id: headerTap
-        anchors.fill: parent
+        onTapped: root.clicked()
+    }
+
+    HoverHandler {
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.clicked()
     }
 }

@@ -9,7 +9,7 @@ Page {
 
     header: DeviceStatusHeader {
         width: root.width
-        title: qsTr("Settings")
+        headerText: qsTr("Settings")
         showIndicator: false
         horizontalPadding: 12
         onClicked: root.settingsRequested()
