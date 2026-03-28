@@ -6,11 +6,20 @@ Item {
     id: root
     property string deviceName: ""
     property color indicatorColor: "#22C55E"
+    property bool highlighted: false
     property int horizontalPadding: 16
     property int verticalPadding: 8
 
     Layout.fillWidth: true
     implicitHeight: Math.max(nameLabel.implicitHeight, statusDot.height) + (verticalPadding * 2)
+
+    Rectangle {
+        anchors.fill: parent
+        visible: root.highlighted
+        color: "#17233A"
+        border.width: 1
+        border.color: Qt.rgba(100 / 255, 116 / 255, 139 / 255, 0.35)
+    }
 
     RowLayout {
         anchors.fill: parent
