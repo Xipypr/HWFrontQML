@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.0
+import Qt.labs.settings 1.1
 
 Item {
     id: root
@@ -15,6 +16,12 @@ Item {
 
     signal removeThisObject(bool removeConnectedDevicePage)
     signal connectionStateChanged(bool allowDevicePageActivation)
+
+    Settings {
+        id: aliasSettings
+        category: "DeviceAliases"
+        property string aliasesJson: "{}"
+    }
 
     ColumnLayout {
         id: contentLayout
@@ -133,8 +140,36 @@ Item {
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
                 connectionInitialized = 1
-                root.connectedDeviceName = core.device().name
+                root.connectedDeviceName = resolveDeviceAlias(core.device().name)
             }
         }
     }
+
+
+
+
+    Connections {
+        target: aliasSettings
+
+        function onAliasesJsonChanged() {
+            if (connectionInitialized === 1)
+                root.connectedDeviceName = resolveDeviceAlias(core.device().name)
+        }
+    }
+function parseAliases() {
+        try {
+            return JSON.parse(aliasSettings.aliasesJson)
+        } catch (err) {
+            return {}
+        }
+    }
+
+    function resolveDeviceAlias(deviceName) {
+        if (!deviceName || deviceName.length === 0)
+            return ""
+
+        let aliases = parseAliases()
+        return aliases[deviceName] || deviceName
+    }
+
 }

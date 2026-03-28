@@ -18,6 +18,28 @@ Dialog {
     property var defaultVariantFn
     property var refreshValuesFn
 
+    function sensorChoices() {
+        if (root.availableSensors.length > 0)
+            return root.availableSensors
+
+        let fallback = []
+        if (!root.selectedWidgetsModel)
+            return fallback
+
+        for (let i = 0; i < root.selectedWidgetsModel.count; ++i) {
+            let widget = root.selectedWidgetsModel.get(i)
+            fallback.push({
+                index: widget.sensorIndex,
+                type: -1,
+                name: widget.sensorName || widget.title,
+                title: widget.title,
+                variant: widget.variant,
+                metrics: [{ key: widget.metricKey, label: widget.metricLabel }]
+            })
+        }
+        return fallback
+    }
+
     Dialog {
         id: addMetricDialog
         parent: Overlay.overlay
@@ -31,7 +53,7 @@ Dialog {
         property var metricOptions: []
 
         onOpened: {
-            if (root.availableSensors.length > 0) {
+            if (root.sensorChoices().length > 0) {
                 sensorSelector.currentIndex = 0
                 refreshMetricOptions()
                 metricSelector.currentIndex = 0
@@ -45,10 +67,11 @@ Dialog {
             if (sensorSelector.currentIndex < 0 || metricSelector.currentIndex < 0)
                 return
 
-            let sensor = root.availableSensors[sensorSelector.currentIndex]
+            let choices = root.sensorChoices()
+            let sensor = choices[sensorSelector.currentIndex]
             let metric = metricOptions[metricSelector.currentIndex]
-            let variant = "ring"
-            if (root.defaultVariantFn)
+            let variant = sensor.variant || "ring"
+            if (root.defaultVariantFn && root.availableSensors.length > 0)
                 variant = root.defaultVariantFn(metric.key)
 
             root.selectedWidgetsModel.append({
@@ -66,11 +89,12 @@ Dialog {
         }
 
         function refreshMetricOptions() {
-            if (sensorSelector.currentIndex < 0 || sensorSelector.currentIndex >= root.availableSensors.length) {
+            let choices = root.sensorChoices()
+            if (sensorSelector.currentIndex < 0 || sensorSelector.currentIndex >= choices.length) {
                 metricOptions = []
                 return
             }
-            metricOptions = root.availableSensors[sensorSelector.currentIndex].metrics
+            metricOptions = choices[sensorSelector.currentIndex].metrics
         }
 
         contentItem: ColumnLayout {
@@ -84,7 +108,7 @@ Dialog {
             ComboBox {
                 id: sensorSelector
                 Layout.fillWidth: true
-                model: root.availableSensors
+                model: root.sensorChoices()
                 textRole: "name"
                 onCurrentIndexChanged: {
                     addMetricDialog.refreshMetricOptions()
@@ -178,7 +202,7 @@ Dialog {
 
             Button {
                 text: "Добавить виджет"
-                enabled: root.availableSensors.length > 0
+                enabled: root.sensorChoices().length > 0
                 onClicked: addMetricDialog.open()
             }
 
@@ -188,7 +212,7 @@ Dialog {
                 color: "#94A3B8"
                 text: root.availableSensors.length > 0
                       ? "Доступно сенсоров: " + root.availableSensors.length
-                      : "Сначала подключите устройство с данными сенсоров"
+                      : "Можно добавлять из уже существующих виджетов"
             }
         }
     }

@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import DeviceData 1.0
+import Qt.labs.settings 1.1
 
 Page {
     id: root
@@ -16,6 +17,12 @@ Page {
         id: selectedWidgetsModel
     }
 
+    Settings {
+        id: aliasSettings
+        category: "DeviceAliases"
+        property string aliasesJson: "{}"
+    }
+
     Component.onCompleted: ensureInitialWidgets()
 
     header: DeviceStatusHeader {
@@ -24,68 +31,18 @@ Page {
         onClicked: deviceSettingsDialog.open()
     }
 
-    Dialog {
+    DeviceSettingsDialog {
         id: deviceSettingsDialog
-        parent: Overlay.overlay
-        anchors.centerIn: parent
-        width: Math.min((parent ? parent.width : root.width) - 32, 460)
-        modal: true
-        title: "Настройки устройства"
-        standardButtons: Dialog.Close
-        padding: 16
-
-        contentItem: ColumnLayout {
-            spacing: 12
-
-            Button {
-                Layout.fillWidth: true
-                text: "Задать имя устройства"
-                onClicked: aliasDialog.open()
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Изменить компоновку виджетов"
-                onClicked: widgetLayoutDialog.open()
-            }
-        }
+        onSetAliasRequested: aliasDialog.open()
+        onEditLayoutRequested: widgetLayoutDialog.open()
     }
 
-    Dialog {
+    DeviceAliasDialog {
         id: aliasDialog
-        parent: Overlay.overlay
-        anchors.centerIn: parent
-        width: Math.min((parent ? parent.width : root.width) - 32, 460)
-        modal: true
-        title: "Псевдоним устройства"
-        standardButtons: Dialog.Ok | Dialog.Cancel
-        padding: 16
-
-        onOpened: {
-            aliasField.text = deviceAlias
-            aliasField.selectAll()
-            aliasField.forceActiveFocus()
-        }
-
-        onAccepted: {
-            deviceAlias = aliasField.text.trim()
-        }
-
-        contentItem: ColumnLayout {
-            spacing: 8
-
-            Label {
-                Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                color: "#CBD5E1"
-                text: "Псевдоним будет отображаться в хедере вместо исходного имени устройства."
-            }
-
-            TextField {
-                id: aliasField
-                Layout.fillWidth: true
-                placeholderText: "Например: Мой игровой ПК"
-            }
+        aliasValue: deviceAlias
+        onAliasSaved: function(newAlias) {
+            deviceAlias = newAlias
+            persistDeviceAlias(destop_name, newAlias)
         }
     }
 
@@ -134,6 +91,7 @@ Page {
                     destop_name = desktop_device.name;
                     objectsArray = desktop_device.devicesList();
                     rebuildAvailableSensors();
+                    deviceAlias = resolveDeviceAlias(destop_name);
                     if (hasOnlyPlaceholderWidgets()) {
                         selectedWidgetsModel.clear()
                     }
@@ -294,4 +252,34 @@ Page {
             return "ring"
         }
     }
+
+    function parseAliases() {
+        try {
+            return JSON.parse(aliasSettings.aliasesJson)
+        } catch (err) {
+            return {}
+        }
+    }
+
+    function persistDeviceAlias(deviceName, aliasValue) {
+        if (!deviceName || deviceName.length === 0)
+            return
+
+        let aliases = parseAliases()
+        if (aliasValue && aliasValue.length > 0) {
+            aliases[deviceName] = aliasValue
+        } else {
+            delete aliases[deviceName]
+        }
+        aliasSettings.aliasesJson = JSON.stringify(aliases)
+    }
+
+    function resolveDeviceAlias(deviceName) {
+        if (!deviceName || deviceName.length === 0)
+            return ""
+
+        let aliases = parseAliases()
+        return aliases[deviceName] || ""
+    }
+
 }
