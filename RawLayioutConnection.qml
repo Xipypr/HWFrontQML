@@ -41,30 +41,13 @@ Item {
             Layout.fillWidth: root.compactMode
             Layout.alignment: root.compactMode ? Qt.AlignLeft : Qt.AlignHCenter
 
-            Item {
-                id: hostInfoContainer
+            ConnectedDeviceCard {
+                id: hostInfo
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: 240
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
-                implicitHeight: hostInput.implicitHeight
-
-                TextField {
-                    id: hostInput
-                    anchors.fill: parent
-                    focus: true
-                    visible: root.connectionInitialized === 0
-                    verticalAlignment: TextInput.AlignVCenter
-                    validator: RegularExpressionValidator {
-                        regularExpression: /^((?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/
-                    }
-                    Component.onCompleted: hostInput.forceActiveFocus()
-                }
-
-                ConnectedDeviceCard {
-                    anchors.fill: parent
-                    visible: root.connectionInitialized === 1
-                    deviceName: root.connectedDeviceName
-                }
+                connected: root.connectionInitialized === 1
+                deviceName: root.connectedDeviceName
             }
 
             Button{
@@ -72,7 +55,7 @@ Item {
                 text: "Connect Device"
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width) + leftPadding + rightPadding
-                enabled: hostInput.acceptableInput || connectingIndicator.running
+                enabled: hostInfo.acceptableInput || connectingIndicator.running
                 onClicked: clickConnectButton()
 
                 function clickConnectButton(){
@@ -88,7 +71,7 @@ Item {
 
                 function sendRequest(){
                     root.connectionStateChanged(true)
-                    core.onMakeGetRequest(hostInput.text)
+                    core.onMakeGetRequest(hostInfo.inputText)
                     connectButton.text = "Stop"
                     connectingIndicator.running = true
                 }
