@@ -8,16 +8,19 @@ Item {
     property int connectionInitialized: 0
     property int horizontalMargin: 10
     property bool compactMode: width < 560
+    property bool singleDeviceMode: ListView.view && ListView.view.count === 1
 
     implicitHeight: contentLayout.implicitHeight + 20
+    height: singleDeviceMode && ListView.view ? ListView.view.height : implicitHeight
 
     signal removeThisObject(bool removeConnectedDevicePage)
     signal connectionStateChanged(bool allowDevicePageActivation)
 
     ColumnLayout {
         id: contentLayout
-        anchors.top: parent.top
-        anchors.topMargin: 10
+        anchors.top: singleDeviceMode ? undefined : parent.top
+        anchors.topMargin: singleDeviceMode ? 0 : 10
+        anchors.verticalCenter: singleDeviceMode ? parent.verticalCenter : undefined
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.leftMargin: root.horizontalMargin
