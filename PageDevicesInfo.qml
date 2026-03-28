@@ -9,6 +9,7 @@ Page {
     property var objectsArray: []
     property var desktop_device: ({})
     property string destop_name: core.device().name
+    property var diskMetrics: []
 
     header: DeviceStatusHeader {
         width: root.width
@@ -59,6 +60,20 @@ Page {
                 value: 68
                 variant: "linear"
             }
+
+            Repeater {
+                model: root.diskMetrics
+
+                delegate: MetricCard {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                    Layout.preferredHeight: 160
+                    Layout.minimumHeight: 150
+                    title: modelData.title
+                    value: modelData.value
+                    variant: "linear"
+                }
+            }
         }
 
         Connections {
@@ -75,6 +90,7 @@ Page {
             }
 
             function parseDevices() {
+                diskMetrics = [];
                 for (let i = 0; i < objectsArray.length; ++i) {
                     switch (objectsArray[i].type) {
                     case Device.MOTHERBOARD:
@@ -127,7 +143,14 @@ Page {
 
             function parseHdd(iter)
             {
-                //console.log(objectsArray[iter].name)
+                let diskObject = objectsArray[iter]
+                let diskName = diskObject.name.substring(0, 14)
+                let updatedMetrics = diskMetrics.slice()
+                updatedMetrics.push({
+                    "title": diskName,
+                    "value": diskObject.loading
+                })
+                diskMetrics = updatedMetrics
             }
         }
     }
