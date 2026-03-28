@@ -1,6 +1,5 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
-import QtQuick.Controls.Material 2.15
 import QtQuick.Layouts 1.3
 
 ToolBar {
@@ -16,7 +15,7 @@ ToolBar {
     verticalPadding: 8
 
     background: Rectangle {
-        color: headerTap.pressed ? root.pressedBackgroundColor : root.Material.background
+        color: headerTap.pressed ? root.pressedBackgroundColor : "#17233A"
 
         Behavior on color {
             ColorAnimation { duration: 120 }
