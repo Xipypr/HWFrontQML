@@ -27,6 +27,15 @@ Page {
         onClicked: deviceSettingsDialog.open()
     }
 
+
+    Timer {
+        id: liveUpdateTimer
+        interval: 1000
+        repeat: true
+        running: root.visible
+        onTriggered: refreshLiveValues()
+    }
+
     DeviceSettingsDialog {
         id: deviceSettingsDialog
         onSetAliasRequested: aliasDialog.open()
@@ -97,7 +106,7 @@ Page {
                     selectedWidgetsModel.clear()
                 }
                 initializeDefaultWidgets()
-                updateWidgetValues()
+                refreshLiveValues()
             }
         }
     }
@@ -120,6 +129,15 @@ Page {
             selectedWidgetsModel.clear()
         }
         initializeDefaultWidgets()
+        refreshLiveValues()
+    }
+
+
+    function refreshLiveValues() {
+        if (!desktop_device || desktop_device.type !== Device.DESKTOP)
+            return
+
+        objectsArray = desktop_device.devicesList()
         updateWidgetValues()
     }
 
