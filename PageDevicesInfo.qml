@@ -18,53 +18,14 @@ Page {
         }
     }
 
-    Dialog {
+    DeviceSettingsDialog {
         id: deviceSettingsDialog
-        parent: Overlay.overlay
-        x: (root.width - width) / 2
-        y: (root.height - height) / 2
-        width: Math.min(root.width - 32, 360)
-        modal: true
-        focus: true
-        padding: 20
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-
-        background: Rectangle {
-            radius: 14
-            color: "#111827"
-            border.color: "#334155"
-            border.width: 1
+        onSetDeviceNameSelected: {
+            console.log("Device settings: set device name clicked")
         }
 
-        contentItem: ColumnLayout {
-            spacing: 10
-
-            Label {
-                Layout.fillWidth: true
-                text: "Настройки устройства"
-                color: "#E2E8F0"
-                font.pixelSize: 18
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Добавить алиас"
-                onClicked: {
-                    console.log("Device settings: add alias clicked")
-                    deviceSettingsDialog.close()
-                }
-            }
-
-            Button {
-                Layout.fillWidth: true
-                text: "Изменить компоновку элементов"
-                onClicked: {
-                    console.log("Device settings: change layout clicked")
-                    deviceSettingsDialog.close()
-                }
-            }
+        onChangeLayoutSelected: {
+            console.log("Device settings: change layout clicked")
         }
     }
 
