@@ -17,8 +17,10 @@ Item {
         id: contentLayout
         anchors.top: parent.top
         anchors.topMargin: 10
-        anchors.horizontalCenter: parent.horizontalCenter
-        width: Math.max(0, Math.min(parent.width - 20, 760))
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.leftMargin: 20
+        anchors.rightMargin: 20
         spacing: 8
 
         Label {
