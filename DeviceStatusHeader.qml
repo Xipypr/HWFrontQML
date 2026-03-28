@@ -58,8 +58,4 @@ ToolBar {
         id: headerTap
         onTapped: root.clicked()
     }
-
-    HoverHandler {
-        cursorShape: Qt.PointingHandCursor
-    }
 }
