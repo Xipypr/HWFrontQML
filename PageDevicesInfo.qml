@@ -15,6 +15,8 @@ Page {
         id: selectedWidgetsModel
     }
 
+    Component.onCompleted: ensureInitialWidgets()
+
     header: DeviceStatusHeader {
         width: root.width
         deviceName: destop_name
@@ -240,6 +242,9 @@ Page {
                     destop_name = desktop_device.name;
                     objectsArray = desktop_device.devicesList();
                     rebuildAvailableSensors();
+                    if (hasOnlyPlaceholderWidgets()) {
+                        selectedWidgetsModel.clear()
+                    }
                     initializeDefaultWidgets();
                     updateWidgetValues();
                 }
@@ -255,6 +260,54 @@ Page {
         appendDefaultWidget(Device.PROCESSOR, "Загрузка CPU")
         appendDefaultWidget(Device.MEMORY, "Загрузка RAM")
         appendDefaultWidget(Device.VIDEO_CARD, "Загрузка GPU")
+    }
+
+    function ensureInitialWidgets()
+    {
+        if (selectedWidgetsModel.count > 0)
+            return
+
+        selectedWidgetsModel.append({
+            title: "CPU",
+            sensorIndex: -1,
+            sensorName: "CPU",
+            metricKey: "loading",
+            metricLabel: "Нагрузка, %",
+            variant: "segments",
+            value: 45
+        })
+
+        selectedWidgetsModel.append({
+            title: "RAM",
+            sensorIndex: -1,
+            sensorName: "RAM",
+            metricKey: "loading",
+            metricLabel: "Нагрузка, %",
+            variant: "ring",
+            value: 76
+        })
+
+        selectedWidgetsModel.append({
+            title: "GPU",
+            sensorIndex: -1,
+            sensorName: "GPU",
+            metricKey: "loading",
+            metricLabel: "Нагрузка, %",
+            variant: "linear",
+            value: 68
+        })
+    }
+
+    function hasOnlyPlaceholderWidgets()
+    {
+        if (selectedWidgetsModel.count === 0)
+            return false
+
+        for (let i = 0; i < selectedWidgetsModel.count; ++i) {
+            if (selectedWidgetsModel.get(i).sensorIndex >= 0)
+                return false
+        }
+        return true
     }
 
     function appendDefaultWidget(deviceType, fallbackTitle)
