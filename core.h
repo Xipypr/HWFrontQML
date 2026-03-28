@@ -5,7 +5,6 @@
 #include "devicebuilder.h"
 
 #include <QObject>
-#include <QHash>
 
 class Core : public QObject
 {
@@ -15,8 +14,6 @@ public:
     ~Core();
 
     Q_INVOKABLE QObject *device() const;
-    Q_INVOKABLE QString deviceAlias(const QString &deviceName) const;
-    Q_INVOKABLE void setDeviceAlias(const QString &deviceName, const QString &alias);
 
 public slots:
     void onStartMonitoring();
@@ -29,13 +26,11 @@ signals:
     void deviceCreated();
 
     void testSignal();
-    void deviceAliasChanged(const QString &deviceName, const QString &alias);
 
 private:
     HWConnector * m_connector;
     DeviceBuilder * m_deviceCreator;
     DesktopDevice * m_device;
-    QHash<QString, QString> m_aliases;
 };
 
 #endif // CORE_H

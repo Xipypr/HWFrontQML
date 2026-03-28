@@ -7,8 +7,8 @@ Page {
     id: root
 
     property var objectsArray: []
-    property var desktop_device: null
-    property string destop_name: ""
+    property var desktop_device: ({})
+    property string destop_name: core.device().name
     property string deviceAlias: ""
     property var availableSensors: []
 
@@ -16,10 +16,7 @@ Page {
         id: selectedWidgetsModel
     }
 
-    Component.onCompleted: {
-        ensureInitialWidgets()
-        syncCurrentDevice()
-    }
+    Component.onCompleted: ensureInitialWidgets()
 
     header: DeviceStatusHeader {
         width: root.width
@@ -27,27 +24,68 @@ Page {
         onClicked: deviceSettingsDialog.open()
     }
 
-
-    Timer {
-        id: liveUpdateTimer
-        interval: 1000
-        repeat: true
-        running: root.visible
-        onTriggered: refreshLiveValues()
-    }
-
-    DeviceSettingsDialog {
+    Dialog {
         id: deviceSettingsDialog
-        onSetAliasRequested: aliasDialog.open()
-        onEditLayoutRequested: widgetLayoutDialog.open()
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        width: Math.min((parent ? parent.width : root.width) - 32, 460)
+        modal: true
+        title: "Настройки устройства"
+        standardButtons: Dialog.Close
+        padding: 16
+
+        contentItem: ColumnLayout {
+            spacing: 12
+
+            Button {
+                Layout.fillWidth: true
+                text: "Задать имя устройства"
+                onClicked: aliasDialog.open()
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: "Изменить компоновку виджетов"
+                onClicked: widgetLayoutDialog.open()
+            }
+        }
     }
 
-    DeviceAliasDialog {
+    Dialog {
         id: aliasDialog
-        aliasValue: deviceAlias
-        onAliasSaved: function(newAlias) {
-            deviceAlias = newAlias
-            core.setDeviceAlias(destop_name, newAlias)
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        width: Math.min((parent ? parent.width : root.width) - 32, 460)
+        modal: true
+        title: "Псевдоним устройства"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        padding: 16
+
+        onOpened: {
+            aliasField.text = deviceAlias
+            aliasField.selectAll()
+            aliasField.forceActiveFocus()
+        }
+
+        onAccepted: {
+            deviceAlias = aliasField.text.trim()
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 8
+
+            Label {
+                Layout.fillWidth: true
+                wrapMode: Text.WordWrap
+                color: "#CBD5E1"
+                text: "Псевдоним будет отображаться в хедере вместо исходного имени устройства."
+            }
+
+            TextField {
+                id: aliasField
+                Layout.fillWidth: true
+                placeholderText: "Например: Мой игровой ПК"
+            }
         }
     }
 
@@ -90,55 +128,20 @@ Page {
             target: core
 
             function onDeviceCreated() {
-                const createdDevice = core.device()
-                if (!createdDevice)
-                    return
-
-                desktop_device = createdDevice
-                if (desktop_device.type !== Device.DESKTOP)
-                    return
-
-                destop_name = desktop_device.name || ""
-                objectsArray = desktop_device.devicesList()
-                rebuildAvailableSensors()
-                deviceAlias = core.deviceAlias(destop_name)
-                if (hasOnlyPlaceholderWidgets()) {
-                    selectedWidgetsModel.clear()
+                desktop_device = core.device();
+                if (desktop_device.type === Device.DESKTOP)
+                {
+                    destop_name = desktop_device.name;
+                    objectsArray = desktop_device.devicesList();
+                    rebuildAvailableSensors();
+                    if (hasOnlyPlaceholderWidgets()) {
+                        selectedWidgetsModel.clear()
+                    }
+                    initializeDefaultWidgets();
+                    updateWidgetValues();
                 }
-                initializeDefaultWidgets()
-                refreshLiveValues()
             }
         }
-    }
-
-
-    function syncCurrentDevice() {
-        const currentDevice = core.device()
-        if (!currentDevice)
-            return
-
-        desktop_device = currentDevice
-        if (desktop_device.type !== Device.DESKTOP)
-            return
-
-        destop_name = desktop_device.name || ""
-        objectsArray = desktop_device.devicesList()
-        rebuildAvailableSensors()
-        deviceAlias = core.deviceAlias(destop_name)
-        if (hasOnlyPlaceholderWidgets()) {
-            selectedWidgetsModel.clear()
-        }
-        initializeDefaultWidgets()
-        refreshLiveValues()
-    }
-
-
-    function refreshLiveValues() {
-        if (!desktop_device || desktop_device.type !== Device.DESKTOP)
-            return
-
-        objectsArray = desktop_device.devicesList()
-        updateWidgetValues()
     }
 
     function initializeDefaultWidgets()
@@ -291,5 +294,4 @@ Page {
             return "ring"
         }
     }
-
 }

@@ -39,25 +39,3 @@ QObject *Core::device() const
 {
     return m_device;
 }
-
-
-QString Core::deviceAlias(const QString &deviceName) const
-{
-    if (deviceName.isEmpty())
-        return QString();
-
-    return m_aliases.value(deviceName);
-}
-
-void Core::setDeviceAlias(const QString &deviceName, const QString &alias)
-{
-    if (deviceName.isEmpty())
-        return;
-
-    if (alias.isEmpty())
-        m_aliases.remove(deviceName);
-    else
-        m_aliases[deviceName] = alias;
-
-    emit deviceAliasChanged(deviceName, alias);
-}

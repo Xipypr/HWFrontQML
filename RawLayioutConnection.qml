@@ -9,7 +9,6 @@ Item {
     property int horizontalMargin: 10
     property bool compactMode: width < 560
     property string connectedDeviceName: ""
-    property string connectedDeviceRawName: ""
     property bool awaitingDeviceCreation: false
 
     implicitHeight: contentLayout.implicitHeight + 20
@@ -117,7 +116,6 @@ Item {
                     connectionInitialized = 0
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
-                    root.connectedDeviceRawName = ""
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
                 }
@@ -134,33 +132,9 @@ Item {
                 awaitingDeviceCreation = false
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
-
-                const createdDevice = core.device()
-                if (!createdDevice) {
-                    connectionInitialized = 0
-                    root.connectedDeviceRawName = ""
-                    root.connectedDeviceName = ""
-                    return
-                }
-
                 connectionInitialized = 1
-                root.connectedDeviceRawName = createdDevice.name
-                const alias = core.deviceAlias(root.connectedDeviceRawName)
-                root.connectedDeviceName = alias.length > 0 ? alias : root.connectedDeviceRawName
+                root.connectedDeviceName = core.device().name
             }
         }
     }
-
-
-    Connections {
-        target: core
-
-        function onDeviceAliasChanged(deviceName, alias) {
-            if (connectionInitialized !== 1 || deviceName !== root.connectedDeviceRawName)
-                return
-
-            root.connectedDeviceName = alias.length > 0 ? alias : root.connectedDeviceRawName
-        }
-    }
-
 }
