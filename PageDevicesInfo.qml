@@ -8,7 +8,7 @@ Page {
 
     property var objectsArray: []
     property var desktop_device: ({})
-    property string destop_name: core.device().name
+    property string destop_name: core.device() ? core.device().name : ""
     property string deviceAlias: ""
     property var availableSensors: []
 
@@ -79,6 +79,9 @@ Page {
 
             function onDeviceCreated() {
                 desktop_device = core.device();
+                if (!desktop_device)
+                    return
+
                 if (desktop_device.type === Device.DESKTOP)
                 {
                     destop_name = desktop_device.name;

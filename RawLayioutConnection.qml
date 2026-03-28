@@ -134,8 +134,17 @@ Item {
                 awaitingDeviceCreation = false
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
+
+                const createdDevice = core.device()
+                if (!createdDevice) {
+                    connectionInitialized = 0
+                    root.connectedDeviceRawName = ""
+                    root.connectedDeviceName = ""
+                    return
+                }
+
                 connectionInitialized = 1
-                root.connectedDeviceRawName = core.device().name
+                root.connectedDeviceRawName = createdDevice.name
                 const alias = core.deviceAlias(root.connectedDeviceRawName)
                 root.connectedDeviceName = alias.length > 0 ? alias : root.connectedDeviceRawName
             }
