@@ -9,6 +9,7 @@ Page {
     property var objectsArray: []
     property var desktop_device: ({})
     property string destop_name: core.device().name
+    property string deviceAlias: ""
     property var availableSensors: []
 
     ListModel {
@@ -19,128 +20,82 @@ Page {
 
     header: DeviceStatusHeader {
         width: root.width
-        deviceName: destop_name
-        onClicked: cardsEditDialog.open()
+        deviceName: deviceAlias.length > 0 ? deviceAlias : destop_name
+        onClicked: deviceSettingsDialog.open()
     }
 
     Dialog {
-        id: cardsEditDialog
+        id: deviceSettingsDialog
         parent: Overlay.overlay
         anchors.centerIn: parent
-        width: Math.min((parent ? parent.width : root.width) - 32, 560)
+        width: Math.min((parent ? parent.width : root.width) - 32, 460)
         modal: true
-        title: "Редактор карточек"
+        title: "Настройки устройства"
         standardButtons: Dialog.Close
         padding: 16
 
         contentItem: ColumnLayout {
-            spacing: 10
+            spacing: 12
+
+            Button {
+                Layout.fillWidth: true
+                text: "Задать имя устройства"
+                onClicked: aliasDialog.open()
+            }
+
+            Button {
+                Layout.fillWidth: true
+                text: "Изменить компоновку виджетов"
+                onClicked: widgetLayoutDialog.open()
+            }
+        }
+    }
+
+    Dialog {
+        id: aliasDialog
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        width: Math.min((parent ? parent.width : root.width) - 32, 460)
+        modal: true
+        title: "Псевдоним устройства"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        padding: 16
+
+        onOpened: {
+            aliasField.text = deviceAlias
+            aliasField.selectAll()
+            aliasField.forceActiveFocus()
+        }
+
+        onAccepted: {
+            deviceAlias = aliasField.text.trim()
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 8
 
             Label {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                text: "Управляйте набором виджетов: меняйте порядок, удаляйте и добавляйте новые на основе доступных сенсоров/метрик."
                 color: "#CBD5E1"
+                text: "Псевдоним будет отображаться в хедере вместо исходного имени устройства."
             }
 
-            Frame {
+            TextField {
+                id: aliasField
                 Layout.fillWidth: true
-                Layout.preferredHeight: 220
-                background: Rectangle {
-                    radius: 6
-                    color: "#1E293B"
-                    border.color: "#334155"
-                }
-
-                ListView {
-                    id: selectedWidgetsView
-                    anchors.fill: parent
-                    anchors.margins: 8
-                    spacing: 8
-                    clip: true
-                    model: selectedWidgetsModel
-
-                    delegate: Rectangle {
-                        width: selectedWidgetsView.width
-                        height: 48
-                        radius: 6
-                        color: "#253247"
-
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
-                            spacing: 8
-
-                            Label {
-                                Layout.fillWidth: true
-                                text: model.title + "  ·  " + model.sensorName + " / " + model.metricLabel
-                                color: "#E2E8F0"
-                                elide: Text.ElideRight
-                            }
-
-                            ToolButton {
-                                text: "↑"
-                                enabled: index > 0
-                                onClicked: selectedWidgetsModel.move(index, index - 1, 1)
-                            }
-
-                            ToolButton {
-                                text: "↓"
-                                enabled: index < selectedWidgetsModel.count - 1
-                                onClicked: selectedWidgetsModel.move(index, index + 1, 1)
-                            }
-
-                            ToolButton {
-                                text: "✕"
-                                onClicked: selectedWidgetsModel.remove(index)
-                            }
-                        }
-                    }
-                }
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-
-                Button {
-                    text: "Добавить виджет"
-                    enabled: availableSensors.length > 0
-                    onClicked: addWidgetDialog.open()
-                }
-
-                Label {
-                    Layout.fillWidth: true
-                    horizontalAlignment: Text.AlignRight
-                    color: "#94A3B8"
-                    text: availableSensors.length > 0
-                          ? "Доступно сенсоров: " + availableSensors.length
-                          : "Сначала подключите устройство с данными сенсоров"
-                }
-            }
-
-            Label {
-                Layout.fillWidth: true
-                wrapMode: Text.WordWrap
-                color: "#94A3B8"
-                text: "Следующий шаг — добавить персональные настройки виджета (тип визуализации, диапазоны, пороги)."
+                placeholderText: "Например: Мой игровой ПК"
             }
         }
     }
 
-
-
-    AddWidgetDialog {
-        id: addWidgetDialog
+    DeviceLayoutDialog {
+        id: widgetLayoutDialog
         availableSensors: root.availableSensors
-
-        onWidgetChosen: function(widgetData) {
-            widgetData.variant = defaultVariant(widgetData.metricKey)
-            selectedWidgetsModel.append(widgetData)
-            updateWidgetValues()
-        }
+        selectedWidgetsModel: selectedWidgetsModel
+        defaultVariantFn: defaultVariant
+        refreshValuesFn: updateWidgetValues
     }
-
 
     ColumnLayout {
         anchors.fill: parent

@@ -8,7 +8,7 @@
         <file>LinearBusyIndicator.qml</file>
         <file>CustomItem.qml</file>
         <file>PageDevicesInfo.qml</file>
-        <file>AddWidgetDialog.qml</file>
+        <file>DeviceLayoutDialog.qml</file>
         <file>MetricCard.qml</file>
         <file>DeviceStatusHeader.qml</file>
         <file>ConnectedDeviceCard.qml</file>
