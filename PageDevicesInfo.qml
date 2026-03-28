@@ -12,7 +12,7 @@ Page {
 
     header: DeviceStatusHeader {
         width: root.width
-        deviceName: destop_name
+        title: destop_name
         onClicked: {
             // TODO: Open device settings popup window.
         }

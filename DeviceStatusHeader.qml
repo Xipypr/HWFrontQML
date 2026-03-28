@@ -4,7 +4,8 @@ import QtQuick.Layouts 1.3
 
 ToolBar {
     id: root
-    property string deviceName: ""
+    property string title: ""
+    property bool showIndicator: true
     property color indicatorColor: "#22C55E"
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
@@ -34,7 +35,7 @@ ToolBar {
         Label {
             id: nameLabel
             Layout.fillWidth: true
-            text: root.deviceName
+            text: root.title
             color: "#E2E8F0"
             font.pixelSize: 16
             font.bold: true
@@ -44,6 +45,7 @@ ToolBar {
 
         Rectangle {
             id: statusDot
+            visible: root.showIndicator
             width: 10
             height: 10
             radius: width / 2
