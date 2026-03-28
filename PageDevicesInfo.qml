@@ -20,6 +20,7 @@ Page {
     Settings {
         id: aliasSettings
         category: "DeviceAliases"
+        fileName: "device_aliases.ini"
         property string aliasesJson: "{}"
     }
 
