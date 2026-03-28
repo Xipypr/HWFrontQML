@@ -19,9 +19,6 @@ int main(int argc, char *argv[])
 #endif
 
     QGuiApplication app(argc, argv);
-    QCoreApplication::setOrganizationName("HWFront");
-    QCoreApplication::setOrganizationDomain("hwfront.local");
-    QCoreApplication::setApplicationName("HWFrontQML");
 
     Core core;
     Device device;

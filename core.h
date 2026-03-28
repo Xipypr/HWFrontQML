@@ -5,6 +5,7 @@
 #include "devicebuilder.h"
 
 #include <QObject>
+#include <QHash>
 
 class Core : public QObject
 {
@@ -34,6 +35,7 @@ private:
     HWConnector * m_connector;
     DeviceBuilder * m_deviceCreator;
     DesktopDevice * m_device;
+    QHash<QString, QString> m_aliases;
 };
 
 #endif // CORE_H
