@@ -8,6 +8,9 @@
         <file>LinearBusyIndicator.qml</file>
         <file>CustomItem.qml</file>
         <file>PageDevicesInfo.qml</file>
+        <file>DeviceSettingsDialog.qml</file>
+        <file>DeviceLayoutDialog.qml</file>
+        <file>DeviceAliasDialog.qml</file>
         <file>DeviceLayoutDialog.qml</file>
         <file>DeviceAliasDialog.qml</file>
         <file>DeviceSettingsDialog.qml</file>

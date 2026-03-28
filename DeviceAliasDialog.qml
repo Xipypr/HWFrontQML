@@ -34,7 +34,7 @@ Dialog {
             Layout.fillWidth: true
             wrapMode: Text.WordWrap
             color: "#CBD5E1"
-            text: "Псевдоним будет отображаться вместо исходного имени устройства."
+            text: "Введите отображаемое имя устройства."
         }
 
         TextField {
