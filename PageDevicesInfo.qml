@@ -7,8 +7,8 @@ Page {
     id: root
 
     property var objectsArray: []
-    property var desktop_device: ({})
-    property string destop_name: core.device() ? core.device().name : ""
+    property var desktop_device: null
+    property string destop_name: ""
     property string deviceAlias: ""
     property var availableSensors: []
 
@@ -16,7 +16,10 @@ Page {
         id: selectedWidgetsModel
     }
 
-    Component.onCompleted: ensureInitialWidgets()
+    Component.onCompleted: {
+        ensureInitialWidgets()
+        syncCurrentDevice()
+    }
 
     header: DeviceStatusHeader {
         width: root.width
@@ -78,24 +81,46 @@ Page {
             target: core
 
             function onDeviceCreated() {
-                desktop_device = core.device();
-                if (!desktop_device)
+                const createdDevice = core.device()
+                if (!createdDevice)
                     return
 
-                if (desktop_device.type === Device.DESKTOP)
-                {
-                    destop_name = desktop_device.name;
-                    objectsArray = desktop_device.devicesList();
-                    rebuildAvailableSensors();
-                    deviceAlias = core.deviceAlias(destop_name);
-                    if (hasOnlyPlaceholderWidgets()) {
-                        selectedWidgetsModel.clear()
-                    }
-                    initializeDefaultWidgets();
-                    updateWidgetValues();
+                desktop_device = createdDevice
+                if (desktop_device.type !== Device.DESKTOP)
+                    return
+
+                destop_name = desktop_device.name || ""
+                objectsArray = desktop_device.devicesList()
+                rebuildAvailableSensors()
+                deviceAlias = core.deviceAlias(destop_name)
+                if (hasOnlyPlaceholderWidgets()) {
+                    selectedWidgetsModel.clear()
                 }
+                initializeDefaultWidgets()
+                updateWidgetValues()
             }
         }
+    }
+
+
+    function syncCurrentDevice() {
+        const currentDevice = core.device()
+        if (!currentDevice)
+            return
+
+        desktop_device = currentDevice
+        if (desktop_device.type !== Device.DESKTOP)
+            return
+
+        destop_name = desktop_device.name || ""
+        objectsArray = desktop_device.devicesList()
+        rebuildAvailableSensors()
+        deviceAlias = core.deviceAlias(destop_name)
+        if (hasOnlyPlaceholderWidgets()) {
+            selectedWidgetsModel.clear()
+        }
+        initializeDefaultWidgets()
+        updateWidgetValues()
     }
 
     function initializeDefaultWidgets()
