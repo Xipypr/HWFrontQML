@@ -11,7 +11,7 @@ Page {
         width: root.width
         title: qsTr("Settings")
         showIndicator: false
-        horizontalPadding: 12
+        contentHorizontalPadding: 12
         onClicked: root.settingsRequested()
     }
 
