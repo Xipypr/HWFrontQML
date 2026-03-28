@@ -10,6 +10,7 @@ Page {
     property var desktop_device: ({})
     property string destop_name: core.device().name
     property var diskMetrics: []
+    property var diskNamesSeen: ({})
 
     header: DeviceStatusHeader {
         width: root.width
@@ -91,6 +92,7 @@ Page {
 
             function parseDevices() {
                 diskMetrics = [];
+                diskNamesSeen = ({});
                 for (let i = 0; i < objectsArray.length; ++i) {
                     switch (objectsArray[i].type) {
                     case Device.MOTHERBOARD:
@@ -144,10 +146,18 @@ Page {
             function parseHdd(iter)
             {
                 let diskObject = objectsArray[iter]
-                let diskName = diskObject.name.substring(0, 14)
+                let fullDiskName = diskObject.name
+                if (diskNamesSeen[fullDiskName]) {
+                    return;
+                }
+
+                let updatedSeenNames = Object.assign({}, diskNamesSeen)
+                updatedSeenNames[fullDiskName] = true
+                diskNamesSeen = updatedSeenNames
+
                 let updatedMetrics = diskMetrics.slice()
                 updatedMetrics.push({
-                    "title": diskName,
+                    "title": fullDiskName.substring(0, 14),
                     "value": diskObject.loading
                 })
                 diskMetrics = updatedMetrics
