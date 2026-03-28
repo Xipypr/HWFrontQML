@@ -9,10 +9,9 @@ ToolBar {
     property color indicatorColor: "#22C55E"
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
-    property int headerHeight: 56
     signal clicked()
 
-    implicitHeight: headerHeight
+    implicitHeight: 56
     horizontalPadding: 16
     verticalPadding: 8
 
