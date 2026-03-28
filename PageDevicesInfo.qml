@@ -25,12 +25,13 @@ Page {
 
     Dialog {
         id: cardsEditDialog
-        x: (root.width - width) / 2
-        y: (root.height - height) / 2
-        width: Math.min(root.width - 32, 560)
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        width: Math.min((parent ? parent.width : root.width) - 32, 560)
         modal: true
         title: "Редактор карточек"
         standardButtons: Dialog.Close
+        padding: 16
 
         contentItem: ColumnLayout {
             spacing: 10
@@ -127,83 +128,19 @@ Page {
         }
     }
 
-    Dialog {
+
+
+    AddWidgetDialog {
         id: addWidgetDialog
-        x: (root.width - width) / 2
-        y: (root.height - height) / 2
-        width: Math.min(root.width - 32, 460)
-        modal: true
-        title: "Добавить виджет"
-        standardButtons: Dialog.Ok | Dialog.Cancel
+        availableSensors: root.availableSensors
 
-        property var metricOptions: []
-
-        onOpened: {
-            if (availableSensors.length > 0) {
-                sensorSelector.currentIndex = 0
-                refreshMetricOptions()
-                metricSelector.currentIndex = 0
-            }
-        }
-
-        onAccepted: {
-            if (sensorSelector.currentIndex < 0 || metricSelector.currentIndex < 0)
-                return;
-
-            let sensor = availableSensors[sensorSelector.currentIndex]
-            let metric = metricOptions[metricSelector.currentIndex]
-            selectedWidgetsModel.append({
-                title: sensor.name,
-                sensorIndex: sensor.index,
-                sensorName: sensor.name,
-                metricKey: metric.key,
-                metricLabel: metric.label,
-                variant: defaultVariant(metric.key),
-                value: 0
-            })
+        onWidgetChosen: function(widgetData) {
+            widgetData.variant = defaultVariant(widgetData.metricKey)
+            selectedWidgetsModel.append(widgetData)
             updateWidgetValues()
         }
-
-        function refreshMetricOptions() {
-            if (sensorSelector.currentIndex < 0 || sensorSelector.currentIndex >= availableSensors.length) {
-                metricOptions = []
-                return
-            }
-            metricOptions = availableSensors[sensorSelector.currentIndex].metrics
-        }
-
-        contentItem: ColumnLayout {
-            spacing: 10
-
-            Label {
-                text: "Сенсор"
-                color: "#CBD5E1"
-            }
-
-            ComboBox {
-                id: sensorSelector
-                Layout.fillWidth: true
-                model: availableSensors
-                textRole: "name"
-                onCurrentIndexChanged: {
-                    addWidgetDialog.refreshMetricOptions()
-                    metricSelector.currentIndex = 0
-                }
-            }
-
-            Label {
-                text: "Метрика"
-                color: "#CBD5E1"
-            }
-
-            ComboBox {
-                id: metricSelector
-                Layout.fillWidth: true
-                model: addWidgetDialog.metricOptions
-                textRole: "label"
-            }
-        }
     }
+
 
     ColumnLayout {
         anchors.fill: parent
