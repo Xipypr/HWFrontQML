@@ -61,21 +61,36 @@ Item {
                 }
 
                 Rectangle {
+                    id: deviceCard
                     anchors.fill: parent
                     visible: root.connectionInitialized === 1
                     radius: 6
-                    color: "#F4F6F8"
-                    border.color: "#D0D7DE"
+                    color: "#2E3B52"
+                    border.color: "#4E5D78"
                     border.width: 1
+                    clip: true
 
-                    Label {
+                    Text {
+                        id: deviceNameLabel
                         anchors.fill: parent
                         anchors.leftMargin: 12
                         anchors.rightMargin: 12
                         verticalAlignment: Text.AlignVCenter
+                        color: "#FFFFFF"
                         elide: Text.ElideRight
                         text: root.connectedDeviceName.length > 0 ? root.connectedDeviceName : "Unknown device"
                     }
+
+                    MouseArea {
+                        id: cardHoverArea
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: deviceNameLabel.truncated ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    }
+
+                    ToolTip.visible: cardHoverArea.containsMouse && deviceNameLabel.truncated
+                    ToolTip.delay: 300
+                    ToolTip.text: root.connectedDeviceName
                 }
             }
 
