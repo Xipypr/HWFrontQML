@@ -6,13 +6,8 @@ Item {
     id: root
 
     property int connectionInitialized: 0
-    property int horizontalMargin: 12
-    property real wideControlsWidth: textField.Layout.preferredWidth
-                                     + connectButton.Layout.preferredWidth
-                                     + connectingIndicator.implicitWidth
-                                     + deleteDevice.implicitWidth
-                                     + controlsLayout.columnSpacing * 3
-    property bool compactMode: contentLayout.width < wideControlsWidth
+    property int horizontalMargin: 10
+    property bool compactMode: width < 560
 
     implicitHeight: contentLayout.implicitHeight + 20
 
@@ -32,8 +27,9 @@ Item {
         Label {
             text: "Введите IP-адрес"
             Layout.fillWidth: root.compactMode
-            Layout.preferredWidth: textField.Layout.preferredWidth
+            Layout.preferredWidth: controlsLayout.implicitWidth
             Layout.alignment: root.compactMode ? Qt.AlignLeft : Qt.AlignHCenter
+            horizontalAlignment: Text.AlignLeft
         }
 
         GridLayout {
