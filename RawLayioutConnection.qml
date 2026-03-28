@@ -8,6 +8,7 @@ Item {
     property int connectionInitialized: 0
     property int horizontalMargin: 10
     property bool compactMode: width < 560
+    property string connectedDeviceName: ""
 
     implicitHeight: contentLayout.implicitHeight + 20
 
@@ -40,18 +41,41 @@ Item {
             Layout.fillWidth: root.compactMode
             Layout.alignment: root.compactMode ? Qt.AlignLeft : Qt.AlignHCenter
 
-            TextField {
-                id: textField
-                focus: true
+            Item {
+                id: hostInfoContainer
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: 240
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
-                verticalAlignment: TextInput.AlignVCenter
-                validator: RegularExpressionValidator {
-                    regularExpression: /^((?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/
+                implicitHeight: hostInput.implicitHeight
+
+                TextField {
+                    id: hostInput
+                    anchors.fill: parent
+                    focus: true
+                    visible: root.connectionInitialized === 0
+                    verticalAlignment: TextInput.AlignVCenter
+                    validator: RegularExpressionValidator {
+                        regularExpression: /^((?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}(?:[0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])$/
+                    }
+                    Component.onCompleted: hostInput.forceActiveFocus()
                 }
-                Component.onCompleted: {
-                    textField.forceActiveFocus()
+
+                Rectangle {
+                    anchors.fill: parent
+                    visible: root.connectionInitialized === 1
+                    radius: 6
+                    color: "#F4F6F8"
+                    border.color: "#D0D7DE"
+                    border.width: 1
+
+                    Label {
+                        anchors.fill: parent
+                        anchors.leftMargin: 12
+                        anchors.rightMargin: 12
+                        verticalAlignment: Text.AlignVCenter
+                        elide: Text.ElideRight
+                        text: root.connectedDeviceName.length > 0 ? root.connectedDeviceName : "Unknown device"
+                    }
                 }
             }
 
@@ -60,7 +84,7 @@ Item {
                 text: "Connect Device"
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width) + leftPadding + rightPadding
-                enabled: textField.acceptableInput || connectingIndicator.running
+                enabled: hostInput.acceptableInput || connectingIndicator.running
                 onClicked: clickConnectButton()
 
                 function clickConnectButton(){
@@ -76,7 +100,7 @@ Item {
 
                 function sendRequest(){
                     root.connectionStateChanged(true)
-                    core.onMakeGetRequest(textField.text)
+                    core.onMakeGetRequest(hostInput.text)
                     connectButton.text = "Stop"
                     connectingIndicator.running = true
                 }
@@ -116,6 +140,7 @@ Item {
                 onClicked: {
                     const removeConnectedDevicePage = connectionInitialized === 1
                     connectionInitialized = 0
+                    root.connectedDeviceName = ""
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
                 }
@@ -129,6 +154,7 @@ Item {
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
                 connectionInitialized = 1
+                root.connectedDeviceName = core.device().name
             }
         }
     }
