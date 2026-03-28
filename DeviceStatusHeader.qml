@@ -8,12 +8,13 @@ Item {
     property color indicatorColor: "#22C55E"
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
+    property int headerHeight: 56
     property int horizontalPadding: 16
     property int verticalPadding: 8
     signal clicked()
 
     Layout.fillWidth: true
-    implicitHeight: Math.max(nameLabel.implicitHeight, statusDot.height) + (verticalPadding * 2)
+    implicitHeight: headerHeight
 
     Rectangle {
         anchors.fill: parent
