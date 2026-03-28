@@ -2,7 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 
-Item {
+ToolBar {
     id: root
     property string deviceName: ""
     property color indicatorColor: "#22C55E"
@@ -13,11 +13,9 @@ Item {
     property int verticalPadding: 8
     signal clicked()
 
-    Layout.fillWidth: true
     implicitHeight: headerHeight
 
-    Rectangle {
-        anchors.fill: parent
+    background: Rectangle {
         color: headerTap.pressed ? root.pressedBackgroundColor : root.backgroundColor
 
         Behavior on color {
