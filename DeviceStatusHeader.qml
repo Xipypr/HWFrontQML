@@ -10,11 +10,11 @@ ToolBar {
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
     property int headerHeight: 56
-    property int contentHorizontalPadding: 16
-    property int contentVerticalPadding: 8
     signal clicked()
 
     implicitHeight: headerHeight
+    horizontalPadding: 16
+    verticalPadding: 8
 
     background: Rectangle {
         color: headerTap.pressed ? root.pressedBackgroundColor : root.backgroundColor
@@ -26,10 +26,10 @@ ToolBar {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: contentHorizontalPadding
-        anchors.rightMargin: contentHorizontalPadding
-        anchors.topMargin: contentVerticalPadding
-        anchors.bottomMargin: contentVerticalPadding
+        anchors.leftMargin: root.horizontalPadding
+        anchors.rightMargin: root.horizontalPadding
+        anchors.topMargin: root.verticalPadding
+        anchors.bottomMargin: root.verticalPadding
         spacing: 12
 
         Label {
