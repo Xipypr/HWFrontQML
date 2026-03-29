@@ -15,6 +15,19 @@ Rectangle {
     readonly property string statusText: safeValue >= 90 ? "CRITICAL" : safeValue >= 70 ? "WARNING" : "NORMAL"
     readonly property int valueFontSize: variant === "ring" ? 34 : 42
 
+    function resolveVizComponent() {
+        switch (variant) {
+        case "ring":
+            return ringViz
+        case "linear":
+            return linearViz
+        case "arc180":
+            return arc180Viz
+        default:
+            return segmentsViz
+        }
+    }
+
     radius: 16
     color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
     border.width: 1
@@ -81,10 +94,7 @@ Rectangle {
             Layout.fillHeight: card.variant === "arc180"
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 56 : 12)
-            sourceComponent: card.variant === "ring"
-                             ? ringViz
-                             : (card.variant === "linear" ? linearViz
-                                                          : (card.variant === "arc180" ? arc180Viz : segmentsViz))
+            sourceComponent: card.resolveVizComponent()
         }
 
     }
@@ -199,8 +209,8 @@ Rectangle {
                 onPaint: {
                     var ctx = getContext("2d");
                     var baseOuterRadius = Math.max(10, Math.min(width / 2 - 6, height - 10));
-                    var outerRadius = baseOuterRadius * 0.9;
-                    var innerRadius = outerRadius * 0.62;
+                    var outerRadius = baseOuterRadius * 0.8;
+                    var innerRadius = outerRadius * 0.72;
                     var centerX = width / 2;
                     var centerY = height - 6;
                     var startAngle = Math.PI;
