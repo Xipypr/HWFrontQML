@@ -13,7 +13,7 @@ Rectangle {
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
     readonly property string statusText: safeValue >= 90 ? "CRITICAL" : safeValue >= 70 ? "WARNING" : "NORMAL"
-    readonly property int valueFontSize: variant === "ring" ? 34 : 42
+    readonly property int valueFontSize: 42
 
     function resolveVizComponent() {
         switch (variant) {
@@ -83,7 +83,7 @@ Rectangle {
 
         Text {
             text: card.safeValue + "%"
-            visible: card.variant !== "arc180"
+            visible: card.variant !== "arc180" && card.variant !== "ring"
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
             font.bold: true
@@ -93,7 +93,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: card.variant === "arc180"
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 56 : 12)
+            Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 86 : 12)
             sourceComponent: card.resolveVizComponent()
         }
 
@@ -138,14 +138,14 @@ Rectangle {
         id: ringViz
 
         Item {
-            implicitHeight: 56
-            implicitWidth: 56
+            implicitHeight: 86
+            implicitWidth: 86
 
             Canvas {
                 id: ringCanvas
                 anchors.centerIn: parent
-                width: 56
-                height: 56
+                width: 86
+                height: 86
                 antialiasing: true
                 smooth: true
                 renderTarget: Canvas.FramebufferObject
@@ -154,8 +154,8 @@ Rectangle {
 
                 onPaint: {
                     var ctx = getContext("2d");
-                    var lineWidth = 8;
-                    var radius = 20;
+                    var lineWidth = 11;
+                    var radius = (Math.min(width, height) - lineWidth) / 2 - 2;
                     var centerX = width / 2;
                     var centerY = height / 2;
 
@@ -185,6 +185,14 @@ Rectangle {
                 }
 
                 Component.onCompleted: requestPaint()
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: card.safeValue + "%"
+                color: "#F8FAFC"
+                font.pixelSize: 24
+                font.bold: true
             }
         }
     }
