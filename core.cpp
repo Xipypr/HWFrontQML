@@ -5,9 +5,7 @@
 #include <QDebug>
 
 Core::Core()
-    : m_device(new DesktopDevice())
 {
-//    qDebug() << m_device->name();
     m_connector = new HWConnector(this);
     m_deviceCreator = new DeviceBuilder(this);
     connect( m_connector, &HWConnector::documentRecieved, m_deviceCreator, &DeviceBuilder::onDocumentRecieved );
@@ -31,6 +29,7 @@ void Core::onMakeGetRequest(const QString &target)
 
 void Core::onDeviceCreated(DesktopDevice *device)
 {
+    // Core is a non-owning observer by design. Ownership stays outside Core.
     m_device = device;
     emit deviceCreated();
 }
