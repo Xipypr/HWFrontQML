@@ -271,104 +271,113 @@ Rectangle {
             implicitHeight: 102
             implicitWidth: 102
 
-            Canvas {
-                id: liquidCanvas
+            Rectangle {
+                id: sphereBorder
                 anchors.centerIn: parent
                 width: 92
                 height: 92
-                antialiasing: true
-                smooth: true
-                renderTarget: Canvas.FramebufferObject
+                radius: width / 2
+                color: "transparent"
+                border.width: 3
+                border.color: Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.9)
+            }
 
-                property real progress: card.safeValue / 100
-                property real phase: 0
-                readonly property real amplitude: Math.max(2, height * 0.03)
-                readonly property real waveLength: width * 0.85
-                readonly property real clampedWaveLength: Math.max(1, waveLength)
+            Rectangle {
+                id: sphereInnerClip
+                anchors.centerIn: sphereBorder
+                width: sphereBorder.width - sphereBorder.border.width * 2
+                height: width
+                radius: width / 2
+                clip: true
+                color: "transparent"
 
-                function rgbaString(colorValue, alphaValue) {
-                    return "rgba("
-                            + Math.round(colorValue.r * 255) + ","
-                            + Math.round(colorValue.g * 255) + ","
-                            + Math.round(colorValue.b * 255) + ","
-                            + alphaValue + ")"
+                readonly property real progress: card.safeValue / 100
+                readonly property real clampedProgress: Math.max(0, Math.min(1, progress))
+                readonly property real fillHeight: height * clampedProgress
+                readonly property color liquidColor: Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.4)
+
+                Rectangle {
+                    id: fillBody
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: sphereInnerClip.fillHeight
+                    color: sphereInnerClip.liquidColor
+                    Behavior on height { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
                 }
 
-                onPaint: {
-                    if (width <= 0 || height <= 0)
-                        return;
+                Item {
+                    id: waveLayer
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    y: parent.height - sphereInnerClip.fillHeight - 8
+                    height: 20
+                    clip: true
 
-                    var ctx = getContext("2d");
-                    var centerX = width / 2;
-                    var centerY = height / 2;
-                    var radius = Math.max(2, Math.min(width, height) / 2 - 2);
-                    var borderWidth = 3;
-                    var clampedProgress = Math.max(0, Math.min(1, progress));
-                    var waterTop = height - (height * clampedProgress);
-                    var x;
-                    var y;
+                    Behavior on y { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
 
-                    ctx.setTransform(1, 0, 0, 1, 0, 0);
-                    ctx.clearRect(0, 0, width, height);
-
-                    // Circle outline.
-                    ctx.lineWidth = borderWidth;
-                    ctx.strokeStyle = rgbaString(card.accentColor, 0.9);
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
-                    ctx.stroke();
-
-                    // Clip by inner circle and draw liquid.
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius - borderWidth / 2, 0, Math.PI * 2, false);
-                    ctx.clip();
-
-                    ctx.beginPath();
-                    ctx.moveTo(0, height);
-                    for (x = 0; x <= width; x += 2) {
-                        y = waterTop + Math.sin((x / clampedWaveLength) * Math.PI * 2 + phase) * amplitude;
-                        ctx.lineTo(x, y);
+                    Rectangle {
+                        id: waveA
+                        y: 6
+                        width: waveLayer.width * 1.6
+                        height: 14
+                        radius: 7
+                        color: Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.52)
                     }
-                    ctx.lineTo(width, height);
-                    ctx.closePath();
-                    ctx.fillStyle = rgbaString(card.accentColor, 0.4);
-                    ctx.fill();
 
-                    // subtle highlight on the wave cap
-                    ctx.beginPath();
-                    for (x = 0; x <= width; x += 2) {
-                        y = waterTop + Math.sin((x / clampedWaveLength) * Math.PI * 2 + phase) * amplitude;
-                        if (x === 0)
-                            ctx.moveTo(x, y);
-                        else
-                            ctx.lineTo(x, y);
+                    Rectangle {
+                        id: waveB
+                        y: 2
+                        width: waveLayer.width * 1.4
+                        height: 12
+                        radius: 6
+                        color: Qt.rgba(1, 1, 1, 0.18)
                     }
-                    ctx.lineWidth = 1.5;
-                    ctx.strokeStyle = Qt.rgba(1, 1, 1, 0.35);
-                    ctx.stroke();
-                    ctx.restore();
+
+                    SequentialAnimation {
+                        running: true
+                        loops: Animation.Infinite
+
+                        NumberAnimation {
+                            target: waveA
+                            property: "x"
+                            from: -waveA.width * 0.45
+                            to: 0
+                            duration: 1700
+                            easing.type: Easing.InOutSine
+                        }
+                        NumberAnimation {
+                            target: waveA
+                            property: "x"
+                            from: 0
+                            to: -waveA.width * 0.45
+                            duration: 1700
+                            easing.type: Easing.InOutSine
+                        }
+                    }
+
+                    SequentialAnimation {
+                        running: true
+                        loops: Animation.Infinite
+
+                        NumberAnimation {
+                            target: waveB
+                            property: "x"
+                            from: 0
+                            to: -waveB.width * 0.35
+                            duration: 1400
+                            easing.type: Easing.InOutSine
+                        }
+                        NumberAnimation {
+                            target: waveB
+                            property: "x"
+                            from: -waveB.width * 0.35
+                            to: 0
+                            duration: 1400
+                            easing.type: Easing.InOutSine
+                        }
+                    }
                 }
-
-                onProgressChanged: requestPaint()
-                onPhaseChanged: requestPaint()
-                onWidthChanged: requestPaint()
-                onHeightChanged: requestPaint()
-                onClampedWaveLengthChanged: requestPaint()
-
-                Connections {
-                    target: card
-                    function onAccentColorChanged() { liquidCanvas.requestPaint(); }
-                }
-
-                NumberAnimation on phase {
-                    from: 0
-                    to: Math.PI * 2
-                    duration: 1800
-                    loops: Animation.Infinite
-                }
-
-                Component.onCompleted: requestPaint()
             }
 
             Text {
