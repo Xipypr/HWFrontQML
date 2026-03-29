@@ -47,42 +47,6 @@ Page {
         return values
     }
 
-    function variantDialogIndexForMode(mode) {
-        for (let i = 0; i < variantDialogOptions.length; ++i) {
-            if (variantDialogOptions[i].value === mode)
-                return i
-        }
-        return 0
-    }
-
-    function openVariantDialogForIndex(widgetIndex) {
-        if (widgetIndex < 0 || widgetIndex >= widgetModel.count)
-            return
-
-        const currentVariant = widgetModel.get(widgetIndex).variant
-        const selectedIndex = variantDialogIndexForMode(currentVariant !== undefined ? currentVariant : "segments")
-
-        if (!variantDialogLoader.active)
-            variantDialogLoader.active = true
-
-        if (variantDialogLoader.status === Loader.Ready && variantDialogLoader.item) {
-            variantDialogLoader.item.selectedWidgetIndex = widgetIndex
-            variantDialogLoader.item.initialIndex = selectedIndex
-            variantDialogLoader.item.open()
-            return
-        }
-
-        variantDialogLoader.pendingOpen = true
-        variantDialogLoader.pendingWidgetIndex = widgetIndex
-        variantDialogLoader.pendingVariantIndex = selectedIndex
-    }
-
-    function applyVariant(widgetIndex, mode) {
-        if (widgetIndex < 0 || widgetIndex >= widgetModel.count)
-            return
-        widgetModel.setProperty(widgetIndex, "variant", mode)
-    }
-
     function openDeviceSettingsDialog() {
         if (!deviceSettingsDialogLoader.active)
             deviceSettingsDialogLoader.active = true
@@ -96,13 +60,6 @@ Page {
     }
 
     Component.onCompleted: resetDefaultWidgets()
-
-    readonly property var variantDialogOptions: [
-        { label: "Segments", value: "segments" },
-        { label: "Ring", value: "ring" },
-        { label: "Linear", value: "linear" },
-        { label: "Arc 180°", value: "arc180" }
-    ]
 
     header: DeviceStatusHeader {
         width: root.width
@@ -160,56 +117,6 @@ Page {
         }
     }
 
-    Component {
-        id: variantDialogComponent
-        Dialog {
-            property int selectedWidgetIndex: -1
-            property int initialIndex: 0
-
-            modal: true
-            focus: true
-            parent: Overlay.overlay
-            x: (parent.width - width) / 2
-            y: (parent.height - height) / 2
-            width: Math.min(parent.width - 32, 280)
-            padding: 16
-            title: "Режим отображения"
-            standardButtons: Dialog.Ok | Dialog.Cancel
-
-            onOpened: variantDialogCombo.currentIndex = initialIndex
-
-            onAccepted: {
-                const selected = root.variantDialogOptions[variantDialogCombo.currentIndex]
-                root.applyVariant(selectedWidgetIndex, selected ? selected.value : "segments")
-            }
-
-            contentItem: ComboBox {
-                id: variantDialogCombo
-                model: root.variantDialogOptions
-                textRole: "label"
-                width: parent.width
-            }
-        }
-    }
-
-    Loader {
-        id: variantDialogLoader
-        active: false
-        sourceComponent: variantDialogComponent
-        property bool pendingOpen: false
-        property int pendingWidgetIndex: -1
-        property int pendingVariantIndex: 0
-
-        onLoaded: {
-            if (pendingOpen && item) {
-                pendingOpen = false
-                item.selectedWidgetIndex = pendingWidgetIndex
-                item.initialIndex = pendingVariantIndex
-                item.open()
-            }
-        }
-    }
-
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
@@ -233,7 +140,9 @@ Page {
                     title: model.title
                     value: model.value
                     variant: model.variant
-                    onVariantDialogRequested: root.openVariantDialogForIndex(index)
+                    onVariantSelected: function(mode) {
+                        widgetModel.setProperty(index, "variant", mode)
+                    }
                 }
             }
         }

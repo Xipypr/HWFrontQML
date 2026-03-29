@@ -9,7 +9,13 @@ Rectangle {
     property int value: 0
     // segments | ring | linear | arc180
     property string variant: "segments"
-    signal variantDialogRequested()
+    signal variantSelected(string mode)
+    readonly property var variantOptions: [
+        { label: "Segments", value: "segments" },
+        { label: "Ring", value: "ring" },
+        { label: "Linear", value: "linear" },
+        { label: "Arc 180°", value: "arc180" }
+    ]
 
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
@@ -27,6 +33,27 @@ Rectangle {
         default:
             return segmentsViz
         }
+    }
+
+    function variantIndex(mode) {
+        for (let i = 0; i < variantOptions.length; ++i) {
+            if (variantOptions[i].value === mode)
+                return i
+        }
+        return 0
+    }
+
+    function openVariantDialog() {
+        if (!variantDialogLoader.active)
+            variantDialogLoader.active = true
+
+        if (variantDialogLoader.status === Loader.Ready && variantDialogLoader.item) {
+            variantDialogLoader.item.initialIndex = variantIndex(variant)
+            variantDialogLoader.item.open()
+            return
+        }
+
+        variantDialogLoader.pendingOpen = true
     }
 
     radius: 16
@@ -102,13 +129,59 @@ Rectangle {
 
     TapHandler {
         acceptedButtons: Qt.RightButton
-        onTapped: card.variantDialogRequested()
+        onTapped: card.openVariantDialog()
     }
 
     TapHandler {
         acceptedButtons: Qt.LeftButton
         gesturePolicy: TapHandler.WithinBounds
-        onLongPressed: card.variantDialogRequested()
+        onLongPressed: card.openVariantDialog()
+    }
+
+    Component {
+        id: variantDialogComponent
+        Dialog {
+            property int initialIndex: 0
+
+            modal: true
+            focus: true
+            parent: Overlay.overlay
+            x: (parent.width - width) / 2
+            y: (parent.height - height) / 2
+            width: Math.min(parent.width - 32, 280)
+            padding: 16
+            title: "Режим отображения"
+            standardButtons: Dialog.Ok | Dialog.Cancel
+
+            onOpened: variantDialogCombo.currentIndex = initialIndex
+
+            onAccepted: {
+                const selected = card.variantOptions[variantDialogCombo.currentIndex]
+                card.variantSelected(selected ? selected.value : "segments")
+            }
+
+            contentItem: ComboBox {
+                id: variantDialogCombo
+                model: card.variantOptions
+                textRole: "label"
+                width: parent.width
+            }
+        }
+    }
+
+    Loader {
+        id: variantDialogLoader
+        active: false
+        sourceComponent: variantDialogComponent
+        property bool pendingOpen: false
+
+        onLoaded: {
+            if (pendingOpen && item) {
+                pendingOpen = false
+                item.initialIndex = card.variantIndex(card.variant)
+                item.open()
+            }
+        }
     }
 
     Component {
