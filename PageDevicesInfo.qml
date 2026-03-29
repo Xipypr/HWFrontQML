@@ -37,6 +37,15 @@ Page {
         }
     }
 
+    function currentValuesByKey() {
+        const values = ({})
+        for (let i = 0; i < widgetModel.count; ++i) {
+            const item = widgetModel.get(i)
+            values[item.key] = item.value
+        }
+        return values
+    }
+
     Component.onCompleted: resetDefaultWidgets()
 
     header: DeviceStatusHeader {
@@ -63,13 +72,14 @@ Page {
         widgetsModel: widgetModel
 
         onApplyLayout: function(widgets) {
+            const latestValues = currentValuesByKey()
             widgetModel.clear()
             for (let i = 0; i < widgets.length; ++i) {
                 const item = widgets[i]
                 widgetModel.append({
                     key: item.key,
                     title: item.title,
-                    value: item.value,
+                    value: latestValues[item.key] !== undefined ? latestValues[item.key] : item.value,
                     variant: item.variant
                 })
             }
