@@ -7,13 +7,26 @@ Rectangle {
 
     property string title: "N/A"
     property int value: 0
-    // segments | ring | linear
+    // segments | ring | linear | arc180 (filled 180° segment)
     property string variant: "segments"
 
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
     readonly property string statusText: safeValue >= 90 ? "CRITICAL" : safeValue >= 70 ? "WARNING" : "NORMAL"
     readonly property int valueFontSize: variant === "ring" ? 34 : 42
+
+    function resolveVizComponent() {
+        switch (variant) {
+        case "ring":
+            return ringViz
+        case "linear":
+            return linearViz
+        case "arc180":
+            return arc180Viz
+        default:
+            return segmentsViz
+        }
+    }
 
     radius: 16
     color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
@@ -31,8 +44,8 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 14
-        spacing: variant === "ring" ? 8 : 10
+        anchors.margins: variant === "arc180" ? 8 : 14
+        spacing: variant === "ring" ? 8 : (variant === "arc180" ? 4 : 10)
 
         RowLayout {
             Layout.fillWidth: true
@@ -70,6 +83,7 @@ Rectangle {
 
         Text {
             text: card.safeValue + "%"
+            visible: card.variant !== "arc180"
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
             font.bold: true
@@ -77,10 +91,10 @@ Rectangle {
 
         Loader {
             Layout.fillWidth: true
-            Layout.fillHeight: false
+            Layout.fillHeight: card.variant === "arc180"
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredHeight: card.variant === "ring" ? 56 : 12
-            sourceComponent: card.variant === "ring" ? ringViz : (card.variant === "linear" ? linearViz : segmentsViz)
+            Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 56 : 12)
+            sourceComponent: card.resolveVizComponent()
         }
 
     }
@@ -171,6 +185,79 @@ Rectangle {
                 }
 
                 Component.onCompleted: requestPaint()
+            }
+        }
+    }
+
+    Component {
+        id: arc180Viz
+
+        Item {
+            implicitHeight: 104
+            implicitWidth: 150
+
+            Canvas {
+                id: arcCanvas
+                anchors.fill: parent
+                anchors.margins: 2
+                antialiasing: true
+                smooth: true
+                renderTarget: Canvas.FramebufferObject
+
+                property real progress: card.safeValue / 100
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    var baseOuterRadius = Math.max(10, Math.min(width / 2 - 6, height - 10));
+                    var outerRadius = baseOuterRadius * 0.8;
+                    var innerRadius = outerRadius * 0.72;
+                    var centerX = width / 2;
+                    var centerY = height - 6;
+                    var startAngle = Math.PI;
+                    var progressAngle = startAngle + Math.PI * progress;
+
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.clearRect(0, 0, width, height);
+
+                    // Base 180° segment (ring segment)
+                    ctx.fillStyle = "#334155";
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, outerRadius, startAngle, 0, false);
+                    ctx.arc(centerX, centerY, innerRadius, 0, startAngle, true);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // Active filled segment (0..180°)
+                    if (progress > 0) {
+                        ctx.fillStyle = card.accentColor;
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, outerRadius, startAngle, progressAngle, false);
+                        ctx.arc(centerX, centerY, innerRadius, progressAngle, startAngle, true);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                }
+
+                onProgressChanged: requestPaint()
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+
+                Connections {
+                    target: card
+                    function onAccentColorChanged() { arcCanvas.requestPaint(); }
+                }
+
+                Component.onCompleted: requestPaint()
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.verticalCenter: parent.verticalCenter
+                anchors.verticalCenterOffset: 28
+                text: card.safeValue + "%"
+                color: "#F8FAFC"
+                font.pixelSize: 24
+                font.bold: true
             }
         }
     }
