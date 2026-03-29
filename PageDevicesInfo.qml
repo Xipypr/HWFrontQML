@@ -47,24 +47,52 @@ Page {
         return values
     }
 
+    function openDeviceSettingsDialog() {
+        if (!deviceSettingsDialogLoader.active)
+            deviceSettingsDialogLoader.active = true
+
+        if (deviceSettingsDialogLoader.status === Loader.Ready && deviceSettingsDialogLoader.item) {
+            deviceSettingsDialogLoader.item.open()
+            return
+        }
+
+        deviceSettingsDialogLoader.pendingOpen = true
+    }
+
     Component.onCompleted: resetDefaultWidgets()
 
     header: DeviceStatusHeader {
         width: root.width
         headerText: destop_name
         onClicked: {
-            deviceSettingsDialog.open()
+            root.openDeviceSettingsDialog()
         }
     }
 
-    DeviceSettingsDialog {
-        id: deviceSettingsDialog
-        onSetDeviceNameSelected: {
-            console.log("Device settings: set device name clicked")
-        }
+    Component {
+        id: deviceSettingsDialogComponent
+        DeviceSettingsDialog {
+            onSetDeviceNameSelected: {
+                console.log("Device settings: set device name clicked")
+            }
 
-        onChangeLayoutSelected: {
-            widgetLayoutDialog.open()
+            onChangeLayoutSelected: {
+                widgetLayoutDialog.open()
+            }
+        }
+    }
+
+    Loader {
+        id: deviceSettingsDialogLoader
+        active: false
+        sourceComponent: deviceSettingsDialogComponent
+        property bool pendingOpen: false
+
+        onLoaded: {
+            if (pendingOpen && item) {
+                pendingOpen = false
+                item.open()
+            }
         }
     }
 
@@ -112,6 +140,9 @@ Page {
                     title: model.title
                     value: model.value
                     variant: model.variant
+                    onVariantSelected: function(mode) {
+                        widgetModel.setProperty(index, "variant", mode)
+                    }
                 }
             }
         }
