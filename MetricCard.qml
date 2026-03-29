@@ -11,7 +11,6 @@ Rectangle {
     property string variant: "segments"
     // Empty string means "use card default mode"
     property string variantOverride: ""
-    signal variantDialogRequested()
 
     readonly property string effectiveVariant: variantOverride !== "" ? variantOverride : variant
 
@@ -102,17 +101,6 @@ Rectangle {
             sourceComponent: card.resolveVizComponent()
         }
 
-    }
-
-    TapHandler {
-        acceptedButtons: Qt.RightButton
-        onTapped: card.variantDialogRequested()
-    }
-
-    TapHandler {
-        acceptedButtons: Qt.LeftButton
-        gesturePolicy: TapHandler.WithinBounds
-        onLongPressed: card.variantDialogRequested()
     }
 
     Component {

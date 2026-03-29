@@ -119,12 +119,6 @@ Page {
     Dialog {
         id: variantDialog
         modal: true
-        focus: true
-        parent: Overlay.overlay
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        width: Math.min(parent.width - 32, 280)
-        padding: 16
         title: "Режим отображения"
         standardButtons: Dialog.Ok | Dialog.Cancel
 
@@ -139,7 +133,7 @@ Page {
             id: variantDialogCombo
             model: root.variantDialogOptions
             textRole: "label"
-            width: parent.width
+            implicitWidth: 220
         }
     }
 
@@ -158,17 +152,30 @@ Page {
             Repeater {
                 model: widgetModel
 
-                delegate: MetricCard {
+                delegate: Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: false
                     Layout.preferredHeight: 160
                     Layout.minimumHeight: 150
-                    title: model.title
-                    value: model.value
-                    variant: model.variant
-                    variantOverride: model.variantOverride !== undefined ? model.variantOverride : ""
 
-                    onVariantDialogRequested: root.openVariantDialogForIndex(index)
+                    MetricCard {
+                        anchors.fill: parent
+                        title: model.title
+                        value: model.value
+                        variant: model.variant
+                        variantOverride: model.variantOverride !== undefined ? model.variantOverride : ""
+                    }
+
+                    TapHandler {
+                        acceptedButtons: Qt.RightButton
+                        onTapped: root.openVariantDialogForIndex(index)
+                    }
+
+                    TapHandler {
+                        acceptedButtons: Qt.LeftButton
+                        gesturePolicy: TapHandler.WithinBounds
+                        onLongPressed: root.openVariantDialogForIndex(index)
+                    }
                 }
             }
         }
