@@ -7,13 +7,13 @@ Rectangle {
 
     property string title: "N/A"
     property int value: 0
-    // segments | ring | linear | arc180
+    // segments | ring | linear | arc180 (filled 180° segment)
     property string variant: "segments"
 
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
     readonly property string statusText: safeValue >= 90 ? "CRITICAL" : safeValue >= 70 ? "WARNING" : "NORMAL"
-    readonly property int valueFontSize: variant === "ring" ? 34 : 42
+    readonly property int valueFontSize: (variant === "ring" || variant === "arc180") ? 34 : 42
 
     radius: 16
     color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
@@ -198,27 +198,33 @@ Rectangle {
 
                 onPaint: {
                     var ctx = getContext("2d");
-                    var lineWidth = 8;
-                    var radius = 24;
+                    var outerRadius = 24;
+                    var innerRadius = 15;
                     var centerX = width / 2;
-                    var centerY = height - 6;
+                    var centerY = height - 8;
                     var startAngle = Math.PI;
-                    var endAngle = 0;
+                    var progressAngle = startAngle + Math.PI * progress;
 
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
                     ctx.clearRect(0, 0, width, height);
-                    ctx.lineWidth = lineWidth;
-                    ctx.lineCap = "round";
 
-                    ctx.strokeStyle = "#334155";
+                    // Base 180° segment (ring segment)
+                    ctx.fillStyle = "#334155";
                     ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius, startAngle, endAngle, false);
-                    ctx.stroke();
+                    ctx.arc(centerX, centerY, outerRadius, startAngle, 0, false);
+                    ctx.arc(centerX, centerY, innerRadius, 0, startAngle, true);
+                    ctx.closePath();
+                    ctx.fill();
 
-                    ctx.strokeStyle = card.accentColor;
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius, startAngle, startAngle + Math.PI * progress, false);
-                    ctx.stroke();
+                    // Active filled segment (0..180°)
+                    if (progress > 0) {
+                        ctx.fillStyle = card.accentColor;
+                        ctx.beginPath();
+                        ctx.arc(centerX, centerY, outerRadius, startAngle, progressAngle, false);
+                        ctx.arc(centerX, centerY, innerRadius, progressAngle, startAngle, true);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
                 }
 
                 onProgressChanged: requestPaint()
