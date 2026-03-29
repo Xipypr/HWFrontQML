@@ -198,7 +198,8 @@ Rectangle {
 
                 onPaint: {
                     var ctx = getContext("2d");
-                    var outerRadius = Math.max(10, Math.min(width / 2 - 6, height - 10));
+                    var baseOuterRadius = Math.max(10, Math.min(width / 2 - 6, height - 10));
+                    var outerRadius = baseOuterRadius * 0.9;
                     var innerRadius = outerRadius * 0.62;
                     var centerX = width / 2;
                     var centerY = height - 6;
@@ -242,7 +243,7 @@ Rectangle {
             Text {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
-                anchors.verticalCenterOffset: 18
+                anchors.verticalCenterOffset: 28
                 text: card.safeValue + "%"
                 color: "#F8FAFC"
                 font.pixelSize: 24
