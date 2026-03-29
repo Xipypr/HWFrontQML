@@ -13,7 +13,7 @@ Rectangle {
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
     readonly property string statusText: safeValue >= 90 ? "CRITICAL" : safeValue >= 70 ? "WARNING" : "NORMAL"
-    readonly property int valueFontSize: variant === "arc180" ? 28 : (variant === "ring" ? 34 : 42)
+    readonly property int valueFontSize: variant === "arc180" ? 24 : (variant === "ring" ? 34 : 42)
 
     radius: 16
     color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
@@ -31,8 +31,8 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: 14
-        spacing: variant === "ring" ? 8 : 10
+        anchors.margins: variant === "arc180" ? 10 : 14
+        spacing: variant === "ring" ? 8 : (variant === "arc180" ? 6 : 10)
 
         RowLayout {
             Layout.fillWidth: true
@@ -79,7 +79,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: false
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredHeight: card.variant === "arc180" ? 112 : (card.variant === "ring" ? 56 : 12)
+            Layout.preferredHeight: card.variant === "arc180" ? 84 : (card.variant === "ring" ? 56 : 12)
             sourceComponent: card.variant === "ring"
                              ? ringViz
                              : (card.variant === "linear" ? linearViz
@@ -182,14 +182,14 @@ Rectangle {
         id: arc180Viz
 
         Item {
-            implicitHeight: 112
-            implicitWidth: 144
+            implicitHeight: 84
+            implicitWidth: 112
 
             Canvas {
                 id: arcCanvas
                 anchors.centerIn: parent
-                width: 144
-                height: 112
+                width: 112
+                height: 84
                 antialiasing: true
                 smooth: true
                 renderTarget: Canvas.FramebufferObject
@@ -198,10 +198,10 @@ Rectangle {
 
                 onPaint: {
                     var ctx = getContext("2d");
-                    var outerRadius = 48;
-                    var innerRadius = 30;
+                    var outerRadius = 38;
+                    var innerRadius = 24;
                     var centerX = width / 2;
-                    var centerY = height - 16;
+                    var centerY = height - 8;
                     var startAngle = Math.PI;
                     var progressAngle = startAngle + Math.PI * progress;
 
