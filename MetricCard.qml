@@ -284,21 +284,36 @@ Rectangle {
                 property real phase: 0
                 readonly property real amplitude: Math.max(2, height * 0.03)
                 readonly property real waveLength: width * 0.85
+                readonly property real clampedWaveLength: Math.max(1, waveLength)
+
+                function rgbaString(colorValue, alphaValue) {
+                    return "rgba("
+                            + Math.round(colorValue.r * 255) + ","
+                            + Math.round(colorValue.g * 255) + ","
+                            + Math.round(colorValue.b * 255) + ","
+                            + alphaValue + ")"
+                }
 
                 onPaint: {
+                    if (width <= 0 || height <= 0)
+                        return;
+
                     var ctx = getContext("2d");
                     var centerX = width / 2;
                     var centerY = height / 2;
-                    var radius = Math.min(width, height) / 2 - 2;
+                    var radius = Math.max(2, Math.min(width, height) / 2 - 2);
                     var borderWidth = 3;
-                    var waterTop = height - (height * progress);
+                    var clampedProgress = Math.max(0, Math.min(1, progress));
+                    var waterTop = height - (height * clampedProgress);
+                    var x;
+                    var y;
 
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
                     ctx.clearRect(0, 0, width, height);
 
                     // Circle outline.
                     ctx.lineWidth = borderWidth;
-                    ctx.strokeStyle = Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.9);
+                    ctx.strokeStyle = rgbaString(card.accentColor, 0.9);
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
                     ctx.stroke();
@@ -311,19 +326,19 @@ Rectangle {
 
                     ctx.beginPath();
                     ctx.moveTo(0, height);
-                    for (var x = 0; x <= width; x += 2) {
-                        var y = waterTop + Math.sin((x / waveLength) * Math.PI * 2 + phase) * amplitude;
+                    for (x = 0; x <= width; x += 2) {
+                        y = waterTop + Math.sin((x / clampedWaveLength) * Math.PI * 2 + phase) * amplitude;
                         ctx.lineTo(x, y);
                     }
                     ctx.lineTo(width, height);
                     ctx.closePath();
-                    ctx.fillStyle = Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.4);
+                    ctx.fillStyle = rgbaString(card.accentColor, 0.4);
                     ctx.fill();
 
                     // subtle highlight on the wave cap
                     ctx.beginPath();
                     for (x = 0; x <= width; x += 2) {
-                        y = waterTop + Math.sin((x / waveLength) * Math.PI * 2 + phase) * amplitude;
+                        y = waterTop + Math.sin((x / clampedWaveLength) * Math.PI * 2 + phase) * amplitude;
                         if (x === 0)
                             ctx.moveTo(x, y);
                         else
@@ -339,6 +354,7 @@ Rectangle {
                 onPhaseChanged: requestPaint()
                 onWidthChanged: requestPaint()
                 onHeightChanged: requestPaint()
+                onClampedWaveLengthChanged: requestPaint()
 
                 Connections {
                     target: card
