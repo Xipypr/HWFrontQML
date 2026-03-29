@@ -7,13 +7,9 @@ Rectangle {
 
     property string title: "N/A"
     property int value: 0
-    // Local card preference (fallback mode)
+    // segments | ring | linear | arc180
     property string variant: "segments"
-    // Empty string means "use card default mode"
-    property string variantOverride: ""
     signal variantDialogRequested()
-
-    readonly property string effectiveVariant: variantOverride !== "" ? variantOverride : variant
 
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
@@ -21,7 +17,7 @@ Rectangle {
     readonly property int valueFontSize: 42
 
     function resolveVizComponent() {
-        switch (effectiveVariant) {
+        switch (variant) {
         case "ring":
             return ringViz
         case "linear":
@@ -49,8 +45,8 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: effectiveVariant === "arc180" ? 8 : 14
-        spacing: effectiveVariant === "ring" ? 8 : (effectiveVariant === "arc180" ? 4 : 10)
+        anchors.margins: variant === "arc180" ? 8 : 14
+        spacing: variant === "ring" ? 8 : (variant === "arc180" ? 4 : 10)
 
         RowLayout {
             Layout.fillWidth: true
@@ -88,7 +84,7 @@ Rectangle {
 
         Text {
             text: card.safeValue + "%"
-            visible: card.effectiveVariant !== "arc180" && card.effectiveVariant !== "ring"
+            visible: card.variant !== "arc180" && card.variant !== "ring"
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
             font.bold: true
@@ -96,9 +92,9 @@ Rectangle {
 
         Loader {
             Layout.fillWidth: true
-            Layout.fillHeight: card.effectiveVariant === "arc180"
+            Layout.fillHeight: card.variant === "arc180"
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredHeight: card.effectiveVariant === "arc180" ? 104 : (card.effectiveVariant === "ring" ? 86 : 12)
+            Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 86 : 12)
             sourceComponent: card.resolveVizComponent()
         }
 

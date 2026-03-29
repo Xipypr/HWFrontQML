@@ -17,9 +17,9 @@ Page {
 
     function resetDefaultWidgets() {
         widgetModel.clear()
-        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "arc180", variantOverride: "" })
-        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "segments", variantOverride: "" })
-        widgetModel.append({ uid: nextWidgetId++, key: "gpu", title: "GPU", value: 68, variant: "linear", variantOverride: "" })
+        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "arc180" })
+        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "segments" })
+        widgetModel.append({ uid: nextWidgetId++, key: "gpu", title: "GPU", value: 68, variant: "linear" })
     }
 
     function findWidgetIndex(widgetKey) {
@@ -59,28 +59,28 @@ Page {
         if (widgetIndex < 0 || widgetIndex >= widgetModel.count)
             return
 
-        const overrideValue = widgetModel.get(widgetIndex).variantOverride
-        const overrideIndex = variantDialogIndexForMode(overrideValue !== undefined ? overrideValue : "")
+        const currentVariant = widgetModel.get(widgetIndex).variant
+        const selectedIndex = variantDialogIndexForMode(currentVariant !== undefined ? currentVariant : "segments")
 
         if (!variantDialogLoader.active)
             variantDialogLoader.active = true
 
         if (variantDialogLoader.status === Loader.Ready && variantDialogLoader.item) {
             variantDialogLoader.item.selectedWidgetIndex = widgetIndex
-            variantDialogLoader.item.initialIndex = overrideIndex
+            variantDialogLoader.item.initialIndex = selectedIndex
             variantDialogLoader.item.open()
             return
         }
 
         variantDialogLoader.pendingOpen = true
         variantDialogLoader.pendingWidgetIndex = widgetIndex
-        variantDialogLoader.pendingVariantIndex = overrideIndex
+        variantDialogLoader.pendingVariantIndex = selectedIndex
     }
 
-    function applyVariantOverride(widgetIndex, mode) {
+    function applyVariant(widgetIndex, mode) {
         if (widgetIndex < 0 || widgetIndex >= widgetModel.count)
             return
-        widgetModel.setProperty(widgetIndex, "variantOverride", mode)
+        widgetModel.setProperty(widgetIndex, "variant", mode)
     }
 
     function openDeviceSettingsDialog() {
@@ -98,7 +98,6 @@ Page {
     Component.onCompleted: resetDefaultWidgets()
 
     readonly property var variantDialogOptions: [
-        { label: "Default", value: "" },
         { label: "Segments", value: "segments" },
         { label: "Ring", value: "ring" },
         { label: "Linear", value: "linear" },
@@ -155,8 +154,7 @@ Page {
                     key: item.key,
                     title: item.title,
                     value: latestValues[uid] !== undefined ? latestValues[uid] : item.value,
-                    variant: item.variant,
-                    variantOverride: item.variantOverride !== undefined ? item.variantOverride : ""
+                    variant: item.variant
                 })
             }
         }
@@ -182,7 +180,7 @@ Page {
 
             onAccepted: {
                 const selected = root.variantDialogOptions[variantDialogCombo.currentIndex]
-                root.applyVariantOverride(selectedWidgetIndex, selected ? selected.value : "")
+                root.applyVariant(selectedWidgetIndex, selected ? selected.value : "segments")
             }
 
             contentItem: ComboBox {
@@ -235,7 +233,6 @@ Page {
                     title: model.title
                     value: model.value
                     variant: model.variant
-                    variantOverride: model.variantOverride !== undefined ? model.variantOverride : ""
                     onVariantDialogRequested: root.openVariantDialogForIndex(index)
                 }
             }
