@@ -12,13 +12,6 @@ Rectangle {
     // Empty string means "use card default mode"
     property string variantOverride: ""
     signal variantOverrideSelected(string mode)
-    readonly property var variantOptions: [
-        { label: "Default", value: "" },
-        { label: "Seg", value: "segments" },
-        { label: "Ring", value: "ring" },
-        { label: "Line", value: "linear" },
-        { label: "Arc", value: "arc180" }
-    ]
 
     readonly property string effectiveVariant: variantOverride !== "" ? variantOverride : variant
 
@@ -92,32 +85,11 @@ Rectangle {
                 font.bold: true
             }
 
-            ComboBox {
-                id: localModeCombo
-                Layout.preferredWidth: 74
-                model: card.variantOptions
-                textRole: "label"
-
-                function updateSelection() {
-                    for (let i = 0; i < model.length; ++i) {
-                        if (model[i].value === card.variantOverride) {
-                            currentIndex = i
-                            return
-                        }
-                    }
-                    currentIndex = 0
-                }
-
-                onActivated: {
-                    const selected = model[currentIndex]
-                    card.variantOverrideSelected(selected ? selected.value : "")
-                }
-
-                Component.onCompleted: updateSelection()
-                Connections {
-                    target: card
-                    function onVariantOverrideChanged() { localModeCombo.updateSelection() }
-                }
+            Label {
+                text: "⋯"
+                color: "#94A3B8"
+                font.pixelSize: 18
+                font.bold: true
             }
         }
 
@@ -137,6 +109,29 @@ Rectangle {
             sourceComponent: card.resolveVizComponent()
         }
 
+    }
+
+    MetricVariantDialog {
+        id: variantDialog
+        selectedMode: card.variantOverride
+        onModeSelected: function(mode) { card.variantOverrideSelected(mode) }
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.RightButton
+        onTapped: {
+            variantDialog.selectedMode = card.variantOverride
+            variantDialog.open()
+        }
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.LeftButton
+        gesturePolicy: TapHandler.WithinBounds
+        onLongPressed: {
+            variantDialog.selectedMode = card.variantOverride
+            variantDialog.open()
+        }
     }
 
     Component {
