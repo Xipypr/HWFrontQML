@@ -7,7 +7,7 @@ Rectangle {
 
     property string title: "N/A"
     property int value: 0
-    // segments | ring | linear
+    // segments | ring | linear | arc180
     property string variant: "segments"
 
     readonly property int safeValue: Math.max(0, Math.min(100, value))
@@ -79,8 +79,11 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: false
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredHeight: card.variant === "ring" ? 56 : 12
-            sourceComponent: card.variant === "ring" ? ringViz : (card.variant === "linear" ? linearViz : segmentsViz)
+            Layout.preferredHeight: (card.variant === "ring" || card.variant === "arc180") ? 56 : 12
+            sourceComponent: card.variant === "ring"
+                             ? ringViz
+                             : (card.variant === "linear" ? linearViz
+                                                          : (card.variant === "arc180" ? arc180Viz : segmentsViz))
         }
 
     }
@@ -168,6 +171,63 @@ Rectangle {
                 Connections {
                     target: card
                     function onAccentColorChanged() { ringCanvas.requestPaint(); }
+                }
+
+                Component.onCompleted: requestPaint()
+            }
+        }
+    }
+
+    Component {
+        id: arc180Viz
+
+        Item {
+            implicitHeight: 56
+            implicitWidth: 72
+
+            Canvas {
+                id: arcCanvas
+                anchors.centerIn: parent
+                width: 72
+                height: 56
+                antialiasing: true
+                smooth: true
+                renderTarget: Canvas.FramebufferObject
+
+                property real progress: card.safeValue / 100
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    var lineWidth = 8;
+                    var radius = 24;
+                    var centerX = width / 2;
+                    var centerY = height - 6;
+                    var startAngle = Math.PI;
+                    var endAngle = 0;
+
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.clearRect(0, 0, width, height);
+                    ctx.lineWidth = lineWidth;
+                    ctx.lineCap = "round";
+
+                    ctx.strokeStyle = "#334155";
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, startAngle, endAngle, false);
+                    ctx.stroke();
+
+                    ctx.strokeStyle = card.accentColor;
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, startAngle, startAngle + Math.PI * progress, false);
+                    ctx.stroke();
+                }
+
+                onProgressChanged: requestPaint()
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+
+                Connections {
+                    target: card
+                    function onAccentColorChanged() { arcCanvas.requestPaint(); }
                 }
 
                 Component.onCompleted: requestPaint()
