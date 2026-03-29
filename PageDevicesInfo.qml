@@ -9,6 +9,45 @@ Page {
     property var objectsArray: []
     property var desktop_device: ({})
     property string destop_name: core.device().name
+    property int nextWidgetId: 1
+
+    ListModel {
+        id: widgetModel
+    }
+
+    function resetDefaultWidgets() {
+        widgetModel.clear()
+        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "segments" })
+        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "ring" })
+        widgetModel.append({ uid: nextWidgetId++, key: "gpu", title: "GPU", value: 68, variant: "linear" })
+    }
+
+    function findWidgetIndex(widgetKey) {
+        for (let i = 0; i < widgetModel.count; ++i) {
+            if (widgetModel.get(i).key === widgetKey)
+                return i
+        }
+        return -1
+    }
+
+    function updateWidgetData(widgetKey, widgetTitle, widgetValue) {
+        const index = findWidgetIndex(widgetKey)
+        if (index >= 0) {
+            widgetModel.setProperty(index, "title", widgetTitle)
+            widgetModel.setProperty(index, "value", widgetValue)
+        }
+    }
+
+    function currentValuesById() {
+        const values = ({})
+        for (let i = 0; i < widgetModel.count; ++i) {
+            const item = widgetModel.get(i)
+            values[item.uid] = item.value
+        }
+        return values
+    }
+
+    Component.onCompleted: resetDefaultWidgets()
 
     header: DeviceStatusHeader {
         width: root.width
@@ -25,7 +64,28 @@ Page {
         }
 
         onChangeLayoutSelected: {
-            console.log("Device settings: change layout clicked")
+            widgetLayoutDialog.open()
+        }
+    }
+
+    WidgetLayoutDialog {
+        id: widgetLayoutDialog
+        widgetsModel: widgetModel
+
+        onApplyLayout: function(widgets) {
+            const latestValues = currentValuesById()
+            widgetModel.clear()
+            for (let i = 0; i < widgets.length; ++i) {
+                const item = widgets[i]
+                const uid = item.uid !== undefined ? item.uid : nextWidgetId++
+                widgetModel.append({
+                    uid: uid,
+                    key: item.key,
+                    title: item.title,
+                    value: latestValues[uid] !== undefined ? latestValues[uid] : item.value,
+                    variant: item.variant
+                })
+            }
         }
     }
 
@@ -41,37 +101,18 @@ Page {
             columnSpacing: 12
             rowSpacing: 12
 
-            MetricCard {
-                id: cpu
-                Layout.fillWidth: true
-                Layout.fillHeight: false
-                Layout.preferredHeight: 160
-                Layout.minimumHeight: 150
-                title: "CPU"
-                value: 45
-                variant: "segments"
-            }
+            Repeater {
+                model: widgetModel
 
-            MetricCard {
-                id: ram
-                Layout.fillWidth: true
-                Layout.fillHeight: false
-                Layout.preferredHeight: 160
-                Layout.minimumHeight: 150
-                title: "RAM"
-                value: 76
-                variant: "ring"
-            }
-
-            MetricCard {
-                id: gpu
-                Layout.fillWidth: true
-                Layout.fillHeight: false
-                Layout.preferredHeight: 160
-                Layout.minimumHeight: 150
-                title: "GPU"
-                value: 68
-                variant: "linear"
+                delegate: MetricCard {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                    Layout.preferredHeight: 160
+                    Layout.minimumHeight: 150
+                    title: model.title
+                    value: model.value
+                    variant: model.variant
+                }
             }
         }
 
@@ -122,21 +163,19 @@ Page {
             function parseProc(iter)
             {
                 let procObject = objectsArray[iter]
-                cpu.title = procObject.name.substring(0, 12)
-                cpu.value = procObject.loading
+                updateWidgetData("cpu", procObject.name.substring(0, 12), procObject.loading)
             }
 
             function parseMemory(iter)
             {
                 let memObject = objectsArray[iter]
-                ram.value = memObject.loading
+                updateWidgetData("ram", "RAM", memObject.loading)
             }
 
             function parseVideocard(iter)
             {
                 let videoObject = objectsArray[iter]
-                gpu.title = videoObject.name.substring(0, 12)
-                gpu.value = videoObject.loading
+                updateWidgetData("gpu", videoObject.name.substring(0, 12), videoObject.loading)
             }
 
             function parseHdd(iter)

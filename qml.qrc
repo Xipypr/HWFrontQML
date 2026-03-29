@@ -11,6 +11,7 @@
         <file>MetricCard.qml</file>
         <file>DeviceStatusHeader.qml</file>
         <file>DeviceSettingsDialog.qml</file>
+        <file>WidgetLayoutDialog.qml</file>
         <file>ConnectedDeviceCard.qml</file>
     </qresource>
 </RCC>
