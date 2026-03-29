@@ -10,7 +10,6 @@ Page {
     property var desktop_device: ({})
     property string destop_name: core.device().name
     property int nextWidgetId: 1
-    property int selectedVariantWidgetIndex: -1
 
     ListModel {
         id: widgetModel
@@ -59,10 +58,41 @@ Page {
     function openVariantDialogForIndex(widgetIndex) {
         if (widgetIndex < 0 || widgetIndex >= widgetModel.count)
             return
-        selectedVariantWidgetIndex = widgetIndex
+
         const overrideValue = widgetModel.get(widgetIndex).variantOverride
-        variantDialogCombo.currentIndex = variantDialogIndexForMode(overrideValue !== undefined ? overrideValue : "")
-        variantDialog.open()
+        const overrideIndex = variantDialogIndexForMode(overrideValue !== undefined ? overrideValue : "")
+
+        if (!variantDialogLoader.active)
+            variantDialogLoader.active = true
+
+        if (variantDialogLoader.status === Loader.Ready && variantDialogLoader.item) {
+            variantDialogLoader.item.selectedWidgetIndex = widgetIndex
+            variantDialogLoader.item.initialIndex = overrideIndex
+            variantDialogLoader.item.open()
+            return
+        }
+
+        variantDialogLoader.pendingOpen = true
+        variantDialogLoader.pendingWidgetIndex = widgetIndex
+        variantDialogLoader.pendingVariantIndex = overrideIndex
+    }
+
+    function applyVariantOverride(widgetIndex, mode) {
+        if (widgetIndex < 0 || widgetIndex >= widgetModel.count)
+            return
+        widgetModel.setProperty(widgetIndex, "variantOverride", mode)
+    }
+
+    function openDeviceSettingsDialog() {
+        if (!deviceSettingsDialogLoader.active)
+            deviceSettingsDialogLoader.active = true
+
+        if (deviceSettingsDialogLoader.status === Loader.Ready && deviceSettingsDialogLoader.item) {
+            deviceSettingsDialogLoader.item.open()
+            return
+        }
+
+        deviceSettingsDialogLoader.pendingOpen = true
     }
 
     Component.onCompleted: resetDefaultWidgets()
@@ -79,18 +109,34 @@ Page {
         width: root.width
         headerText: destop_name
         onClicked: {
-            deviceSettingsDialog.open()
+            root.openDeviceSettingsDialog()
         }
     }
 
-    DeviceSettingsDialog {
-        id: deviceSettingsDialog
-        onSetDeviceNameSelected: {
-            console.log("Device settings: set device name clicked")
-        }
+    Component {
+        id: deviceSettingsDialogComponent
+        DeviceSettingsDialog {
+            onSetDeviceNameSelected: {
+                console.log("Device settings: set device name clicked")
+            }
 
-        onChangeLayoutSelected: {
-            widgetLayoutDialog.open()
+            onChangeLayoutSelected: {
+                widgetLayoutDialog.open()
+            }
+        }
+    }
+
+    Loader {
+        id: deviceSettingsDialogLoader
+        active: false
+        sourceComponent: deviceSettingsDialogComponent
+        property bool pendingOpen: false
+
+        onLoaded: {
+            if (pendingOpen && item) {
+                pendingOpen = false
+                item.open()
+            }
         }
     }
 
@@ -116,30 +162,53 @@ Page {
         }
     }
 
-    Dialog {
-        id: variantDialog
-        modal: true
-        focus: true
-        parent: Overlay.overlay
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        width: Math.min(parent.width - 32, 280)
-        padding: 16
-        title: "Режим отображения"
-        standardButtons: Dialog.Ok | Dialog.Cancel
+    Component {
+        id: variantDialogComponent
+        Dialog {
+            property int selectedWidgetIndex: -1
+            property int initialIndex: 0
 
-        onAccepted: {
-            if (selectedVariantWidgetIndex < 0 || selectedVariantWidgetIndex >= widgetModel.count)
-                return
-            const selected = variantDialogOptions[variantDialogCombo.currentIndex]
-            widgetModel.setProperty(selectedVariantWidgetIndex, "variantOverride", selected ? selected.value : "")
+            modal: true
+            focus: true
+            parent: Overlay.overlay
+            x: (parent.width - width) / 2
+            y: (parent.height - height) / 2
+            width: Math.min(parent.width - 32, 280)
+            padding: 16
+            title: "Режим отображения"
+            standardButtons: Dialog.Ok | Dialog.Cancel
+
+            onOpened: variantDialogCombo.currentIndex = initialIndex
+
+            onAccepted: {
+                const selected = root.variantDialogOptions[variantDialogCombo.currentIndex]
+                root.applyVariantOverride(selectedWidgetIndex, selected ? selected.value : "")
+            }
+
+            contentItem: ComboBox {
+                id: variantDialogCombo
+                model: root.variantDialogOptions
+                textRole: "label"
+                width: parent.width
+            }
         }
+    }
 
-        contentItem: ComboBox {
-            id: variantDialogCombo
-            model: root.variantDialogOptions
-            textRole: "label"
-            width: parent.width
+    Loader {
+        id: variantDialogLoader
+        active: false
+        sourceComponent: variantDialogComponent
+        property bool pendingOpen: false
+        property int pendingWidgetIndex: -1
+        property int pendingVariantIndex: 0
+
+        onLoaded: {
+            if (pendingOpen && item) {
+                pendingOpen = false
+                item.selectedWidgetIndex = pendingWidgetIndex
+                item.initialIndex = pendingVariantIndex
+                item.open()
+            }
         }
     }
 
