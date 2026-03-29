@@ -6,6 +6,14 @@ import DeviceData 1.0
 Page {
     id: root
 
+    readonly property var availableVariants: [
+        { label: "Из карточек", value: "" },
+        { label: "Segments", value: "segments" },
+        { label: "Ring", value: "ring" },
+        { label: "Linear", value: "linear" },
+        { label: "Arc 180°", value: "arc180" }
+    ]
+    property string globalWidgetVariant: ""
     property var objectsArray: []
     property var desktop_device: ({})
     property string destop_name: core.device().name
@@ -17,9 +25,9 @@ Page {
 
     function resetDefaultWidgets() {
         widgetModel.clear()
-        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "arc180" })
-        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "segments" })
-        widgetModel.append({ uid: nextWidgetId++, key: "gpu", title: "GPU", value: 68, variant: "linear" })
+        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "arc180", variantOverride: "" })
+        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "segments", variantOverride: "" })
+        widgetModel.append({ uid: nextWidgetId++, key: "gpu", title: "GPU", value: 68, variant: "linear", variantOverride: "" })
     }
 
     function findWidgetIndex(widgetKey) {
@@ -83,7 +91,8 @@ Page {
                     key: item.key,
                     title: item.title,
                     value: latestValues[uid] !== undefined ? latestValues[uid] : item.value,
-                    variant: item.variant
+                    variant: item.variant,
+                    variantOverride: item.variantOverride !== undefined ? item.variantOverride : ""
                 })
             }
         }
@@ -93,6 +102,35 @@ Page {
         anchors.fill: parent
         anchors.margins: 16
         spacing: 12
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+
+            Label {
+                text: "Глобальный режим:"
+                color: "#E2E8F0"
+            }
+
+            ComboBox {
+                id: globalVariantCombo
+                model: root.availableVariants
+                textRole: "label"
+
+                Component.onCompleted: {
+                    for (let i = 0; i < model.length; ++i) {
+                        if (model[i].value === root.globalWidgetVariant) {
+                            currentIndex = i
+                            break
+                        }
+                    }
+                }
+
+                onActivated: root.globalWidgetVariant = model[index].value
+            }
+
+            Item { Layout.fillWidth: true }
+        }
 
         GridLayout {
             Layout.fillWidth: true
@@ -112,6 +150,12 @@ Page {
                     title: model.title
                     value: model.value
                     variant: model.variant
+                    globalVariant: root.globalWidgetVariant
+                    variantOverride: model.variantOverride !== undefined ? model.variantOverride : ""
+
+                    onVariantOverrideSelected: function(mode) {
+                        widgetModel.setProperty(index, "variantOverride", mode)
+                    }
                 }
             }
         }

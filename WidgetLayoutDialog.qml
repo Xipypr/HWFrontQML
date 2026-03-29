@@ -45,7 +45,8 @@ Dialog {
                 key: item.key,
                 title: item.title,
                 value: item.value,
-                variant: item.variant
+                variant: item.variant,
+                variantOverride: item.variantOverride !== undefined ? item.variantOverride : ""
             })
         }
     }
@@ -166,7 +167,8 @@ Dialog {
                         key: item.key,
                         title: title,
                         value: 0,
-                        variant: item.variant
+                        variant: item.variant,
+                        variantOverride: ""
                     })
                 }
             }

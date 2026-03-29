@@ -7,8 +7,15 @@ Rectangle {
 
     property string title: "N/A"
     property int value: 0
-    // segments | ring | linear | arc180 (filled 180° segment)
+    // Local card preference (fallback mode)
     property string variant: "segments"
+    // Global mode provided by page-level selector
+    property string globalVariant: "segments"
+    // Empty string means "use global mode"
+    property string variantOverride: ""
+    signal variantOverrideSelected(string mode)
+
+    readonly property string effectiveVariant: variantOverride !== "" ? variantOverride : (globalVariant !== "" ? globalVariant : variant)
 
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
@@ -16,7 +23,7 @@ Rectangle {
     readonly property int valueFontSize: 42
 
     function resolveVizComponent() {
-        switch (variant) {
+        switch (effectiveVariant) {
         case "ring":
             return ringViz
         case "linear":
@@ -44,8 +51,8 @@ Rectangle {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: variant === "arc180" ? 8 : 14
-        spacing: variant === "ring" ? 8 : (variant === "arc180" ? 4 : 10)
+        anchors.margins: effectiveVariant === "arc180" ? 8 : 14
+        spacing: effectiveVariant === "ring" ? 8 : (effectiveVariant === "arc180" ? 4 : 10)
 
         RowLayout {
             Layout.fillWidth: true
@@ -79,11 +86,55 @@ Rectangle {
                 font.pixelSize: 11
                 font.bold: true
             }
+
+            ToolButton {
+                text: "⋯"
+                font.pixelSize: 16
+                onClicked: modeMenu.open()
+            }
+
+            Menu {
+                id: modeMenu
+
+                Action {
+                    text: card.globalVariant === "" ? "Глобальный (из карточки)" : "Глобальный (" + card.globalVariant + ")"
+                    checkable: true
+                    checked: card.variantOverride === ""
+                    onTriggered: card.variantOverrideSelected("")
+                }
+
+                MenuSeparator {}
+
+                Action {
+                    text: "Segments"
+                    checkable: true
+                    checked: card.variantOverride === "segments"
+                    onTriggered: card.variantOverrideSelected("segments")
+                }
+                Action {
+                    text: "Ring"
+                    checkable: true
+                    checked: card.variantOverride === "ring"
+                    onTriggered: card.variantOverrideSelected("ring")
+                }
+                Action {
+                    text: "Linear"
+                    checkable: true
+                    checked: card.variantOverride === "linear"
+                    onTriggered: card.variantOverrideSelected("linear")
+                }
+                Action {
+                    text: "Arc 180°"
+                    checkable: true
+                    checked: card.variantOverride === "arc180"
+                    onTriggered: card.variantOverrideSelected("arc180")
+                }
+            }
         }
 
         Text {
             text: card.safeValue + "%"
-            visible: card.variant !== "arc180" && card.variant !== "ring"
+            visible: card.effectiveVariant !== "arc180" && card.effectiveVariant !== "ring"
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
             font.bold: true
@@ -91,9 +142,9 @@ Rectangle {
 
         Loader {
             Layout.fillWidth: true
-            Layout.fillHeight: card.variant === "arc180"
+            Layout.fillHeight: card.effectiveVariant === "arc180"
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 86 : 12)
+            Layout.preferredHeight: card.effectiveVariant === "arc180" ? 104 : (card.effectiveVariant === "ring" ? 86 : 12)
             sourceComponent: card.resolveVizComponent()
         }
 
