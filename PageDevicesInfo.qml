@@ -17,10 +17,9 @@ Page {
 
     function resetDefaultWidgets() {
         widgetModel.clear()
-        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "segments" })
-        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "ring" })
+        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "arc180" })
+        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "segments" })
         widgetModel.append({ uid: nextWidgetId++, key: "gpu", title: "GPU", value: 68, variant: "linear" })
-        widgetModel.append({ uid: nextWidgetId++, key: "hdd", title: "HDD", value: 52, variant: "arc180" })
     }
 
     function findWidgetIndex(widgetKey) {
