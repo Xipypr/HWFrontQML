@@ -6,11 +6,9 @@ Dialog {
     id: root
 
     property var widgetsModel: null
+    property int customWidgetCounter: 1
 
-    signal moveWidgetUp(int index)
-    signal moveWidgetDown(int index)
-    signal deleteWidget(int index)
-    signal addWidget(string widgetKey, string widgetTitle, string widgetVariant)
+    signal applyLayout(var widgets)
 
     parent: Overlay.overlay
     x: (parent.width - width) / 2
@@ -30,6 +28,36 @@ Dialog {
 
     property int selectedTemplateIndex: 0
 
+    ListModel {
+        id: editableModel
+    }
+
+    function syncFromSource() {
+        editableModel.clear()
+        if (!root.widgetsModel)
+            return
+
+        for (let i = 0; i < root.widgetsModel.count; ++i) {
+            const item = root.widgetsModel.get(i)
+            editableModel.append({
+                key: item.key,
+                title: item.title,
+                value: item.value,
+                variant: item.variant
+            })
+        }
+    }
+
+    function exportWidgets() {
+        const widgets = []
+        for (let i = 0; i < editableModel.count; ++i) {
+            widgets.push(editableModel.get(i))
+        }
+        return widgets
+    }
+
+    onOpened: syncFromSource()
+
     contentItem: ColumnLayout {
         spacing: 12
 
@@ -48,7 +76,7 @@ Dialog {
             Layout.preferredHeight: 260
             clip: true
             spacing: 8
-            model: root.widgetsModel
+            model: editableModel
 
             delegate: Rectangle {
                 width: widgetsList.width
@@ -73,18 +101,18 @@ Dialog {
                     ToolButton {
                         text: "↑"
                         enabled: index > 0
-                        onClicked: root.moveWidgetUp(index)
+                        onClicked: editableModel.move(index, index - 1, 1)
                     }
 
                     ToolButton {
                         text: "↓"
-                        enabled: root.widgetsModel && index < root.widgetsModel.count - 1
-                        onClicked: root.moveWidgetDown(index)
+                        enabled: index < editableModel.count - 1
+                        onClicked: editableModel.move(index, index + 1, 1)
                     }
 
                     ToolButton {
                         text: "✕"
-                        onClicked: root.deleteWidget(index)
+                        onClicked: editableModel.remove(index, 1)
                     }
                 }
             }
@@ -106,7 +134,32 @@ Dialog {
                 text: "Добавить"
                 onClicked: {
                     const item = root.widgetTemplates[root.selectedTemplateIndex];
-                    root.addWidget(item.key, item.title, item.variant)
+                    let title = item.title
+                    if (item.key === "custom") {
+                        title = "Новый виджет " + customWidgetCounter
+                        customWidgetCounter += 1
+                    }
+                    editableModel.append({ key: item.key, title: title, value: 0, variant: item.variant })
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+
+            Item { Layout.fillWidth: true }
+
+            Button {
+                text: "Отмена"
+                onClicked: root.close()
+            }
+
+            Button {
+                text: "Принять"
+                onClicked: {
+                    root.applyLayout(root.exportWidgets())
+                    root.close()
                 }
             }
         }

@@ -9,7 +9,6 @@ Page {
     property var objectsArray: []
     property var desktop_device: ({})
     property string destop_name: core.device().name
-    property int customWidgetCounter: 1
 
     ListModel {
         id: widgetModel
@@ -63,28 +62,17 @@ Page {
         id: widgetLayoutDialog
         widgetsModel: widgetModel
 
-        onMoveWidgetUp: function(index) {
-            if (index > 0)
-                widgetModel.move(index, index - 1, 1)
-        }
-
-        onMoveWidgetDown: function(index) {
-            if (index < widgetModel.count - 1)
-                widgetModel.move(index, index + 1, 1)
-        }
-
-        onDeleteWidget: function(index) {
-            if (index >= 0 && index < widgetModel.count)
-                widgetModel.remove(index, 1)
-        }
-
-        onAddWidget: function(widgetKey, widgetTitle, widgetVariant) {
-            let finalTitle = widgetTitle
-            if (widgetKey === "custom") {
-                finalTitle = "Новый виджет " + customWidgetCounter
-                customWidgetCounter += 1
+        onApplyLayout: function(widgets) {
+            widgetModel.clear()
+            for (let i = 0; i < widgets.length; ++i) {
+                const item = widgets[i]
+                widgetModel.append({
+                    key: item.key,
+                    title: item.title,
+                    value: item.value,
+                    variant: item.variant
+                })
             }
-            widgetModel.append({ key: widgetKey, title: finalTitle, value: 0, variant: widgetVariant })
         }
     }
 
