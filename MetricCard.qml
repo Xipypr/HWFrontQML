@@ -9,20 +9,18 @@ Rectangle {
     property int value: 0
     // Local card preference (fallback mode)
     property string variant: "segments"
-    // Global mode provided by page-level selector
-    property string globalVariant: "segments"
-    // Empty string means "use global mode"
+    // Empty string means "use card default mode"
     property string variantOverride: ""
     signal variantOverrideSelected(string mode)
     readonly property var variantOptions: [
-        { label: "Auto", value: "" },
+        { label: "Default", value: "" },
         { label: "Seg", value: "segments" },
         { label: "Ring", value: "ring" },
         { label: "Line", value: "linear" },
         { label: "Arc", value: "arc180" }
     ]
 
-    readonly property string effectiveVariant: variantOverride !== "" ? variantOverride : (globalVariant !== "" ? globalVariant : variant)
+    readonly property string effectiveVariant: variantOverride !== "" ? variantOverride : variant
 
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"

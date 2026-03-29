@@ -6,14 +6,6 @@ import DeviceData 1.0
 Page {
     id: root
 
-    readonly property var availableVariants: [
-        { label: "Из карточек", value: "" },
-        { label: "Segments", value: "segments" },
-        { label: "Ring", value: "ring" },
-        { label: "Linear", value: "linear" },
-        { label: "Arc 180°", value: "arc180" }
-    ]
-    property string globalWidgetVariant: ""
     property var objectsArray: []
     property var desktop_device: ({})
     property string destop_name: core.device().name
@@ -103,35 +95,6 @@ Page {
         anchors.margins: 16
         spacing: 12
 
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 8
-
-            Label {
-                text: "Глобальный режим:"
-                color: "#E2E8F0"
-            }
-
-            ComboBox {
-                id: globalVariantCombo
-                model: root.availableVariants
-                textRole: "label"
-
-                Component.onCompleted: {
-                    for (let i = 0; i < model.length; ++i) {
-                        if (model[i].value === root.globalWidgetVariant) {
-                            currentIndex = i
-                            break
-                        }
-                    }
-                }
-
-                onActivated: root.globalWidgetVariant = model[index].value
-            }
-
-            Item { Layout.fillWidth: true }
-        }
-
         GridLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -150,7 +113,6 @@ Page {
                     title: model.title
                     value: model.value
                     variant: model.variant
-                    globalVariant: root.globalWidgetVariant
                     variantOverride: model.variantOverride !== undefined ? model.variantOverride : ""
 
                     onVariantOverrideSelected: function(mode) {
