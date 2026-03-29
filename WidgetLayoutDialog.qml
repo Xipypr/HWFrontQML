@@ -6,8 +6,6 @@ Dialog {
     id: root
 
     property var widgetsModel: null
-    property int customWidgetCounter: 1
-
     signal applyLayout(var widgets)
 
     parent: Overlay.overlay
@@ -54,6 +52,23 @@ Dialog {
             widgets.push(editableModel.get(i))
         }
         return widgets
+    }
+
+    function nextCustomWidgetTitle() {
+        let maxNumber = 0
+        for (let i = 0; i < editableModel.count; ++i) {
+            const item = editableModel.get(i)
+            if (item.key !== "custom")
+                continue
+
+            const match = /^Новый виджет\s+(\d+)$/.exec(item.title)
+            if (match && match.length > 1) {
+                const number = parseInt(match[1], 10)
+                if (!isNaN(number))
+                    maxNumber = Math.max(maxNumber, number)
+            }
+        }
+        return "Новый виджет " + (maxNumber + 1)
     }
 
     onOpened: syncFromSource()
@@ -135,10 +150,8 @@ Dialog {
                 onClicked: {
                     const item = root.widgetTemplates[root.selectedTemplateIndex];
                     let title = item.title
-                    if (item.key === "custom") {
-                        title = "Новый виджет " + customWidgetCounter
-                        customWidgetCounter += 1
-                    }
+                    if (item.key === "custom")
+                        title = root.nextCustomWidgetTitle()
                     editableModel.append({ key: item.key, title: title, value: 0, variant: item.variant })
                 }
             }
