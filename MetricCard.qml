@@ -104,19 +104,18 @@ Rectangle {
 
     }
 
-    Dialog {
-        id: variantDialog
+    Popup {
+        id: variantPopup
         modal: true
         focus: true
         parent: Overlay.overlay
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
         width: Math.min(parent.width - 32, 260)
-        padding: 16
-        title: "Режим"
-        standardButtons: Dialog.Ok | Dialog.Cancel
+        padding: 12
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-        property string tempMode: ""
+        property int selectedIndex: 0
         readonly property var variantOptions: [
             { label: "Default", value: "" },
             { label: "Segments", value: "segments" },
@@ -133,29 +132,59 @@ Rectangle {
             return 0
         }
 
-        onOpened: {
-            tempMode = card.variantOverride
-            modeCombo.currentIndex = indexForMode(tempMode)
+        onOpened: selectedIndex = indexForMode(card.variantOverride)
+
+        background: Rectangle {
+            radius: 10
+            color: "#0F172A"
+            border.width: 1
+            border.color: "#334155"
         }
 
-        onAccepted: {
-            const selected = variantOptions[modeCombo.currentIndex]
-            card.variantOverrideSelected(selected ? selected.value : "")
-        }
+        contentItem: ColumnLayout {
+            spacing: 8
 
-        contentItem: ComboBox {
-            id: modeCombo
-            model: variantDialog.variantOptions
-            textRole: "label"
-            width: parent.width
+            Label {
+                text: "Режим"
+                color: "#E2E8F0"
+                font.bold: true
+            }
+
+            ComboBox {
+                id: modeCombo
+                Layout.fillWidth: true
+                model: variantPopup.variantOptions
+                textRole: "label"
+                currentIndex: variantPopup.selectedIndex
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: 8
+
+                Item { Layout.fillWidth: true }
+
+                Button {
+                    text: "Отмена"
+                    onClicked: variantPopup.close()
+                }
+
+                Button {
+                    text: "OK"
+                    onClicked: {
+                        const selected = variantPopup.variantOptions[modeCombo.currentIndex]
+                        card.variantOverrideSelected(selected ? selected.value : "")
+                        variantPopup.close()
+                    }
+                }
+            }
         }
     }
 
     TapHandler {
         acceptedButtons: Qt.RightButton
         onTapped: {
-            variantDialog.tempMode = card.variantOverride
-            variantDialog.open()
+            variantPopup.open()
         }
     }
 
@@ -163,8 +192,7 @@ Rectangle {
         acceptedButtons: Qt.LeftButton
         gesturePolicy: TapHandler.WithinBounds
         onLongPressed: {
-            variantDialog.tempMode = card.variantOverride
-            variantDialog.open()
+            variantPopup.open()
         }
     }
 
