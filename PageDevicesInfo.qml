@@ -10,7 +10,6 @@ Page {
     property var desktop_device: ({})
     property string destop_name: core.device().name
     property int nextWidgetId: 1
-    property int selectedVariantWidgetIndex: -1
 
     ListModel {
         id: widgetModel
@@ -48,32 +47,7 @@ Page {
         return values
     }
 
-    function variantDialogIndexForMode(mode) {
-        for (let i = 0; i < variantDialogOptions.length; ++i) {
-            if (variantDialogOptions[i].value === mode)
-                return i
-        }
-        return 0
-    }
-
-    function openVariantDialogForIndex(widgetIndex) {
-        if (widgetIndex < 0 || widgetIndex >= widgetModel.count)
-            return
-        selectedVariantWidgetIndex = widgetIndex
-        const overrideValue = widgetModel.get(widgetIndex).variantOverride
-        variantDialogCombo.currentIndex = variantDialogIndexForMode(overrideValue !== undefined ? overrideValue : "")
-        variantDialog.open()
-    }
-
     Component.onCompleted: resetDefaultWidgets()
-
-    readonly property var variantDialogOptions: [
-        { label: "Default", value: "" },
-        { label: "Segments", value: "segments" },
-        { label: "Ring", value: "ring" },
-        { label: "Linear", value: "linear" },
-        { label: "Arc 180°", value: "arc180" }
-    ]
 
     header: DeviceStatusHeader {
         width: root.width
@@ -116,27 +90,6 @@ Page {
         }
     }
 
-    Dialog {
-        id: variantDialog
-        modal: true
-        title: "Режим отображения"
-        standardButtons: Dialog.Ok | Dialog.Cancel
-
-        onAccepted: {
-            if (selectedVariantWidgetIndex < 0 || selectedVariantWidgetIndex >= widgetModel.count)
-                return
-            const selected = variantDialogOptions[variantDialogCombo.currentIndex]
-            widgetModel.setProperty(selectedVariantWidgetIndex, "variantOverride", selected ? selected.value : "")
-        }
-
-        contentItem: ComboBox {
-            id: variantDialogCombo
-            model: root.variantDialogOptions
-            textRole: "label"
-            implicitWidth: 220
-        }
-    }
-
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
@@ -152,30 +105,15 @@ Page {
             Repeater {
                 model: widgetModel
 
-                delegate: Item {
+                delegate: MetricCard {
                     Layout.fillWidth: true
                     Layout.fillHeight: false
                     Layout.preferredHeight: 160
                     Layout.minimumHeight: 150
-
-                    MetricCard {
-                        anchors.fill: parent
-                        title: model.title
-                        value: model.value
-                        variant: model.variant
-                        variantOverride: model.variantOverride !== undefined ? model.variantOverride : ""
-                    }
-
-                    TapHandler {
-                        acceptedButtons: Qt.RightButton
-                        onTapped: root.openVariantDialogForIndex(index)
-                    }
-
-                    TapHandler {
-                        acceptedButtons: Qt.LeftButton
-                        gesturePolicy: TapHandler.WithinBounds
-                        onLongPressed: root.openVariantDialogForIndex(index)
-                    }
+                    title: model.title
+                    value: model.value
+                    variant: model.variant
+                    variantOverride: model.variantOverride !== undefined ? model.variantOverride : ""
                 }
             }
         }
