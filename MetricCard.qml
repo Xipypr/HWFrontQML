@@ -14,6 +14,13 @@ Rectangle {
     // Empty string means "use global mode"
     property string variantOverride: ""
     signal variantOverrideSelected(string mode)
+    readonly property var variantOptions: [
+        { label: "Auto", value: "" },
+        { label: "Seg", value: "segments" },
+        { label: "Ring", value: "ring" },
+        { label: "Line", value: "linear" },
+        { label: "Arc", value: "arc180" }
+    ]
 
     readonly property string effectiveVariant: variantOverride !== "" ? variantOverride : (globalVariant !== "" ? globalVariant : variant)
 
@@ -87,47 +94,31 @@ Rectangle {
                 font.bold: true
             }
 
-            ToolButton {
-                text: "⋯"
-                font.pixelSize: 16
-                onClicked: modeMenu.open()
-            }
+            ComboBox {
+                id: localModeCombo
+                Layout.preferredWidth: 74
+                model: card.variantOptions
+                textRole: "label"
 
-            Menu {
-                id: modeMenu
-
-                Action {
-                    text: card.globalVariant === "" ? "Глобальный (из карточки)" : "Глобальный (" + card.globalVariant + ")"
-                    checkable: true
-                    checked: card.variantOverride === ""
-                    onTriggered: card.variantOverrideSelected("")
+                function updateSelection() {
+                    for (let i = 0; i < model.length; ++i) {
+                        if (model[i].value === card.variantOverride) {
+                            currentIndex = i
+                            return
+                        }
+                    }
+                    currentIndex = 0
                 }
 
-                MenuSeparator {}
+                onActivated: {
+                    const selected = model[currentIndex]
+                    card.variantOverrideSelected(selected ? selected.value : "")
+                }
 
-                Action {
-                    text: "Segments"
-                    checkable: true
-                    checked: card.variantOverride === "segments"
-                    onTriggered: card.variantOverrideSelected("segments")
-                }
-                Action {
-                    text: "Ring"
-                    checkable: true
-                    checked: card.variantOverride === "ring"
-                    onTriggered: card.variantOverrideSelected("ring")
-                }
-                Action {
-                    text: "Linear"
-                    checkable: true
-                    checked: card.variantOverride === "linear"
-                    onTriggered: card.variantOverrideSelected("linear")
-                }
-                Action {
-                    text: "Arc 180°"
-                    checkable: true
-                    checked: card.variantOverride === "arc180"
-                    onTriggered: card.variantOverrideSelected("arc180")
+                Component.onCompleted: updateSelection()
+                Connections {
+                    target: card
+                    function onVariantOverrideChanged() { localModeCombo.updateSelection() }
                 }
             }
         }
