@@ -271,113 +271,123 @@ Rectangle {
             implicitHeight: 102
             implicitWidth: 102
 
-            Rectangle {
-                id: sphereBorder
+            Canvas {
+                id: liquidCanvas
                 anchors.centerIn: parent
                 width: 92
                 height: 92
-                radius: width / 2
-                color: "transparent"
-                border.width: 3
-                border.color: Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.9)
-            }
+                antialiasing: true
+                smooth: true
+                renderTarget: Canvas.Image
 
-            Rectangle {
-                id: sphereInnerClip
-                anchors.centerIn: sphereBorder
-                width: sphereBorder.width - sphereBorder.border.width * 2
-                height: width
-                radius: width / 2
-                clip: true
-                color: "transparent"
+                property real progress: card.safeValue / 100
+                property real phase: 0
 
-                readonly property real progress: card.safeValue / 100
-                readonly property real clampedProgress: Math.max(0, Math.min(1, progress))
-                readonly property real fillHeight: height * clampedProgress
-                readonly property color liquidColor: Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.4)
-
-                Rectangle {
-                    id: fillBody
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    height: sphereInnerClip.fillHeight
-                    color: sphereInnerClip.liquidColor
-                    Behavior on height { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+                function rgbaString(colorValue, alphaValue) {
+                    return "rgba("
+                            + Math.round(colorValue.r * 255) + ","
+                            + Math.round(colorValue.g * 255) + ","
+                            + Math.round(colorValue.b * 255) + ","
+                            + alphaValue + ")"
                 }
 
-                Item {
-                    id: waveLayer
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    y: parent.height - sphereInnerClip.fillHeight - 8
-                    height: 20
-                    clip: true
+                onPaint: {
+                    if (width <= 0 || height <= 0)
+                        return;
 
-                    Behavior on y { NumberAnimation { duration: 280; easing.type: Easing.OutCubic } }
+                    var ctx = getContext("2d");
+                    var borderWidth = 2.5;
+                    var radius = Math.min(width, height) / 2 - borderWidth;
+                    var centerX = width / 2;
+                    var centerY = height / 2;
+                    var clampedProgress = Math.max(0, Math.min(1, progress));
+                    var liquidY = height - clampedProgress * height;
+                    var amp1 = Math.max(2.5, height * 0.045);
+                    var amp2 = Math.max(1.5, height * 0.03);
+                    var waveLen = Math.max(12, width * 0.9);
+                    var x;
+                    var y1;
+                    var y2;
 
-                    Rectangle {
-                        id: waveA
-                        y: 6
-                        width: waveLayer.width * 1.6
-                        height: 14
-                        radius: 7
-                        color: Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.52)
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.clearRect(0, 0, width, height);
+
+                    // Clip all liquid drawing strictly to a circle.
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
+                    ctx.clip();
+
+                    // Base liquid fill.
+                    ctx.fillStyle = rgbaString(card.accentColor, 0.36);
+                    ctx.fillRect(0, liquidY, width, height - liquidY);
+
+                    // Front wave.
+                    ctx.beginPath();
+                    ctx.moveTo(0, height);
+                    for (x = 0; x <= width; x += 2) {
+                        y1 = liquidY + Math.sin((x / waveLen) * Math.PI * 2 + phase) * amp1;
+                        ctx.lineTo(x, y1);
                     }
+                    ctx.lineTo(width, height);
+                    ctx.closePath();
+                    ctx.fillStyle = rgbaString(card.accentColor, 0.58);
+                    ctx.fill();
 
-                    Rectangle {
-                        id: waveB
-                        y: 2
-                        width: waveLayer.width * 1.4
-                        height: 12
-                        radius: 6
-                        color: Qt.rgba(1, 1, 1, 0.18)
+                    // Rear wave highlight.
+                    ctx.beginPath();
+                    ctx.moveTo(0, height);
+                    for (x = 0; x <= width; x += 2) {
+                        y2 = liquidY + Math.sin((x / (waveLen * 0.82)) * Math.PI * 2 + phase + 1.3) * amp2;
+                        ctx.lineTo(x, y2);
                     }
+                    ctx.lineTo(width, height);
+                    ctx.closePath();
+                    ctx.fillStyle = "rgba(255,255,255,0.16)";
+                    ctx.fill();
 
-                    SequentialAnimation {
-                        running: true
-                        loops: Animation.Infinite
-
-                        NumberAnimation {
-                            target: waveA
-                            property: "x"
-                            from: -waveA.width * 0.45
-                            to: 0
-                            duration: 1700
-                            easing.type: Easing.InOutSine
-                        }
-                        NumberAnimation {
-                            target: waveA
-                            property: "x"
-                            from: 0
-                            to: -waveA.width * 0.45
-                            duration: 1700
-                            easing.type: Easing.InOutSine
-                        }
+                    // Crest line.
+                    ctx.beginPath();
+                    for (x = 0; x <= width; x += 2) {
+                        y1 = liquidY + Math.sin((x / waveLen) * Math.PI * 2 + phase) * amp1;
+                        if (x === 0)
+                            ctx.moveTo(x, y1);
+                        else
+                            ctx.lineTo(x, y1);
                     }
+                    ctx.lineWidth = 1.2;
+                    ctx.strokeStyle = "rgba(255,255,255,0.32)";
+                    ctx.stroke();
+                    ctx.restore();
 
-                    SequentialAnimation {
-                        running: true
-                        loops: Animation.Infinite
+                    // Sphere border on top.
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
+                    ctx.lineWidth = borderWidth;
+                    ctx.strokeStyle = rgbaString(card.accentColor, 0.95);
+                    ctx.stroke();
+                }
 
-                        NumberAnimation {
-                            target: waveB
-                            property: "x"
-                            from: 0
-                            to: -waveB.width * 0.35
-                            duration: 1400
-                            easing.type: Easing.InOutSine
-                        }
-                        NumberAnimation {
-                            target: waveB
-                            property: "x"
-                            from: -waveB.width * 0.35
-                            to: 0
-                            duration: 1400
-                            easing.type: Easing.InOutSine
-                        }
+                onProgressChanged: requestPaint()
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+
+                Connections {
+                    target: card
+                    function onAccentColorChanged() { liquidCanvas.requestPaint(); }
+                }
+
+                Timer {
+                    interval: 40
+                    repeat: true
+                    running: liquidCanvas.visible
+                    onTriggered: {
+                        liquidCanvas.phase += 0.18
+                        liquidCanvas.requestPaint()
                     }
                 }
+
+                Component.onCompleted: requestPaint()
             }
 
             Text {
