@@ -22,6 +22,7 @@ Dialog {
         { label: "RAM", key: "ram", title: "RAM", variant: "ring" },
         { label: "GPU", key: "gpu", title: "GPU", variant: "linear" },
         { label: "HDD (180°)", key: "hdd", title: "HDD", variant: "arc180" },
+        { label: "Сфера (жидкость)", key: "liquid", title: "Liquid", variant: "liquid" },
         { label: "Новый виджет", key: "custom", title: "Новый виджет", variant: "segments" }
     ]
 

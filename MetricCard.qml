@@ -7,7 +7,7 @@ Rectangle {
 
     property string title: "N/A"
     property int value: 0
-    // segments | ring | linear | arc180 (filled 180° segment)
+    // segments | ring | linear | arc180 (filled 180° segment) | liquid (sphere)
     property string variant: "segments"
 
     readonly property int safeValue: Math.max(0, Math.min(100, value))
@@ -23,6 +23,8 @@ Rectangle {
             return linearViz
         case "arc180":
             return arc180Viz
+        case "liquid":
+            return liquidViz
         default:
             return segmentsViz
         }
@@ -83,7 +85,7 @@ Rectangle {
 
         Text {
             text: card.safeValue + "%"
-            visible: card.variant !== "arc180"
+            visible: card.variant !== "arc180" && card.variant !== "liquid"
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
             font.bold: true
@@ -93,7 +95,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: card.variant === "arc180"
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 56 : 12)
+            Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 56 : (card.variant === "liquid" ? 96 : 12))
             sourceComponent: card.resolveVizComponent()
         }
 
@@ -257,6 +259,107 @@ Rectangle {
                 text: card.safeValue + "%"
                 color: "#F8FAFC"
                 font.pixelSize: 24
+                font.bold: true
+            }
+        }
+    }
+
+    Component {
+        id: liquidViz
+
+        Item {
+            implicitHeight: 102
+            implicitWidth: 102
+
+            Canvas {
+                id: liquidCanvas
+                anchors.centerIn: parent
+                width: 92
+                height: 92
+                antialiasing: true
+                smooth: true
+                renderTarget: Canvas.FramebufferObject
+
+                property real progress: card.safeValue / 100
+                property real phase: 0
+                readonly property real amplitude: Math.max(2, height * 0.03)
+                readonly property real waveLength: width * 0.85
+
+                onPaint: {
+                    var ctx = getContext("2d");
+                    var centerX = width / 2;
+                    var centerY = height / 2;
+                    var radius = Math.min(width, height) / 2 - 2;
+                    var borderWidth = 3;
+                    var waterTop = height - (height * progress);
+
+                    ctx.setTransform(1, 0, 0, 1, 0, 0);
+                    ctx.clearRect(0, 0, width, height);
+
+                    // Circle outline.
+                    ctx.lineWidth = borderWidth;
+                    ctx.strokeStyle = Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.9);
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
+                    ctx.stroke();
+
+                    // Clip by inner circle and draw liquid.
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, radius - borderWidth / 2, 0, Math.PI * 2, false);
+                    ctx.clip();
+
+                    ctx.beginPath();
+                    ctx.moveTo(0, height);
+                    for (var x = 0; x <= width; x += 2) {
+                        var y = waterTop + Math.sin((x / waveLength) * Math.PI * 2 + phase) * amplitude;
+                        ctx.lineTo(x, y);
+                    }
+                    ctx.lineTo(width, height);
+                    ctx.closePath();
+                    ctx.fillStyle = Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.4);
+                    ctx.fill();
+
+                    // subtle highlight on the wave cap
+                    ctx.beginPath();
+                    for (x = 0; x <= width; x += 2) {
+                        y = waterTop + Math.sin((x / waveLength) * Math.PI * 2 + phase) * amplitude;
+                        if (x === 0)
+                            ctx.moveTo(x, y);
+                        else
+                            ctx.lineTo(x, y);
+                    }
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = Qt.rgba(1, 1, 1, 0.35);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                onProgressChanged: requestPaint()
+                onPhaseChanged: requestPaint()
+                onWidthChanged: requestPaint()
+                onHeightChanged: requestPaint()
+
+                Connections {
+                    target: card
+                    function onAccentColorChanged() { liquidCanvas.requestPaint(); }
+                }
+
+                NumberAnimation on phase {
+                    from: 0
+                    to: Math.PI * 2
+                    duration: 1800
+                    loops: Animation.Infinite
+                }
+
+                Component.onCompleted: requestPaint()
+            }
+
+            Text {
+                anchors.centerIn: parent
+                text: card.safeValue + "%"
+                color: "#F8FAFC"
+                font.pixelSize: 20
                 font.bold: true
             }
         }
