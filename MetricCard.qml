@@ -11,7 +11,7 @@ Rectangle {
     property string variant: "segments"
     // Empty string means "use card default mode"
     property string variantOverride: ""
-    signal variantOverrideSelected(string mode)
+    signal variantDialogRequested()
 
     readonly property string effectiveVariant: variantOverride !== "" ? variantOverride : variant
 
@@ -104,96 +104,15 @@ Rectangle {
 
     }
 
-    Popup {
-        id: variantPopup
-        modal: true
-        focus: true
-        parent: Overlay.overlay
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        width: Math.min(parent.width - 32, 260)
-        padding: 12
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-
-        property int selectedIndex: 0
-        readonly property var variantOptions: [
-            { label: "Default", value: "" },
-            { label: "Segments", value: "segments" },
-            { label: "Ring", value: "ring" },
-            { label: "Linear", value: "linear" },
-            { label: "Arc 180°", value: "arc180" }
-        ]
-
-        function indexForMode(mode) {
-            for (let i = 0; i < variantOptions.length; ++i) {
-                if (variantOptions[i].value === mode)
-                    return i
-            }
-            return 0
-        }
-
-        onOpened: selectedIndex = indexForMode(card.variantOverride)
-
-        background: Rectangle {
-            radius: 10
-            color: "#0F172A"
-            border.width: 1
-            border.color: "#334155"
-        }
-
-        contentItem: ColumnLayout {
-            spacing: 8
-
-            Label {
-                text: "Режим"
-                color: "#E2E8F0"
-                font.bold: true
-            }
-
-            ComboBox {
-                id: modeCombo
-                Layout.fillWidth: true
-                model: variantPopup.variantOptions
-                textRole: "label"
-                currentIndex: variantPopup.selectedIndex
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: 8
-
-                Item { Layout.fillWidth: true }
-
-                Button {
-                    text: "Отмена"
-                    onClicked: variantPopup.close()
-                }
-
-                Button {
-                    text: "OK"
-                    onClicked: {
-                        const selected = variantPopup.variantOptions[modeCombo.currentIndex]
-                        card.variantOverrideSelected(selected ? selected.value : "")
-                        variantPopup.close()
-                    }
-                }
-            }
-        }
-    }
-
     TapHandler {
         acceptedButtons: Qt.RightButton
-        onTapped: {
-            variantPopup.open()
-        }
+        onTapped: card.variantDialogRequested()
     }
 
     TapHandler {
         acceptedButtons: Qt.LeftButton
         gesturePolicy: TapHandler.WithinBounds
-        onLongPressed: {
-            variantPopup.open()
-        }
+        onLongPressed: card.variantDialogRequested()
     }
 
     Component {
