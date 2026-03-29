@@ -13,7 +13,7 @@ Rectangle {
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
     readonly property string statusText: safeValue >= 90 ? "CRITICAL" : safeValue >= 70 ? "WARNING" : "NORMAL"
-    readonly property int valueFontSize: (variant === "ring" || variant === "arc180") ? 34 : 42
+    readonly property int valueFontSize: variant === "arc180" ? 28 : (variant === "ring" ? 34 : 42)
 
     radius: 16
     color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
@@ -79,7 +79,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: false
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredHeight: (card.variant === "ring" || card.variant === "arc180") ? 56 : 12
+            Layout.preferredHeight: card.variant === "arc180" ? 112 : (card.variant === "ring" ? 56 : 12)
             sourceComponent: card.variant === "ring"
                              ? ringViz
                              : (card.variant === "linear" ? linearViz
@@ -182,14 +182,14 @@ Rectangle {
         id: arc180Viz
 
         Item {
-            implicitHeight: 56
-            implicitWidth: 72
+            implicitHeight: 112
+            implicitWidth: 144
 
             Canvas {
                 id: arcCanvas
                 anchors.centerIn: parent
-                width: 72
-                height: 56
+                width: 144
+                height: 112
                 antialiasing: true
                 smooth: true
                 renderTarget: Canvas.FramebufferObject
@@ -198,10 +198,10 @@ Rectangle {
 
                 onPaint: {
                     var ctx = getContext("2d");
-                    var outerRadius = 24;
-                    var innerRadius = 15;
+                    var outerRadius = 48;
+                    var innerRadius = 30;
                     var centerX = width / 2;
-                    var centerY = height - 8;
+                    var centerY = height - 16;
                     var startAngle = Math.PI;
                     var progressAngle = startAngle + Math.PI * progress;
 

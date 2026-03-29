@@ -108,8 +108,8 @@ Page {
                 delegate: MetricCard {
                     Layout.fillWidth: true
                     Layout.fillHeight: false
-                    Layout.preferredHeight: 160
-                    Layout.minimumHeight: 150
+                    Layout.preferredHeight: model.variant === "arc180" ? 220 : 160
+                    Layout.minimumHeight: model.variant === "arc180" ? 210 : 150
                     title: model.title
                     value: model.value
                     variant: model.variant
