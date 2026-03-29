@@ -84,13 +84,6 @@ Rectangle {
                 font.pixelSize: 11
                 font.bold: true
             }
-
-            Label {
-                text: "⋯"
-                color: "#94A3B8"
-                font.pixelSize: 18
-                font.bold: true
-            }
         }
 
         Text {
@@ -111,16 +104,57 @@ Rectangle {
 
     }
 
-    MetricVariantDialog {
+    Dialog {
         id: variantDialog
-        selectedMode: card.variantOverride
-        onModeSelected: function(mode) { card.variantOverrideSelected(mode) }
+        modal: true
+        focus: true
+        parent: Overlay.overlay
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        width: Math.min(parent.width - 32, 260)
+        padding: 16
+        title: "Режим"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        property string tempMode: ""
+        readonly property var variantOptions: [
+            { label: "Default", value: "" },
+            { label: "Segments", value: "segments" },
+            { label: "Ring", value: "ring" },
+            { label: "Linear", value: "linear" },
+            { label: "Arc 180°", value: "arc180" }
+        ]
+
+        function indexForMode(mode) {
+            for (let i = 0; i < variantOptions.length; ++i) {
+                if (variantOptions[i].value === mode)
+                    return i
+            }
+            return 0
+        }
+
+        onOpened: {
+            tempMode = card.variantOverride
+            modeCombo.currentIndex = indexForMode(tempMode)
+        }
+
+        onAccepted: {
+            const selected = variantOptions[modeCombo.currentIndex]
+            card.variantOverrideSelected(selected ? selected.value : "")
+        }
+
+        contentItem: ComboBox {
+            id: modeCombo
+            model: variantDialog.variantOptions
+            textRole: "label"
+            width: parent.width
+        }
     }
 
     TapHandler {
         acceptedButtons: Qt.RightButton
         onTapped: {
-            variantDialog.selectedMode = card.variantOverride
+            variantDialog.tempMode = card.variantOverride
             variantDialog.open()
         }
     }
@@ -129,7 +163,7 @@ Rectangle {
         acceptedButtons: Qt.LeftButton
         gesturePolicy: TapHandler.WithinBounds
         onLongPressed: {
-            variantDialog.selectedMode = card.variantOverride
+            variantDialog.tempMode = card.variantOverride
             variantDialog.open()
         }
     }

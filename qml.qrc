@@ -9,7 +9,6 @@
         <file>CustomItem.qml</file>
         <file>PageDevicesInfo.qml</file>
         <file>MetricCard.qml</file>
-        <file>MetricVariantDialog.qml</file>
         <file>DeviceStatusHeader.qml</file>
         <file>DeviceSettingsDialog.qml</file>
         <file>WidgetLayoutDialog.qml</file>
