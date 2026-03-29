@@ -245,7 +245,7 @@ Rectangle {
                 anchors.verticalCenterOffset: 18
                 text: card.safeValue + "%"
                 color: "#F8FAFC"
-                font.pixelSize: 28
+                font.pixelSize: 24
                 font.bold: true
             }
         }
