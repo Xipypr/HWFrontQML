@@ -29,19 +29,7 @@ void Core::onMakeGetRequest(const QString &target)
 
 void Core::onDeviceCreated(DesktopDevice *device)
 {
-    const bool replacingCurrent = (m_device && m_device != device);
-    const bool coreOwnsCurrent = replacingCurrent && (m_device->parent() == this);
-
-    if (coreOwnsCurrent) {
-        // Delete only objects that Core owns via QObject parent-child relation.
-        m_device->deleteLater();
-    }
-
-    if (device && !device->parent()) {
-        // Take ownership when builder returns an orphan object.
-        device->setParent(this);
-    }
-
+    // Core is a non-owning observer by design. Ownership stays outside Core.
     m_device = device;
     emit deviceCreated();
 }

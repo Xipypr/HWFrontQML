@@ -31,7 +31,7 @@ signals:
 private:
     HWConnector * m_connector;
     DeviceBuilder * m_deviceCreator;
-    // Guarded pointer: becomes nullptr automatically if DesktopDevice is deleted elsewhere.
+    // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
     QPointer<DesktopDevice> m_device;
 };
 
