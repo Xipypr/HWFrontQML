@@ -5,9 +5,10 @@
 #include <QDebug>
 
 Core::Core()
-    : m_device(new DesktopDevice(this))
+    : m_device(new DesktopDevice())
 {
 //    qDebug() << m_device->name();
+    m_device->setParent(this);
     m_connector = new HWConnector(this);
     m_deviceCreator = new DeviceBuilder(this);
     connect( m_connector, &HWConnector::documentRecieved, m_deviceCreator, &DeviceBuilder::onDocumentRecieved );
