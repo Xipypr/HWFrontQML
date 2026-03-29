@@ -27,13 +27,6 @@ Dialog {
 
     property int selectedTemplateIndex: 0
     property int tempWidgetId: -1
-    readonly property var variantOptions: [
-        { label: "Default", value: "" },
-        { label: "Segments", value: "segments" },
-        { label: "Ring", value: "ring" },
-        { label: "Linear", value: "linear" },
-        { label: "Arc 180°", value: "arc180" }
-    ]
 
     ListModel {
         id: editableModel
@@ -112,7 +105,7 @@ Dialog {
 
             delegate: Rectangle {
                 width: widgetsList.width
-                height: 54
+                height: 48
                 radius: 8
                 color: "#1E293B"
                 border.width: 1
@@ -124,32 +117,10 @@ Dialog {
                     spacing: 8
 
                     Label {
-                        Layout.preferredWidth: 90
+                        Layout.fillWidth: true
                         text: title
                         color: "#E2E8F0"
                         elide: Text.ElideRight
-                    }
-
-                    ComboBox {
-                        id: variantCombo
-                        Layout.fillWidth: true
-                        model: root.variantOptions
-                        textRole: "label"
-
-                        Component.onCompleted: {
-                            const current = variantOverride !== undefined ? variantOverride : ""
-                            for (let i = 0; i < model.length; ++i) {
-                                if (model[i].value === current) {
-                                    currentIndex = i
-                                    break
-                                }
-                            }
-                        }
-
-                        onActivated: {
-                            const selected = model[currentIndex]
-                            editableModel.setProperty(index, "variantOverride", selected ? selected.value : "")
-                        }
                     }
 
                     ToolButton {

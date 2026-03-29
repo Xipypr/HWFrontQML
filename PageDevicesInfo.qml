@@ -10,6 +10,7 @@ Page {
     property var desktop_device: ({})
     property string destop_name: core.device().name
     property int nextWidgetId: 1
+    property int selectedVariantWidgetIndex: -1
 
     ListModel {
         id: widgetModel
@@ -47,7 +48,32 @@ Page {
         return values
     }
 
+    function variantDialogIndexForMode(mode) {
+        for (let i = 0; i < variantDialogOptions.length; ++i) {
+            if (variantDialogOptions[i].value === mode)
+                return i
+        }
+        return 0
+    }
+
+    function openVariantDialogForIndex(widgetIndex) {
+        if (widgetIndex < 0 || widgetIndex >= widgetModel.count)
+            return
+        selectedVariantWidgetIndex = widgetIndex
+        const overrideValue = widgetModel.get(widgetIndex).variantOverride
+        variantDialogCombo.currentIndex = variantDialogIndexForMode(overrideValue !== undefined ? overrideValue : "")
+        variantDialog.open()
+    }
+
     Component.onCompleted: resetDefaultWidgets()
+
+    readonly property var variantDialogOptions: [
+        { label: "Default", value: "" },
+        { label: "Segments", value: "segments" },
+        { label: "Ring", value: "ring" },
+        { label: "Linear", value: "linear" },
+        { label: "Arc 180°", value: "arc180" }
+    ]
 
     header: DeviceStatusHeader {
         width: root.width
@@ -90,6 +116,33 @@ Page {
         }
     }
 
+    Dialog {
+        id: variantDialog
+        modal: true
+        focus: true
+        parent: Overlay.overlay
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        width: Math.min(parent.width - 32, 280)
+        padding: 16
+        title: "Режим отображения"
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        onAccepted: {
+            if (selectedVariantWidgetIndex < 0 || selectedVariantWidgetIndex >= widgetModel.count)
+                return
+            const selected = variantDialogOptions[variantDialogCombo.currentIndex]
+            widgetModel.setProperty(selectedVariantWidgetIndex, "variantOverride", selected ? selected.value : "")
+        }
+
+        contentItem: ComboBox {
+            id: variantDialogCombo
+            model: root.variantDialogOptions
+            textRole: "label"
+            width: parent.width
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16
@@ -114,6 +167,7 @@ Page {
                     value: model.value
                     variant: model.variant
                     variantOverride: model.variantOverride !== undefined ? model.variantOverride : ""
+                    onVariantDialogRequested: root.openVariantDialogForIndex(index)
                 }
             }
         }
