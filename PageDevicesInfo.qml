@@ -9,6 +9,7 @@ Page {
     property var objectsArray: []
     property var desktop_device: ({})
     property string destop_name: core.device().name
+    property int nextWidgetId: 1
 
     ListModel {
         id: widgetModel
@@ -16,9 +17,9 @@ Page {
 
     function resetDefaultWidgets() {
         widgetModel.clear()
-        widgetModel.append({ key: "cpu", title: "CPU", value: 45, variant: "segments" })
-        widgetModel.append({ key: "ram", title: "RAM", value: 76, variant: "ring" })
-        widgetModel.append({ key: "gpu", title: "GPU", value: 68, variant: "linear" })
+        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "segments" })
+        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "ring" })
+        widgetModel.append({ uid: nextWidgetId++, key: "gpu", title: "GPU", value: 68, variant: "linear" })
     }
 
     function findWidgetIndex(widgetKey) {
@@ -37,11 +38,11 @@ Page {
         }
     }
 
-    function currentValuesByKey() {
+    function currentValuesById() {
         const values = ({})
         for (let i = 0; i < widgetModel.count; ++i) {
             const item = widgetModel.get(i)
-            values[item.key] = item.value
+            values[item.uid] = item.value
         }
         return values
     }
@@ -72,14 +73,16 @@ Page {
         widgetsModel: widgetModel
 
         onApplyLayout: function(widgets) {
-            const latestValues = currentValuesByKey()
+            const latestValues = currentValuesById()
             widgetModel.clear()
             for (let i = 0; i < widgets.length; ++i) {
                 const item = widgets[i]
+                const uid = item.uid !== undefined ? item.uid : nextWidgetId++
                 widgetModel.append({
+                    uid: uid,
                     key: item.key,
                     title: item.title,
-                    value: latestValues[item.key] !== undefined ? latestValues[item.key] : item.value,
+                    value: latestValues[uid] !== undefined ? latestValues[uid] : item.value,
                     variant: item.variant
                 })
             }

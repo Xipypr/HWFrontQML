@@ -25,12 +25,14 @@ Dialog {
     ]
 
     property int selectedTemplateIndex: 0
+    property int tempWidgetId: -1
 
     ListModel {
         id: editableModel
     }
 
     function syncFromSource() {
+        tempWidgetId = -1
         editableModel.clear()
         if (!root.widgetsModel)
             return
@@ -38,6 +40,7 @@ Dialog {
         for (let i = 0; i < root.widgetsModel.count; ++i) {
             const item = root.widgetsModel.get(i)
             editableModel.append({
+                uid: item.uid,
                 key: item.key,
                 title: item.title,
                 value: item.value,
@@ -69,6 +72,11 @@ Dialog {
             }
         }
         return "Новый виджет " + (maxNumber + 1)
+    }
+
+    function nextTempWidgetUid() {
+        tempWidgetId -= 1
+        return tempWidgetId
     }
 
     onOpened: syncFromSource()
@@ -152,7 +160,13 @@ Dialog {
                     let title = item.title
                     if (item.key === "custom")
                         title = root.nextCustomWidgetTitle()
-                    editableModel.append({ key: item.key, title: title, value: 0, variant: item.variant })
+                    editableModel.append({
+                        uid: root.nextTempWidgetUid(),
+                        key: item.key,
+                        title: title,
+                        value: 0,
+                        variant: item.variant
+                    })
                 }
             }
         }
