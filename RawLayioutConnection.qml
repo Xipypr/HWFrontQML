@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.0
+import SessionData 1.0
 
 Item {
     id: root
@@ -11,8 +12,8 @@ Item {
 
     readonly property var currentSession: core.session
     readonly property int currentSessionState: core.sessionState
-    readonly property bool isConnected: currentSessionState === core.connected
-    readonly property bool isConnecting: currentSessionState === core.connecting
+    readonly property bool isConnected: currentSessionState === SessionState.connected
+    readonly property bool isConnecting: currentSessionState === SessionState.connecting
 
     implicitHeight: contentLayout.implicitHeight + 20
 
@@ -51,7 +52,7 @@ Item {
                 Layout.preferredWidth: 240
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
                 connected: root.isConnected
-                deviceName: root.currentSession.displayName || ""
+                deviceName: root.currentSession.displayName
             }
 
             Button{
@@ -125,7 +126,7 @@ Item {
             target: core
 
             function onSessionStateChanged(state) {
-                if (state !== core.connected)
+                if (state !== SessionState.connected)
                     return
 
                 if (!awaitingDeviceCreation)

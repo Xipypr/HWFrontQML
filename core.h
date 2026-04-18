@@ -1,8 +1,9 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "hwconnector.h"
 #include "devicebuilder.h"
+#include "hwconnector.h"
+#include "session.h"
 
 #include <QObject>
 #include <QPointer>
@@ -15,35 +16,6 @@ class Core : public QObject
     Q_PROPERTY(SessionState sessionState READ sessionState NOTIFY sessionStateChanged)
 
 public:
-    enum class SessionState {
-        idle,
-        connecting,
-        connected,
-        error,
-        disconnected
-    };
-    Q_ENUM(SessionState)
-
-    struct Session
-    {
-        Q_GADGET
-
-        Q_PROPERTY(QString sessionId MEMBER sessionId)
-        Q_PROPERTY(QString target MEMBER target)
-        Q_PROPERTY(QString displayName MEMBER displayName)
-        Q_PROPERTY(Core::SessionState state MEMBER state)
-        Q_PROPERTY(QString lastError MEMBER lastError)
-        Q_PROPERTY(QString createdAt MEMBER createdAt)
-
-    public:
-        QString sessionId;
-        QString target;
-        QString displayName;
-        SessionState state = SessionState::idle;
-        QString lastError;
-        QString createdAt;
-    };
-
     explicit Core();
     ~Core();
 
@@ -74,6 +46,7 @@ signals:
 private:
     QVariantMap sessionToMap() const;
     void setSessionState(SessionState newState, const QString &errorText = QString());
+    void updateSessionDisplayName();
 
 private:
     HWConnector * m_connector;
@@ -82,8 +55,5 @@ private:
     QPointer<DesktopDevice> m_device;
     Session m_session;
 };
-
-Q_DECLARE_METATYPE(Core::SessionState)
-Q_DECLARE_METATYPE(Core::Session)
 
 #endif // CORE_H

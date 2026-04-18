@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Window 2.12
 import QtQuick.Layouts 1.3
+import SessionData 1.0
 
 ApplicationWindow {
     width: 640
@@ -27,11 +28,11 @@ ApplicationWindow {
         target: core
 
         function onSessionStateChanged(state) {
-            if (state === core.connected && allowDevicePageActivation) {
+            if (state === SessionState.connected && allowDevicePageActivation) {
                 devicePageVisible = true
             }
 
-            if (state !== core.connected) {
+            if (state !== SessionState.connected) {
                 devicePageVisible = false
             }
         }
