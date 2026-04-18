@@ -8,7 +8,7 @@ Page {
 
     property var objectsArray: []
     property var desktop_device: ({})
-    property string destop_name: core.device().name
+    property string destop_name: (core.session.displayName || "")
     property int nextWidgetId: 1
 
     ListModel {
@@ -154,7 +154,7 @@ Page {
                 desktop_device = core.device();
                 if (desktop_device.type === Device.DESKTOP)
                 {
-                    destop_name = desktop_device.name;
+                    destop_name = core.session.displayName || desktop_device.name;
                     objectsArray = desktop_device.devicesList();
                     parseDevices();
                 }

@@ -5,11 +5,14 @@ import QtQuick.Layouts 1.0
 Item {
     id: root
 
-    property int connectionInitialized: 0
     property int horizontalMargin: 10
     property bool compactMode: width < 560
-    property string connectedDeviceName: ""
     property bool awaitingDeviceCreation: false
+
+    readonly property var currentSession: core.session
+    readonly property int currentSessionState: core.sessionState
+    readonly property bool isConnected: currentSessionState === core.connected
+    readonly property bool isConnecting: currentSessionState === core.connecting
 
     implicitHeight: contentLayout.implicitHeight + 20
 
@@ -47,20 +50,20 @@ Item {
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: 240
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
-                connected: root.connectionInitialized === 1
-                deviceName: root.connectedDeviceName
+                connected: root.isConnected
+                deviceName: root.currentSession.displayName || ""
             }
 
             Button{
                 id: connectButton
-                text: "Connect Device"
+                text: root.isConnecting ? "Stop" : (root.isConnected ? "Reconnect" : "Connect Device")
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width) + leftPadding + rightPadding
-                enabled: hostInfo.acceptableInput || connectingIndicator.running
+                enabled: hostInfo.acceptableInput || root.isConnecting
                 onClicked: clickConnectButton()
 
                 function clickConnectButton(){
-                    if (connectingIndicator.running)
+                    if (root.isConnecting)
                     {
                         stopSendingRequests()
                     }
@@ -74,15 +77,12 @@ Item {
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
                     core.onMakeGetRequest(hostInfo.inputText)
-                    connectButton.text = "Stop"
-                    connectingIndicator.running = true
                 }
 
                 function stopSendingRequests(){
                     awaitingDeviceCreation = false
                     root.connectionStateChanged(false)
-                    connectButton.text = "Connect Device"
-                    connectingIndicator.running = false
+                    core.disconnectSession()
                 }
 
             }
@@ -101,7 +101,7 @@ Item {
 
             LinearBusyIndicator {
                 id: connectingIndicator
-                running: false
+                running: root.isConnecting
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: root.compactMode ? 0 : implicitWidth
                 Layout.preferredHeight: implicitHeight
@@ -112,10 +112,9 @@ Item {
                 text: "Delete Device"
                 Layout.fillWidth: root.compactMode
                 onClicked: {
-                    const removeConnectedDevicePage = connectionInitialized === 1
-                    connectionInitialized = 0
+                    const removeConnectedDevicePage = root.isConnected
                     awaitingDeviceCreation = false
-                    root.connectedDeviceName = ""
+                    core.disconnectSession()
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
                 }
@@ -125,15 +124,14 @@ Item {
         Connections{
             target: core
 
-            function onDeviceCreated() {
+            function onSessionStateChanged(state) {
+                if (state !== core.connected)
+                    return
+
                 if (!awaitingDeviceCreation)
                     return
 
                 awaitingDeviceCreation = false
-                connectingIndicator.running = false
-                connectButton.text = "Reconnect"
-                connectionInitialized = 1
-                root.connectedDeviceName = core.device().name
             }
         }
     }

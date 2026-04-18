@@ -26,9 +26,13 @@ ApplicationWindow {
     Connections{
         target: core
 
-        function onDeviceCreated() {
-            if (allowDevicePageActivation) {
+        function onSessionStateChanged(state) {
+            if (state === core.connected && allowDevicePageActivation) {
                 devicePageVisible = true
+            }
+
+            if (state !== core.connected) {
+                devicePageVisible = false
             }
         }
     }
