@@ -14,8 +14,6 @@
 | `target` | `string \| object` | Цель подключения (IP/host/device descriptor). |
 | `displayName` | `string` | Имя сессии для отображения в UI. |
 | `state` | `SessionState` | Текущее состояние сессии. |
-| `lastError` | `string \| null` | Текст последней ошибки для этой сессии. |
-| `createdAt` | `string` (`ISO-8601`) | Время создания сессии. |
 
 ### SessionState
 

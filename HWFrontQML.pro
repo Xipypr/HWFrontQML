@@ -57,7 +57,9 @@ INCLUDEPATH += $$PWD/../DeviceBuilder/src
 DEPENDPATH += $$PWD/../DeviceBuilder/src
 
 HEADERS += \
-    core.h
+    core.h \
+    session.h \
+    sessionstate.h
 
 DISTFILES += \
     android/AndroidManifest.xml \
