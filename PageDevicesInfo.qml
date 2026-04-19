@@ -154,6 +154,7 @@ Page {
                 desktop_device = core.device();
                 if (desktop_device.type === Device.DESKTOP)
                 {
+                    destop_name = desktop_device.name;
                     objectsArray = desktop_device.devicesList();
                     parseDevices();
                 }
