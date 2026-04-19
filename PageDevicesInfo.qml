@@ -8,7 +8,7 @@ Page {
 
     property var objectsArray: []
     property var desktop_device: ({})
-    property string destop_name: core.session.displayName
+    property string destop_name: core.device().name
     property int nextWidgetId: 1
 
     ListModel {

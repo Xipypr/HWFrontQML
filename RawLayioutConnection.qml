@@ -1,19 +1,15 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.0
-import SessionData 1.0
 
 Item {
     id: root
 
+    property int connectionInitialized: 0
     property int horizontalMargin: 10
     property bool compactMode: width < 560
+    property string connectedDeviceName: ""
     property bool awaitingDeviceCreation: false
-
-    readonly property var currentSession: core.session
-    readonly property int currentSessionState: core.sessionState
-    readonly property bool isConnected: currentSessionState === SessionState.connected
-    readonly property bool isConnecting: currentSessionState === SessionState.connecting
 
     implicitHeight: contentLayout.implicitHeight + 20
 
@@ -51,20 +47,20 @@ Item {
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: 240
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
-                connected: root.isConnected
-                deviceName: root.currentSession.displayName
+                connected: root.connectionInitialized === 1
+                deviceName: root.connectedDeviceName
             }
 
             Button{
                 id: connectButton
-                text: root.isConnecting ? "Stop" : (root.isConnected ? "Reconnect" : "Connect Device")
+                text: "Connect Device"
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width) + leftPadding + rightPadding
-                enabled: hostInfo.acceptableInput || root.isConnecting
+                enabled: hostInfo.acceptableInput || connectingIndicator.running
                 onClicked: clickConnectButton()
 
                 function clickConnectButton(){
-                    if (root.isConnecting)
+                    if (connectingIndicator.running)
                     {
                         stopSendingRequests()
                     }
@@ -78,12 +74,15 @@ Item {
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
                     core.onMakeGetRequest(hostInfo.inputText)
+                    connectButton.text = "Stop"
+                    connectingIndicator.running = true
                 }
 
                 function stopSendingRequests(){
                     awaitingDeviceCreation = false
                     root.connectionStateChanged(false)
-                    core.disconnectSession()
+                    connectButton.text = "Connect Device"
+                    connectingIndicator.running = false
                 }
 
             }
@@ -102,7 +101,7 @@ Item {
 
             LinearBusyIndicator {
                 id: connectingIndicator
-                running: root.isConnecting
+                running: false
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: root.compactMode ? 0 : implicitWidth
                 Layout.preferredHeight: implicitHeight
@@ -113,9 +112,10 @@ Item {
                 text: "Delete Device"
                 Layout.fillWidth: root.compactMode
                 onClicked: {
-                    const removeConnectedDevicePage = root.isConnected
+                    const removeConnectedDevicePage = connectionInitialized === 1
+                    connectionInitialized = 0
                     awaitingDeviceCreation = false
-                    core.disconnectSession()
+                    root.connectedDeviceName = ""
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
                 }
@@ -125,14 +125,15 @@ Item {
         Connections{
             target: core
 
-            function onSessionStateChanged(state) {
-                if (state !== SessionState.connected)
-                    return
-
+            function onDeviceCreated() {
                 if (!awaitingDeviceCreation)
                     return
 
                 awaitingDeviceCreation = false
+                connectingIndicator.running = false
+                connectButton.text = "Reconnect"
+                connectionInitialized = 1
+                root.connectedDeviceName = core.device().name
             }
         }
     }

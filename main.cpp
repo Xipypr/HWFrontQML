@@ -11,7 +11,6 @@
 #include "storages/ram.h"
 
 #include "core.h"
-#include "sessionstate.h"
 
 int main(int argc, char *argv[])
 {
@@ -30,11 +29,6 @@ int main(int argc, char *argv[])
     QQmlContext * context = engine.rootContext();
 
     qmlRegisterUncreatableType<Device>("DeviceData", 1, 0, "Device", "Access to devices Id");
-    qmlRegisterUncreatableMetaObject(SessionStateNs::staticMetaObject,
-                                     "SessionData",
-                                     1, 0,
-                                     "SessionState",
-                                     "SessionState enum is read-only");
 
     context->setContextProperty("core", &core);
     context->setContextProperty("device", &device);
