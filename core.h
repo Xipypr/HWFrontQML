@@ -45,7 +45,7 @@ signals:
 
 private:
     QVariantMap sessionToMap() const;
-    void setSessionState(SessionState newState, const QString &errorText = QString());
+    void setSessionState(SessionState newState);
     void updateSessionDisplayName();
 
 private:

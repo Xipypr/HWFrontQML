@@ -79,18 +79,15 @@ QVariantMap Core::sessionToMap() const
     map.insert(QStringLiteral("target"), m_session.target);
     map.insert(QStringLiteral("displayName"), m_session.displayName);
     map.insert(QStringLiteral("state"), SessionStateNs::toString(m_session.state));
-    map.insert(QStringLiteral("lastError"), m_session.lastError);
-    map.insert(QStringLiteral("createdAt"), m_session.createdAt);
     return map;
 }
 
-void Core::setSessionState(SessionState newState, const QString &errorText)
+void Core::setSessionState(SessionState newState)
 {
-    if (m_session.state == newState && m_session.lastError == errorText)
+    if (m_session.state == newState)
         return;
 
     m_session.state = newState;
-    m_session.lastError = errorText;
 
     emit sessionStateChanged(m_session.state);
     emit sessionStateChangedById(m_session.sessionId, m_session.state);
