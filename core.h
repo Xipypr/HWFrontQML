@@ -5,6 +5,7 @@
 #include "devicebuilder.h"
 
 #include <QObject>
+#include <QHash>
 #include <QPointer>
 
 class Core : public QObject
@@ -15,24 +16,30 @@ public:
     ~Core();
 
     Q_INVOKABLE QObject *device() const;
+    Q_INVOKABLE QObject *device(const QString &sessionId) const;
 
 public slots:
     void onStartMonitoring();
-    void onMakeGetRequest(const QString & target);
+    void onMakeGetRequest(const QString &sessionId, const QString &target);
+    void onRemoveSession(const QString &sessionId);
 
-    void onDeviceCreated(DesktopDevice * device);
-
+    void onDeviceCreated(DesktopDevice *device);
 
 signals:
-    void deviceCreated();
+    void sessionAdded(const QString &sessionId);
+    void sessionStateChanged(const QString &sessionId, const QString &state);
+    void deviceReady(const QString &sessionId, QObject *deviceRef);
+    void sessionRemoved(const QString &sessionId);
 
     void testSignal();
 
 private:
-    HWConnector * m_connector;
-    DeviceBuilder * m_deviceCreator;
+    HWConnector *m_connector;
+    DeviceBuilder *m_deviceCreator;
     // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
     QPointer<DesktopDevice> m_device;
+    QString m_pendingSessionId;
+    QHash<QString, QPointer<DesktopDevice>> m_devicesBySession;
 };
 
 #endif // CORE_H

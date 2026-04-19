@@ -10,11 +10,13 @@ Item {
     property bool compactMode: width < 560
     property string connectedDeviceName: ""
     property bool awaitingDeviceCreation: false
+    property string sessionId: ""
 
     implicitHeight: contentLayout.implicitHeight + 20
 
     signal removeThisObject(bool removeConnectedDevicePage)
     signal connectionStateChanged(bool allowDevicePageActivation)
+    signal sessionSelected(string sessionId)
 
     ColumnLayout {
         id: contentLayout
@@ -71,9 +73,13 @@ Item {
                 }
 
                 function sendRequest(){
+                    if (!root.sessionId || root.sessionId.length === 0) {
+                        root.sessionId = hostInfo.inputText + "-" + Date.now()
+                    }
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
-                    core.onMakeGetRequest(hostInfo.inputText)
+                    root.sessionSelected(root.sessionId)
+                    core.onMakeGetRequest(root.sessionId, hostInfo.inputText)
                     connectButton.text = "Stop"
                     connectingIndicator.running = true
                 }
@@ -113,9 +119,13 @@ Item {
                 Layout.fillWidth: root.compactMode
                 onClicked: {
                     const removeConnectedDevicePage = connectionInitialized === 1
+                    if (root.sessionId && root.sessionId.length > 0) {
+                        core.onRemoveSession(root.sessionId)
+                    }
                     connectionInitialized = 0
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
+                    root.sessionId = ""
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
                 }
@@ -125,15 +135,16 @@ Item {
         Connections{
             target: core
 
-            function onDeviceCreated() {
-                if (!awaitingDeviceCreation)
+            function onDeviceReady(sessionId, deviceRef) {
+                if (!awaitingDeviceCreation || root.sessionId !== sessionId)
                     return
 
                 awaitingDeviceCreation = false
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
                 connectionInitialized = 1
-                root.connectedDeviceName = core.device().name
+                root.connectedDeviceName = deviceRef.name
+                root.sessionSelected(sessionId)
             }
         }
     }

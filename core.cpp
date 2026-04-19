@@ -3,38 +3,80 @@
 #include "storages/desktopdevice.h"
 
 #include <QDebug>
+#include <utility>
 
 Core::Core()
 {
     m_connector = new HWConnector(this);
     m_deviceCreator = new DeviceBuilder(this);
-    connect( m_connector, &HWConnector::documentRecieved, m_deviceCreator, &DeviceBuilder::onDocumentRecieved );
-    connect( m_deviceCreator, &DeviceBuilder::desktopCreated, this, &Core::onDeviceCreated );
+    connect(m_connector, &HWConnector::documentRecieved, m_deviceCreator, &DeviceBuilder::onDocumentRecieved);
+    connect(m_deviceCreator, &DeviceBuilder::desktopCreated, this, &Core::onDeviceCreated);
 }
 
 Core::~Core()
 {
-
 }
 
 void Core::onStartMonitoring()
 {
-
 }
 
-void Core::onMakeGetRequest(const QString &target)
+void Core::onMakeGetRequest(const QString &sessionId, const QString &target)
 {
+    m_pendingSessionId = sessionId;
+    emit sessionAdded(sessionId);
+    emit sessionStateChanged(sessionId, QStringLiteral("connecting"));
     m_connector->makeGetRequest(target);
+}
+
+void Core::onRemoveSession(const QString &sessionId)
+{
+    if (m_pendingSessionId == sessionId) {
+        m_pendingSessionId.clear();
+    }
+
+    m_devicesBySession.remove(sessionId);
+
+    if (!m_device.isNull()) {
+        const QString activeSession = m_devicesBySession.key(m_device, QString());
+        if (activeSession == sessionId) {
+            m_device.clear();
+        }
+    }
+
+    emit sessionStateChanged(sessionId, QStringLiteral("disconnected"));
+    emit sessionRemoved(sessionId);
 }
 
 void Core::onDeviceCreated(DesktopDevice *device)
 {
     // Core is a non-owning observer by design. Ownership stays outside Core.
     m_device = device;
-    emit deviceCreated();
+
+    const QString sessionId = m_pendingSessionId;
+    if (sessionId.isEmpty()) {
+        qWarning() << "Desktop device was created without pending session id";
+        return;
+    }
+
+    m_devicesBySession.insert(sessionId, device);
+    emit sessionStateChanged(sessionId, QStringLiteral("connected"));
+    emit deviceReady(sessionId, device);
+
+    m_pendingSessionId.clear();
 }
 
 QObject *Core::device() const
 {
     return m_device;
+}
+
+QObject *Core::device(const QString &sessionId) const
+{
+    const auto it = m_devicesBySession.constFind(sessionId);
+    if (it == m_devicesBySession.cend()) {
+        return nullptr;
+    }
+
+    return it.value();
 }

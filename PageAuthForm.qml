@@ -6,6 +6,7 @@ Page {
     signal connectedDeviceDeleted()
     signal connectionStateChanged(bool allowDevicePageActivation)
     signal settingsRequested()
+    signal sessionSelected(string sessionId)
 
     header: DeviceStatusHeader {
         width: root.width
@@ -35,6 +36,7 @@ Page {
                 height: implicitHeight
                 onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
                 onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
+                onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
             }
 
             // Сама модель, в которой будут содержаться все элементы

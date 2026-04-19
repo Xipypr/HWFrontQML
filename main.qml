@@ -11,23 +11,20 @@ ApplicationWindow {
     id: root
     property bool devicePageVisible: false
     property bool allowDevicePageActivation: false
+    property string activeSessionId: ""
 
     Loader {
             id: pagesLoader
 
             anchors.fill: parent
             asynchronous: true
-//            source: "Background_1.qml"
-
-//            onStatusChanged: console.log("status", status,  "item", item)
-//            onLoaded: item.color = "green"
         }
 
     Connections{
         target: core
 
-        function onDeviceCreated() {
-            if (allowDevicePageActivation) {
+        function onDeviceReady(sessionId, deviceRef) {
+            if (allowDevicePageActivation && activeSessionId === sessionId) {
                 devicePageVisible = true
             }
         }
@@ -52,6 +49,10 @@ ApplicationWindow {
                     devicePageVisible = false
                 }
             }
+
+            onSessionSelected: (sessionId) => {
+                activeSessionId = sessionId
+            }
         }
 
         Loader {
@@ -59,6 +60,16 @@ ApplicationWindow {
             active: devicePageVisible
             source: "PageDevicesInfo.qml"
             visible: devicePageVisible
+            onLoaded: {
+                if (item)
+                    item.sessionId = root.activeSessionId
+            }
+        }
+    }
+
+    onActiveSessionIdChanged: {
+        if (pageDeviceInfoLoader.item) {
+            pageDeviceInfoLoader.item.sessionId = activeSessionId
         }
     }
 
