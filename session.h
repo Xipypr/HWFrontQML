@@ -5,6 +5,7 @@
 
 #include <QMetaType>
 #include <QObject>
+#include <QUuid>
 
 struct Session
 {
@@ -16,6 +17,11 @@ struct Session
     Q_PROPERTY(SessionState state MEMBER state)
 
 public:
+    Session()
+        : sessionId(QUuid::createUuid().toString(QUuid::WithoutBraces))
+    {
+    }
+
     QString sessionId;
     QString target;
     QString displayName;
