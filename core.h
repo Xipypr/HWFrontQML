@@ -3,6 +3,7 @@
 
 #include "hwconnector.h"
 #include "devicebuilder.h"
+#include "session.h"
 
 #include <QObject>
 #include <QPointer>
@@ -35,8 +36,7 @@ private:
     DeviceBuilder *m_deviceCreator;
     // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
     QPointer<DesktopDevice> m_device;
-    QString m_pendingSessionId;
-    QString m_activeSessionId;
+    Session m_session;
 };
 
 #endif // CORE_H
