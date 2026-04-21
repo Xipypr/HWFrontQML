@@ -35,6 +35,16 @@ public:
     }
 };
 
+inline bool operator<(const Session &lhs, const Session &rhs)
+{
+    return lhs.sessionId < rhs.sessionId;
+}
+
+inline bool operator==(const Session &lhs, const Session &rhs)
+{
+    return lhs.sessionId == rhs.sessionId;
+}
+
 Q_DECLARE_METATYPE(Session)
 
 #endif // SESSION_H

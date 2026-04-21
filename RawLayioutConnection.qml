@@ -75,7 +75,7 @@ Item {
                 function sendRequest(){
                     let createdNewSession = false
                     if (!root.sessionId || root.sessionId.length === 0) {
-                        root.sessionId = sessionManager.createSession(hostInfo.inputText, hostInfo.inputText)
+                        root.sessionId = sessionManager.createSession(hostInfo.inputText)
                         createdNewSession = true
                     }
                     awaitingDeviceCreation = true

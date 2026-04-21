@@ -4,7 +4,7 @@
 #include "core.h"
 #include "session.h"
 
-#include <QHash>
+#include <QMap>
 #include <QObject>
 #include <QStringList>
 
@@ -17,7 +17,7 @@ public:
     explicit SessionManager(QObject *parent = nullptr);
     ~SessionManager() override;
 
-    Q_INVOKABLE QString createSession(const QString &target, const QString &displayName = QString());
+    Q_INVOKABLE QString createSession(const QString &target);
     Q_INVOKABLE void removeSession(const QString &sessionId);
     Q_INVOKABLE QObject *coreForSession(const QString &sessionId) const;
     Q_INVOKABLE QStringList sessionIds() const;
@@ -30,12 +30,7 @@ signals:
     void deviceReady(const QString &sessionId, QObject *deviceRef);
 
 private:
-    struct SessionEntry {
-        Session session;
-        Core *core = nullptr;
-    };
-
-    QHash<QString, SessionEntry> m_sessions;
+    QMap<Session, Core *> m_sessions;
 };
 
 #endif // SESSIONMANAGER_H
