@@ -21,7 +21,7 @@ ApplicationWindow {
         }
 
     Connections{
-        target: core
+        target: sessionManager
 
         function onDeviceReady(sessionId, deviceRef) {
             if (allowDevicePageActivation && activeSessionId === sessionId) {

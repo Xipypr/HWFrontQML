@@ -67,6 +67,13 @@ QString Core::sessionId() const
     return m_session.sessionId;
 }
 
+void Core::configureSession(const QString &sessionId, const QString &target, const QString &displayName)
+{
+    m_session.sessionId = sessionId;
+    m_session.target = target;
+    m_session.displayName = displayName;
+}
+
 bool Core::isValidTransition(SessionState from, SessionState to) const
 {
     switch (from) {

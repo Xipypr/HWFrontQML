@@ -17,6 +17,7 @@ public:
 
     Q_INVOKABLE QObject *device() const;
     Q_INVOKABLE QString sessionId() const;
+    void configureSession(const QString &sessionId, const QString &target, const QString &displayName = QString());
 public slots:
     void onStartMonitoring();
     void onMakeGetRequest(const QString &target);

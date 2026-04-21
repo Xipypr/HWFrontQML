@@ -10,7 +10,7 @@
 #include "hwconnector.h"
 #include "storages/ram.h"
 
-#include "core.h"
+#include "sessionmanager.h"
 
 int main(int argc, char *argv[])
 {
@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 
     QGuiApplication app(argc, argv);
 
-    Core core;
+    SessionManager sessionManager;
     Device device;
     DesktopDevice desktopDevice;
     Ram ram;
@@ -30,7 +30,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterUncreatableType<Device>("DeviceData", 1, 0, "Device", "Access to devices Id");
 
-    context->setContextProperty("core", &core);
+    context->setContextProperty("sessionManager", &sessionManager);
     context->setContextProperty("device", &device);
     context->setContextProperty("desktopDevice", &desktopDevice);
 
