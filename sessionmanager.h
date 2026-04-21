@@ -30,7 +30,12 @@ signals:
     void deviceReady(const QString &sessionId, QObject *deviceRef);
 
 private:
-    QMap<Session, Core *> m_sessions;
+    struct SessionEntry {
+        Session session;
+        Core *core = nullptr;
+    };
+
+    QMap<QString, SessionEntry> m_sessions;
 };
 
 #endif // SESSIONMANAGER_H
