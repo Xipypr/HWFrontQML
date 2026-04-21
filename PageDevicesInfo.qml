@@ -8,7 +8,8 @@ Page {
 
     property var objectsArray: []
     property var desktop_device: ({})
-    property string destop_name: core.device().name
+    property string sessionId: ""
+    property string destop_name: ""
     property int nextWidgetId: 1
 
     ListModel {
@@ -150,13 +151,16 @@ Page {
         Connections {
             target: core
 
-            function onDeviceCreated() {
-                desktop_device = core.device();
+            function onDeviceReady(sessionId, deviceRef) {
+                if (!root.sessionId || root.sessionId !== sessionId)
+                    return
+
+                desktop_device = deviceRef
                 if (desktop_device.type === Device.DESKTOP)
                 {
-                    destop_name = desktop_device.name;
-                    objectsArray = desktop_device.devicesList();
-                    parseDevices();
+                    destop_name = desktop_device.name
+                    objectsArray = desktop_device.devicesList()
+                    parseDevices()
                 }
             }
 
@@ -164,24 +168,24 @@ Page {
                 for (let i = 0; i < objectsArray.length; ++i) {
                     switch (objectsArray[i].type) {
                     case Device.MOTHERBOARD:
-                        parseMotherBoard(i);
-                        break;
+                        parseMotherBoard(i)
+                        break
 
                     case Device.PROCESSOR:
-                        parseProc(i);
-                        break;
+                        parseProc(i)
+                        break
 
                     case Device.MEMORY:
-                        parseMemory(i);
-                        break;
+                        parseMemory(i)
+                        break
 
                     case Device.VIDEO_CARD:
-                        parseVideocard(i);
-                        break;
+                        parseVideocard(i)
+                        break
 
                     case Device.HARD_DISK:
-                        parseHdd(i);
-                        break;
+                        parseHdd(i)
+                        break
                     }
                 }
             }
