@@ -24,7 +24,6 @@ void Core::onMakeGetRequest(const QString &sessionId, const QString &target)
 {
     m_sessionId = sessionId;
 
-    emit sessionAdded(m_sessionId);
     emit sessionStateChanged(m_sessionId, QStringLiteral("connecting"));
     m_connector->makeGetRequest(target);
 }

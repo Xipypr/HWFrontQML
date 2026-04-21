@@ -21,10 +21,8 @@ public slots:
     void onDeviceCreated(DesktopDevice *device);
 
 signals:
-    void sessionAdded(const QString &sessionId);
     void sessionStateChanged(const QString &sessionId, const QString &state);
     void deviceReady(const QString &sessionId, QObject *deviceRef);
-    void sessionRemoved(const QString &sessionId);
 
     void testSignal();
 
