@@ -119,9 +119,6 @@ Item {
                 Layout.fillWidth: root.compactMode
                 onClicked: {
                     const removeConnectedDevicePage = connectionInitialized === 1
-                    if (root.sessionId && root.sessionId.length > 0) {
-                        core.onRemoveSession(root.sessionId)
-                    }
                     connectionInitialized = 0
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""

@@ -22,26 +22,11 @@ void Core::onStartMonitoring()
 
 void Core::onMakeGetRequest(const QString &sessionId, const QString &target)
 {
-    m_session.sessionId = sessionId;
-    m_session.target = target;
+    m_sessionId = sessionId;
 
-    emit sessionAdded(m_session.sessionId);
-    emit sessionStateChanged(m_session.sessionId, QStringLiteral("connecting"));
+    emit sessionAdded(m_sessionId);
+    emit sessionStateChanged(m_sessionId, QStringLiteral("connecting"));
     m_connector->makeGetRequest(target);
-}
-
-void Core::onRemoveSession(const QString &sessionId)
-{
-    if (m_session.sessionId != sessionId) {
-        return;
-    }
-
-    m_device.clear();
-
-    emit sessionStateChanged(m_session.sessionId, QStringLiteral("disconnected"));
-    emit sessionRemoved(m_session.sessionId);
-
-    m_session = Session();
 }
 
 void Core::onDeviceCreated(DesktopDevice *device)
@@ -49,13 +34,13 @@ void Core::onDeviceCreated(DesktopDevice *device)
     // Core is a non-owning observer by design. Ownership stays outside Core.
     m_device = device;
 
-    if (m_session.sessionId.isEmpty()) {
+    if (m_sessionId.isEmpty()) {
         qWarning() << "Desktop device was created without session id";
         return;
     }
 
-    emit sessionStateChanged(m_session.sessionId, QStringLiteral("connected"));
-    emit deviceReady(m_session.sessionId, device);
+    emit sessionStateChanged(m_sessionId, QStringLiteral("connected"));
+    emit deviceReady(m_sessionId, device);
 }
 
 QObject *Core::device() const

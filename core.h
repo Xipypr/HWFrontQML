@@ -3,7 +3,6 @@
 
 #include "hwconnector.h"
 #include "devicebuilder.h"
-#include "session.h"
 
 #include <QObject>
 #include <QPointer>
@@ -19,8 +18,6 @@ public:
 public slots:
     void onStartMonitoring();
     void onMakeGetRequest(const QString &sessionId, const QString &target);
-    void onRemoveSession(const QString &sessionId);
-
     void onDeviceCreated(DesktopDevice *device);
 
 signals:
@@ -36,7 +33,7 @@ private:
     DeviceBuilder *m_deviceCreator;
     // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
     QPointer<DesktopDevice> m_device;
-    Session m_session;
+    QString m_sessionId;
 };
 
 #endif // CORE_H
