@@ -5,7 +5,6 @@
 #include "devicebuilder.h"
 
 #include <QObject>
-#include <QHash>
 #include <QPointer>
 
 class Core : public QObject
@@ -16,8 +15,6 @@ public:
     ~Core();
 
     Q_INVOKABLE QObject *device() const;
-    Q_INVOKABLE QObject *device(const QString &sessionId) const;
-
 public slots:
     void onStartMonitoring();
     void onMakeGetRequest(const QString &sessionId, const QString &target);
@@ -39,7 +36,7 @@ private:
     // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
     QPointer<DesktopDevice> m_device;
     QString m_pendingSessionId;
-    QHash<QString, QPointer<DesktopDevice>> m_devicesBySession;
+    QString m_activeSessionId;
 };
 
 #endif // CORE_H

@@ -3,7 +3,6 @@
 #include "storages/desktopdevice.h"
 
 #include <QDebug>
-#include <utility>
 
 Core::Core()
 {
@@ -35,13 +34,9 @@ void Core::onRemoveSession(const QString &sessionId)
         m_pendingSessionId.clear();
     }
 
-    m_devicesBySession.remove(sessionId);
-
-    if (!m_device.isNull()) {
-        const QString activeSession = m_devicesBySession.key(m_device, QString());
-        if (activeSession == sessionId) {
-            m_device.clear();
-        }
+    if (m_activeSessionId == sessionId) {
+        m_activeSessionId.clear();
+        m_device.clear();
     }
 
     emit sessionStateChanged(sessionId, QStringLiteral("disconnected"));
@@ -59,7 +54,7 @@ void Core::onDeviceCreated(DesktopDevice *device)
         return;
     }
 
-    m_devicesBySession.insert(sessionId, device);
+    m_activeSessionId = sessionId;
     emit sessionStateChanged(sessionId, QStringLiteral("connected"));
     emit deviceReady(sessionId, device);
 
@@ -69,14 +64,4 @@ void Core::onDeviceCreated(DesktopDevice *device)
 QObject *Core::device() const
 {
     return m_device;
-}
-
-QObject *Core::device(const QString &sessionId) const
-{
-    const auto it = m_devicesBySession.constFind(sessionId);
-    if (it == m_devicesBySession.cend()) {
-        return nullptr;
-    }
-
-    return it.value();
 }
