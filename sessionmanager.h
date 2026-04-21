@@ -32,12 +32,7 @@ signals:
     void deviceReady(const QString &sessionId, QObject *deviceRef);
 
 private:
-    struct SessionEntry {
-        Session session;
-        Core *core = nullptr;
-    };
-
-    QHash<QString, SessionEntry> m_sessions;
+    QHash<Session, Core *> m_sessions;
     QMultiHash<QString, QString> m_sessionIdsByName;
 };
 

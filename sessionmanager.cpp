@@ -9,13 +9,13 @@ SessionManager::SessionManager(QObject *parent)
 
 SessionManager::~SessionManager()
 {
-    const QList<SessionEntry> sessions = m_sessions.values();
+    const QList<Core *> cores = m_sessions.values();
     m_sessions.clear();
     m_sessionIdsByName.clear();
 
-    for (const SessionEntry &entry : sessions) {
-        if (entry.core) {
-            entry.core->deleteLater();
+    for (Core *core : cores) {
+        if (core) {
+            core->deleteLater();
         }
     }
 }
@@ -26,7 +26,7 @@ QString SessionManager::createSession(const QString &target)
     session.target = target;
     session.displayName = target;
 
-    if (m_sessions.contains(session.sessionId)) {
+    if (m_sessions.contains(session)) {
         qWarning().noquote() << QStringLiteral("Refusing to create duplicated session id: %1").arg(session.sessionId);
         return QString();
     }
@@ -41,18 +41,22 @@ QString SessionManager::createSession(const QString &target)
     });
 
     connect(core, &QObject::destroyed, this, [this, sessionId = session.sessionId]() {
-        const SessionEntry removedEntry = m_sessions.take(sessionId);
-        if (!removedEntry.session.sessionId.isEmpty()) {
-            m_sessionIdsByName.remove(removedEntry.session.displayName, sessionId);
-            emit sessionRemoved(sessionId);
-            emit sessionIdsChanged();
+        Session lookup;
+        lookup.sessionId = sessionId;
+
+        auto it = m_sessions.find(lookup);
+        if (it == m_sessions.end()) {
+            return;
         }
+
+        const QString displayName = it.key().displayName;
+        m_sessions.erase(it);
+        m_sessionIdsByName.remove(displayName, sessionId);
+        emit sessionRemoved(sessionId);
+        emit sessionIdsChanged();
     });
 
-    SessionEntry entry;
-    entry.session = session;
-    entry.core = core;
-    m_sessions.insert(session.sessionId, entry);
+    m_sessions.insert(session, core);
     m_sessionIdsByName.insert(session.displayName, session.sessionId);
 
     emit sessionCreated(session.sessionId);
@@ -69,22 +73,37 @@ void SessionManager::removeSession(const QString &sessionId)
         return;
     }
 
-    const SessionEntry entry = m_sessions.take(sessionId);
-    if (!entry.core) {
+    Session lookup;
+    lookup.sessionId = sessionId;
+
+    auto it = m_sessions.find(lookup);
+    if (it == m_sessions.end()) {
         qInfo().noquote() << QStringLiteral("Skipping removeSession: session '%1' was already removed").arg(sessionId);
         return;
     }
 
-    m_sessionIdsByName.remove(entry.session.displayName, sessionId);
-    disconnect(entry.core, nullptr, this, nullptr);
+    const QString displayName = it.key().displayName;
+    Core *core = it.value();
+    m_sessions.erase(it);
+    m_sessionIdsByName.remove(displayName, sessionId);
+
+    if (!core) {
+        qInfo().noquote() << QStringLiteral("Skipping removeSession: session '%1' was already removed").arg(sessionId);
+        return;
+    }
+
+    disconnect(core, nullptr, this, nullptr);
     emit sessionRemoved(sessionId);
     emit sessionIdsChanged();
-    entry.core->deleteLater();
+    core->deleteLater();
 }
 
 QObject *SessionManager::coreForSession(const QString &sessionId) const
 {
-    return m_sessions.value(sessionId).core;
+    Session lookup;
+    lookup.sessionId = sessionId;
+
+    return m_sessions.value(lookup, nullptr);
 }
 
 QObject *SessionManager::coreForSessionName(const QString &sessionName) const
@@ -105,5 +124,12 @@ QString SessionManager::sessionIdByName(const QString &sessionName) const
 
 QStringList SessionManager::sessionIds() const
 {
-    return m_sessions.keys();
+    QStringList ids;
+    ids.reserve(m_sessions.size());
+
+    for (auto it = m_sessions.cbegin(); it != m_sessions.cend(); ++it) {
+        ids.append(it.key().sessionId);
+    }
+
+    return ids;
 }
