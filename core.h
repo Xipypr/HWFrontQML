@@ -21,6 +21,8 @@ public slots:
     void onStartMonitoring();
     void onMakeGetRequest(const QString &target);
     void onDeviceCreated(DesktopDevice *device);
+    void onConnectorError(const QString &errorText);
+    void onConnectorDisconnected();
 
 signals:
     void sessionStateChanged(const QString &sessionId, const QString &state);
@@ -29,6 +31,9 @@ signals:
     void testSignal();
 
 private:
+    bool isValidTransition(SessionState from, SessionState to) const;
+    void setState(SessionState newState, const QString &errorText = QString());
+
     HWConnector *m_connector;
     DeviceBuilder *m_deviceCreator;
     // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
