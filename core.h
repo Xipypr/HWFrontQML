@@ -1,9 +1,9 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "hwconnector.h"
 #include "devicebuilder.h"
-#include "session.h"
+#include "hwconnector.h"
+#include "sessionstate.h"
 
 #include <QObject>
 #include <QPointer>
@@ -16,8 +16,7 @@ public:
     ~Core();
 
     Q_INVOKABLE QObject *device() const;
-    Q_INVOKABLE QString sessionId() const;
-    void configureSession(const QString &sessionId, const QString &target, const QString &displayName = QString());
+
 public slots:
     void onStartMonitoring();
     void onMakeGetRequest(const QString &target);
@@ -26,8 +25,8 @@ public slots:
     void onConnectorDisconnected();
 
 signals:
-    void sessionStateChanged(const QString &sessionId, const QString &state);
-    void deviceReady(const QString &sessionId, QObject *deviceRef);
+    void sessionStateChanged(const QString &state);
+    void deviceReady(QObject *deviceRef);
 
     void testSignal();
 
@@ -39,7 +38,7 @@ private:
     DeviceBuilder *m_deviceCreator;
     // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
     QPointer<DesktopDevice> m_device;
-    Session m_session;
+    SessionState m_state = SessionState::idle;
 };
 
 #endif // CORE_H

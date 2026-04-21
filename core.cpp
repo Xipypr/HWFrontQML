@@ -1,5 +1,4 @@
 #include "core.h"
-#include "storages/device.h"
 #include "storages/desktopdevice.h"
 
 #include <QDebug>
@@ -27,8 +26,6 @@ void Core::onStartMonitoring()
 
 void Core::onMakeGetRequest(const QString &target)
 {
-    m_session.target = target;
-
     setState(SessionState::connecting);
     m_connector->makeGetRequest(target);
 }
@@ -38,13 +35,8 @@ void Core::onDeviceCreated(DesktopDevice *device)
     // Core is a non-owning observer by design. Ownership stays outside Core.
     m_device = device;
 
-    if (m_session.sessionId.isEmpty()) {
-        qWarning() << "Desktop device was created without session id";
-        return;
-    }
-
     setState(SessionState::connected);
-    emit deviceReady(m_session.sessionId, device);
+    emit deviceReady(device);
 }
 
 void Core::onConnectorError(const QString &errorText)
@@ -60,18 +52,6 @@ void Core::onConnectorDisconnected()
 QObject *Core::device() const
 {
     return m_device;
-}
-
-QString Core::sessionId() const
-{
-    return m_session.sessionId;
-}
-
-void Core::configureSession(const QString &sessionId, const QString &target, const QString &displayName)
-{
-    m_session.sessionId = sessionId;
-    m_session.target = target;
-    m_session.displayName = displayName;
 }
 
 bool Core::isValidTransition(SessionState from, SessionState to) const
@@ -96,31 +76,27 @@ bool Core::isValidTransition(SessionState from, SessionState to) const
 
 void Core::setState(SessionState newState, const QString &errorText)
 {
-    const SessionState oldState = m_session.state;
+    const SessionState oldState = m_state;
 
     if (oldState == newState) {
         return;
     }
 
     if (!isValidTransition(oldState, newState)) {
-        qWarning().noquote() << QStringLiteral("Session %1: invalid transition %2 -> %3")
-                                    .arg(m_session.sessionId,
-                                         SessionStateNs::toString(oldState),
+        qWarning().noquote() << QStringLiteral("Core: invalid transition %1 -> %2")
+                                    .arg(SessionStateNs::toString(oldState),
                                          SessionStateNs::toString(newState));
         return;
     }
 
-    m_session.state = newState;
-    qInfo().noquote() << QStringLiteral("Session %1: state %2 -> %3")
-                             .arg(m_session.sessionId,
-                                  SessionStateNs::toString(oldState),
+    m_state = newState;
+    qInfo().noquote() << QStringLiteral("Core: state %1 -> %2")
+                             .arg(SessionStateNs::toString(oldState),
                                   SessionStateNs::toString(newState));
 
     if (!errorText.isEmpty()) {
-        qWarning().noquote() << QStringLiteral("Session %1: %2")
-                                    .arg(m_session.sessionId, errorText);
+        qWarning().noquote() << QStringLiteral("Core error: %1").arg(errorText);
     }
 
-    // State changes are scoped by sessionId and stay local to this Core instance.
-    emit sessionStateChanged(m_session.sessionId, SessionStateNs::toString(newState));
+    emit sessionStateChanged(SessionStateNs::toString(newState));
 }

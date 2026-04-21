@@ -2,6 +2,7 @@
 #define SESSIONMANAGER_H
 
 #include "core.h"
+#include "session.h"
 
 #include <QHash>
 #include <QObject>
@@ -29,9 +30,12 @@ signals:
     void deviceReady(const QString &sessionId, QObject *deviceRef);
 
 private:
-    QString generateUniqueSessionId() const;
+    struct SessionEntry {
+        Session session;
+        Core *core = nullptr;
+    };
 
-    QHash<QString, Core *> m_sessions;
+    QHash<QString, SessionEntry> m_sessions;
 };
 
 #endif // SESSIONMANAGER_H
