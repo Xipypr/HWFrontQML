@@ -9,6 +9,11 @@ Core::Core()
     m_connector = new HWConnector(this);
     m_deviceCreator = new DeviceBuilder(this);
     connect(m_connector, &HWConnector::documentRecieved, m_deviceCreator, &DeviceBuilder::onDocumentRecieved);
+
+    //TODO FIX
+    connect(m_connector, SIGNAL(errorOccurred(QString)), this, SLOT(onConnectorError(QString)));
+    connect(m_connector, SIGNAL(disconnected()), this, SLOT(onConnectorDisconnected()));
+
     connect(m_deviceCreator, &DeviceBuilder::desktopCreated, this, &Core::onDeviceCreated);
 }
 
@@ -24,7 +29,7 @@ void Core::onMakeGetRequest(const QString &target)
 {
     m_session.target = target;
 
-    emit sessionStateChanged(m_session.sessionId, QStringLiteral("connecting"));
+    setState(SessionState::connecting);
     m_connector->makeGetRequest(target);
 }
 
@@ -38,8 +43,18 @@ void Core::onDeviceCreated(DesktopDevice *device)
         return;
     }
 
-    emit sessionStateChanged(m_session.sessionId, QStringLiteral("connected"));
+    setState(SessionState::connected);
     emit deviceReady(m_session.sessionId, device);
+}
+
+void Core::onConnectorError(const QString &errorText)
+{
+    setState(SessionState::error, errorText);
+}
+
+void Core::onConnectorDisconnected()
+{
+    setState(SessionState::disconnected);
 }
 
 QObject *Core::device() const
@@ -50,4 +65,55 @@ QObject *Core::device() const
 QString Core::sessionId() const
 {
     return m_session.sessionId;
+}
+
+bool Core::isValidTransition(SessionState from, SessionState to) const
+{
+    switch (from) {
+    case SessionState::idle:
+        return to == SessionState::connecting;
+    case SessionState::connecting:
+        return to == SessionState::connected
+               || to == SessionState::error
+               || to == SessionState::disconnected;
+    case SessionState::connected:
+        return to == SessionState::disconnected
+               || to == SessionState::error;
+    case SessionState::error:
+    case SessionState::disconnected:
+        return to == SessionState::connecting;
+    }
+
+    return false;
+}
+
+void Core::setState(SessionState newState, const QString &errorText)
+{
+    const SessionState oldState = m_session.state;
+
+    if (oldState == newState) {
+        return;
+    }
+
+    if (!isValidTransition(oldState, newState)) {
+        qWarning().noquote() << QStringLiteral("Session %1: invalid transition %2 -> %3")
+                                    .arg(m_session.sessionId,
+                                         SessionStateNs::toString(oldState),
+                                         SessionStateNs::toString(newState));
+        return;
+    }
+
+    m_session.state = newState;
+    qInfo().noquote() << QStringLiteral("Session %1: state %2 -> %3")
+                             .arg(m_session.sessionId,
+                                  SessionStateNs::toString(oldState),
+                                  SessionStateNs::toString(newState));
+
+    if (!errorText.isEmpty()) {
+        qWarning().noquote() << QStringLiteral("Session %1: %2")
+                                    .arg(m_session.sessionId, errorText);
+    }
+
+    // State changes are scoped by sessionId and stay local to this Core instance.
+    emit sessionStateChanged(m_session.sessionId, SessionStateNs::toString(newState));
 }
