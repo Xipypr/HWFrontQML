@@ -9,9 +9,12 @@ Core::Core()
     m_connector = new HWConnector(this);
     m_deviceCreator = new DeviceBuilder(this);
     connect(m_connector, &HWConnector::documentRecieved, m_deviceCreator, &DeviceBuilder::onDocumentRecieved);
-    connect(m_deviceCreator, &DeviceBuilder::desktopCreated, this, &Core::onDeviceCreated);
+
+    //TODO FIX
     connect(m_connector, SIGNAL(errorOccurred(QString)), this, SLOT(onConnectorError(QString)));
     connect(m_connector, SIGNAL(disconnected()), this, SLOT(onConnectorDisconnected()));
+
+    connect(m_deviceCreator, &DeviceBuilder::desktopCreated, this, &Core::onDeviceCreated);
 }
 
 Core::~Core()
