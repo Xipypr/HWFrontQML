@@ -74,12 +74,12 @@ Item {
 
                 function sendRequest(){
                     if (!root.sessionId || root.sessionId.length === 0) {
-                        root.sessionId = hostInfo.inputText + "-" + Date.now()
+                        root.sessionId = core.sessionId()
                     }
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
                     root.sessionSelected(root.sessionId)
-                    core.onMakeGetRequest(root.sessionId, hostInfo.inputText)
+                    core.onMakeGetRequest(hostInfo.inputText)
                     connectButton.text = "Stop"
                     connectingIndicator.running = true
                 }
