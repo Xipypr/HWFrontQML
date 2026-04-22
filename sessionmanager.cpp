@@ -1,6 +1,5 @@
 #include "sessionmanager.h"
 
-#include <QDebug>
 
 SessionManager::SessionManager(QObject *parent)
     : QObject(parent)
@@ -24,9 +23,9 @@ QString SessionManager::createSession(const QString &target)
     Session session;
     session.target = target;
 
-    if (m_sessions.contains(session.sessionId)) {
-        qWarning().noquote() << QStringLiteral("Refusing to create duplicated session id: %1").arg(session.sessionId);
-        return QString();
+    while (m_sessions.contains(session.sessionId)) {
+        session = Session();
+        session.target = target;
     }
 
     Core *core = new Core(this);
@@ -60,17 +59,14 @@ QString SessionManager::createSession(const QString &target)
 void SessionManager::removeSession(const QString &sessionId)
 {
     if (sessionId.isEmpty()) {
-        qWarning() << "Skipping removeSession: empty sessionId";
         return;
     }
 
     const SessionEntry entry = m_sessions.take(sessionId);
     if (!entry.core) {
-        qInfo().noquote() << QStringLiteral("Skipping removeSession: session '%1' was already removed").arg(sessionId);
         return;
     }
 
-    disconnect(entry.core, nullptr, this, nullptr);
     emit sessionRemoved(sessionId);
     emit sessionIdsChanged();
     entry.core->deleteLater();
@@ -78,7 +74,12 @@ void SessionManager::removeSession(const QString &sessionId)
 
 QObject *SessionManager::coreForSession(const QString &sessionId) const
 {
-    return m_sessions.value(sessionId).core;
+    const auto it = m_sessions.constFind(sessionId);
+    if (it == m_sessions.cend()) {
+        return nullptr;
+    }
+
+    return it.value().core;
 }
 
 QStringList SessionManager::sessionIds() const
