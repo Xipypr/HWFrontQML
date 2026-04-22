@@ -12,7 +12,7 @@ class Core : public QObject
 {
     Q_OBJECT
 public:
-    explicit Core();
+    explicit Core(QObject *parent = nullptr);
     ~Core();
 
     Q_INVOKABLE QObject *device() const;

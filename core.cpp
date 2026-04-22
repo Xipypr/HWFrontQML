@@ -3,7 +3,8 @@
 
 #include <QDebug>
 
-Core::Core()
+Core::Core(QObject *parent)
+    : QObject(parent)
 {
     m_connector = new HWConnector(this);
     m_deviceCreator = new DeviceBuilder(this);
