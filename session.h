@@ -45,11 +45,6 @@ inline bool operator==(const Session &lhs, const Session &rhs)
     return lhs.sessionId == rhs.sessionId;
 }
 
-inline uint qHash(const Session &session, uint seed = 0)
-{
-    return qHash(session.sessionId, seed);
-}
-
 Q_DECLARE_METATYPE(Session)
 
 #endif // SESSION_H
