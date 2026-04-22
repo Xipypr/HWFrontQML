@@ -74,12 +74,7 @@ void SessionManager::removeSession(const QString &sessionId)
 
 QObject *SessionManager::coreForSession(const QString &sessionId) const
 {
-    const auto it = m_sessions.constFind(sessionId);
-    if (it == m_sessions.cend()) {
-        return nullptr;
-    }
-
-    return it.value().core;
+    return m_sessions.value(sessionId, SessionEntry{}).core;
 }
 
 QStringList SessionManager::sessionIds() const
