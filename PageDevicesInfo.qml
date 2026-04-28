@@ -149,7 +149,7 @@ Page {
         }
 
         Connections {
-            target: core
+            target: sessionManager
 
             function onDeviceReady(sessionId, deviceRef) {
                 if (!root.sessionId || root.sessionId !== sessionId)

@@ -73,13 +73,19 @@ Item {
                 }
 
                 function sendRequest(){
+                    let createdNewSession = false
                     if (!root.sessionId || root.sessionId.length === 0) {
-                        root.sessionId = core.sessionId()
+                        root.sessionId = sessionManager.createSession(hostInfo.inputText)
+                        createdNewSession = true
                     }
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
                     root.sessionSelected(root.sessionId)
-                    core.onMakeGetRequest(hostInfo.inputText)
+                    if (!createdNewSession && root.sessionId && root.sessionId.length > 0) {
+                        const sessionCore = sessionManager.coreForSession(root.sessionId)
+                        if (sessionCore)
+                            sessionCore.onMakeGetRequest(hostInfo.inputText)
+                    }
                     connectButton.text = "Stop"
                     connectingIndicator.running = true
                 }
@@ -122,6 +128,8 @@ Item {
                     connectionInitialized = 0
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
+                    if (root.sessionId && root.sessionId.length > 0)
+                        sessionManager.removeSession(root.sessionId)
                     root.sessionId = ""
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
@@ -130,7 +138,7 @@ Item {
         }
 
         Connections{
-            target: core
+            target: sessionManager
 
             function onDeviceReady(sessionId, deviceRef) {
                 if (!awaitingDeviceCreation || root.sessionId !== sessionId)
