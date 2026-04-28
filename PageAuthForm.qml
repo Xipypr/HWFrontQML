@@ -16,45 +16,81 @@ Page {
         onClicked: root.settingsRequested()
     }
 
-    footer: Button{
-                text: "Add Device"
-                onClicked: addDevice()
+    footer: Button {
+        text: "Add Device"
+        onClicked: addDevice()
+    }
+
+    Flickable {
+        id: scrollArea
+        anchors.fill: parent
+        clip: true
+        contentWidth: width
+        contentHeight: contentColumn.implicitHeight
+
+        Column {
+            id: contentColumn
+            width: scrollArea.width
+            spacing: 4
+
+            Repeater {
+                id: pendingRepeater
+                model: pendingModel
+
+                delegate: RawLayioutConnection {
+                    width: contentColumn.width
+                    height: implicitHeight
+                    onRemoveThisObject: (removeConnectedDevicePage) => removePending(index, removeConnectedDevicePage)
+                    onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
+                    onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
+                }
             }
 
-    // ListView для представления данных в виде списка
-        ListView {
-            id: listView
-            // Размещаем его в оставшейся части окна приложения
-            anchors.fill: parent
-            clip: true
-            readonly property real centeredVerticalMargin: Math.max(0, (height - contentHeight) / 2)
-            topMargin: centeredVerticalMargin
-            bottomMargin: centeredVerticalMargin
-            delegate: RawLayioutConnection{
-                id: delegate
-                width: listView.width
-                height: implicitHeight
-                onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
-                onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
-                onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
+            Repeater {
+                model: sessionManager.sessionsModel
+
+                delegate: RawLayioutConnection {
+                    width: contentColumn.width
+                    height: implicitHeight
+                    sessionId: model.sessionId
+                    onRemoveThisObject: (removeConnectedDevicePage) => removeExisting(removeConnectedDevicePage)
+                    onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
+                    onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
+                }
             }
-
-            // Сама модель, в которой будут содержаться все элементы
-            model: sessionManager.sessionsModel
         }
+    }
 
-        function addDevice()
-        {
-            console.log("Adding deivce")
-        }
+    ListModel {
+        id: pendingModel
+    }
 
-        function removeDevice(index, removeConnectedDevicePage)
-        {
-            console.log("Deleting " + index)
-            if (removeConnectedDevicePage)
-            {
-                connectedDeviceDeleted()
-            }
-            console.log(listView.count)
+    Component.onCompleted: {
+        if (pendingModel.count === 0 && sessionManager.sessionsModel.rowCount() === 0) {
+            pendingModel.append({})
         }
+    }
+
+    function addDevice() {
+        pendingModel.append({})
+    }
+
+    function removePending(index, removeConnectedDevicePage) {
+        if (index >= 0 && index < pendingModel.count)
+            pendingModel.remove(index)
+
+        if (removeConnectedDevicePage)
+            connectedDeviceDeleted()
+
+        if (pendingModel.count === 0 && sessionManager.sessionsModel.rowCount() === 0)
+            pendingModel.append({})
+    }
+
+    function removeExisting(removeConnectedDevicePage) {
+        if (removeConnectedDevicePage)
+            connectedDeviceDeleted()
+
+        if (pendingModel.count === 0 && sessionManager.sessionsModel.rowCount() === 0)
+            pendingModel.append({})
+    }
 }
