@@ -9,75 +9,71 @@ ApplicationWindow {
     visible: true
     title: qsTr("Hardware Monitor")
     id: root
-    property bool devicePageVisible: false
-    property bool allowDevicePageActivation: false
-    property string activeSessionId: ""
 
-    Loader {
-            id: pagesLoader
+    ListModel {
+        id: devicePagesModel
+    }
 
-            anchors.fill: parent
-            asynchronous: true
+    function indexOfSession(sessionId) {
+        for (let i = 0; i < devicePagesModel.count; ++i) {
+            if (devicePagesModel.get(i).sessionId === sessionId)
+                return i
+        }
+        return -1
+    }
+
+    function syncDevicePages() {
+        if (!sessionManager || !sessionManager.sessionIds)
+            return
+
+        const ids = sessionManager.sessionIds
+
+        for (let i = devicePagesModel.count - 1; i >= 0; --i) {
+            const modelSessionId = devicePagesModel.get(i).sessionId
+            if (ids.indexOf(modelSessionId) === -1)
+                devicePagesModel.remove(i)
         }
 
-    Connections{
-        target: sessionManager
-
-        function onDeviceReady(sessionId, deviceRef) {
-            if (allowDevicePageActivation && activeSessionId === sessionId) {
-                devicePageVisible = true
-            }
+        for (let j = 0; j < ids.length; ++j) {
+            const sessionId = ids[j]
+            if (indexOfSession(sessionId) === -1)
+                devicePagesModel.append({ sessionId: sessionId })
         }
     }
+
+    Connections {
+        target: sessionManager
+
+        function onSessionIdsChanged() {
+            root.syncDevicePages()
+        }
+
+        function onSessionRemoved(sessionId) {
+            const index = root.indexOfSession(sessionId)
+            if (index >= 0)
+                devicePagesModel.remove(index)
+
+            if (swipeView.currentIndex > devicePagesModel.count)
+                swipeView.currentIndex = 0
+        }
+    }
+
+    Component.onCompleted: syncDevicePages()
 
     SwipeView {
         id: swipeView
         anchors.fill: parent
-        currentIndex: 0
-        interactive: devicePageVisible
 
         PageAuthForm {
             id: pageAuth
-
-            onConnectedDeviceDeleted: {
-                devicePageVisible = false
-            }
-
-            onConnectionStateChanged: (allowDevicePageActivationValue) => {
-                allowDevicePageActivation = allowDevicePageActivationValue
-                if (!allowDevicePageActivation) {
-                    devicePageVisible = false
-                }
-            }
-
-            onSessionSelected: (sessionId) => {
-                activeSessionId = sessionId
-            }
         }
 
-        Loader {
-            id: pageDeviceInfoLoader
-            active: devicePageVisible
-            source: "PageDevicesInfo.qml"
-            visible: devicePageVisible
-            onLoaded: {
-                if (item)
-                    item.sessionId = root.activeSessionId
+        Repeater {
+            model: devicePagesModel
+
+            delegate: PageDevicesInfo {
+                sessionId: model.sessionId
             }
-        }
-    }
-
-    onActiveSessionIdChanged: {
-        if (pageDeviceInfoLoader.item) {
-            pageDeviceInfoLoader.item.sessionId = activeSessionId
-        }
-    }
-
-    onDevicePageVisibleChanged: {
-        if (devicePageVisible && swipeView.currentIndex === 0) {
-            swipeView.currentIndex = 1
-        } else if (!devicePageVisible && swipeView.currentIndex > 0) {
-            swipeView.currentIndex = 0
         }
     }
 }
