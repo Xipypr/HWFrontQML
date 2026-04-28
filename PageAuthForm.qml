@@ -40,28 +40,17 @@ Page {
             }
 
             // Сама модель, в которой будут содержаться все элементы
-            model: ListModel {
-                id: listModel // задаём ей id для обращения
-            }
+            model: sessionManager.sessionsModel
         }
-
-        Component.onCompleted: addDevice()
 
         function addDevice()
         {
             console.log("Adding deivce")
-            listModel.append({})
-            console.log(listView.count)
         }
 
         function removeDevice(index, removeConnectedDevicePage)
         {
             console.log("Deleting " + index)
-            if (index < 0 || index >= listModel.count) {
-                console.warn("Skip delete: invalid index " + index + ", count=" + listModel.count)
-                return
-            }
-            listModel.remove(index)
             if (removeConnectedDevicePage)
             {
                 connectedDeviceDeleted()
