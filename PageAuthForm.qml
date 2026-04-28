@@ -31,6 +31,7 @@ Page {
         Column {
             id: contentColumn
             width: scrollArea.width
+            y: Math.max(0, (scrollArea.height - implicitHeight) / 2)
             spacing: 4
 
             Repeater {
