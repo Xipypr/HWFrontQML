@@ -19,7 +19,17 @@ SessionManager::~SessionManager()
     }
 }
 
-QString SessionManager::createSession(const QString &target, bool startRequest)
+QString SessionManager::createSession(const QString &target)
+{
+    return createSessionInternal(target, true);
+}
+
+QString SessionManager::appendSession()
+{
+    return createSessionInternal(QString(), false);
+}
+
+QString SessionManager::createSessionInternal(const QString &target, bool startRequest)
 {
     Session session;
     session.target = target;

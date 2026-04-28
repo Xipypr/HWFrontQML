@@ -44,7 +44,7 @@ Page {
 
     function addDevice()
     {
-        sessionManager.createSession("", false)
+        sessionManager.appendSession()
     }
 
     function removeDevice(index, removeConnectedDevicePage)
