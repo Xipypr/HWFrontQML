@@ -19,7 +19,7 @@ SessionManager::~SessionManager()
     }
 }
 
-QString SessionManager::createSession(const QString &target)
+QString SessionManager::createSession(const QString &target, bool startRequest)
 {
     Session session;
     session.target = target;
@@ -68,7 +68,9 @@ QString SessionManager::createSession(const QString &target)
     emit sessionCreated(session.sessionId);
     emit sessionIdsChanged();
 
-    core->onMakeGetRequest(target);
+    if (startRequest) {
+        core->onMakeGetRequest(target);
+    }
     return session.sessionId;
 }
 

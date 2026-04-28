@@ -16,82 +16,42 @@ Page {
         onClicked: root.settingsRequested()
     }
 
-    footer: Button {
-        text: "Add Device"
-        onClicked: addDevice()
-    }
+    footer: Button{
+                text: "Add Device"
+                onClicked: addDevice()
+            }
 
-    Flickable {
-        id: scrollArea
+    ListView {
+        id: listView
         anchors.fill: parent
         clip: true
-        contentWidth: width
-        contentHeight: contentColumn.implicitHeight
-
-        Column {
-            id: contentColumn
-            width: scrollArea.width
-            y: Math.max(0, (scrollArea.height - implicitHeight) / 2)
-            spacing: 4
-
-            Repeater {
-                id: pendingRepeater
-                model: pendingModel
-
-                delegate: RawLayioutConnection {
-                    width: contentColumn.width
-                    height: implicitHeight
-                    onRemoveThisObject: (removeConnectedDevicePage) => removePending(index, removeConnectedDevicePage)
-                    onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
-                    onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
-                }
-            }
-
-            Repeater {
-                model: sessionManager.sessionsModel
-
-                delegate: RawLayioutConnection {
-                    width: contentColumn.width
-                    height: implicitHeight
-                    sessionId: model.sessionId
-                    onRemoveThisObject: (removeConnectedDevicePage) => removeExisting(removeConnectedDevicePage)
-                    onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
-                    onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
-                }
-            }
+        readonly property real centeredVerticalMargin: Math.max(0, (height - contentHeight) / 2)
+        topMargin: centeredVerticalMargin
+        bottomMargin: centeredVerticalMargin
+        delegate: RawLayioutConnection{
+            width: listView.width
+            height: implicitHeight
+            sessionId: model.sessionId
+            onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
+            onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
+            onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
         }
+
+        model: sessionManager.sessionsModel
     }
 
-    ListModel {
-        id: pendingModel
+    Component.onCompleted: addDevice()
+
+    function addDevice()
+    {
+        sessionManager.createSession("", false)
     }
 
-    Component.onCompleted: {
-        if (pendingModel.count === 0 && sessionManager.sessionsModel.rowCount() === 0) {
-            pendingModel.append({})
+    function removeDevice(index, removeConnectedDevicePage)
+    {
+        if (removeConnectedDevicePage)
+        {
+            connectedDeviceDeleted()
         }
-    }
-
-    function addDevice() {
-        pendingModel.append({})
-    }
-
-    function removePending(index, removeConnectedDevicePage) {
-        if (index >= 0 && index < pendingModel.count)
-            pendingModel.remove(index)
-
-        if (removeConnectedDevicePage)
-            connectedDeviceDeleted()
-
-        if (pendingModel.count === 0 && sessionManager.sessionsModel.rowCount() === 0)
-            pendingModel.append({})
-    }
-
-    function removeExisting(removeConnectedDevicePage) {
-        if (removeConnectedDevicePage)
-            connectedDeviceDeleted()
-
-        if (pendingModel.count === 0 && sessionManager.sessionsModel.rowCount() === 0)
-            pendingModel.append({})
     }
 }
