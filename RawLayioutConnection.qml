@@ -150,7 +150,7 @@ Item {
                 connectButton.text = "Reconnect"
                 connectionInitialized = 1
                 root.connectedDeviceName = deviceRef.name
-                if (sessionManager.connectedSessionIds.length === 1)
+                if (sessionManager.sessionsModel.rowCount() === 1)
                     root.sessionSelected(sessionId)
             }
         }
