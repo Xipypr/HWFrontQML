@@ -82,7 +82,6 @@ Item {
                     }
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
-                    root.sessionSelected(root.sessionId)
                     if (root.sessionId && root.sessionId.length > 0) {
                         const sessionCore = sessionManager.coreForSession(root.sessionId)
                         if (sessionCore)
