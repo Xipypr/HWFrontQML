@@ -15,7 +15,7 @@ ToolBar {
 
     implicitHeight: 56
     horizontalPadding: 16
-    verticalPadding: 0
+    verticalPadding: 8
 
     background: Rectangle {
         color: headerTap.pressed ? root.pressedBackgroundColor : root.backgroundColor
@@ -39,8 +39,8 @@ ToolBar {
             onClicked: root.homeClicked()
             background: Rectangle {
                 radius: 8
-                color: homeButton.down ? "#3E5A87" : "#2A3B5C"
-                border.color: "#5E7BB0"
+                color: homeButton.down ? "#2D3F61" : "#223150"
+                border.color: "#3A4B6B"
                 border.width: 1
             }
             contentItem: Label {
