@@ -87,6 +87,20 @@ void SessionListModel::removeSession(const QString &sessionId)
     endRemoveRows();
 }
 
+QStringList SessionListModel::connectedSessionIds() const
+{
+    QStringList ids;
+    ids.reserve(m_rows.size());
+
+    for (const Session &row : m_rows) {
+        if (row.hasDevice) {
+            ids.push_back(row.sessionId);
+        }
+    }
+
+    return ids;
+}
+
 int SessionListModel::indexOf(const QString &sessionId) const
 {
     for (int i = 0; i < m_rows.size(); ++i) {
