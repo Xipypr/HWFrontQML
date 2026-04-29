@@ -137,7 +137,6 @@ Item {
                     connectionInitialized = 0
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
-                    root.deviceAlias = ""
                     if (root.hasValidSessionId(root.sessionId))
                         sessionManager.setSessionAlias(root.sessionId, "")
                     if (root.hasValidSessionId(root.sessionId))
@@ -155,7 +154,6 @@ Item {
         id: aliasInputDialog
         initialAlias: root.deviceAlias
         onAliasSubmitted: function(alias) {
-            root.deviceAlias = alias
             if (root.hasValidSessionId(root.sessionId))
                 sessionManager.setSessionAlias(root.sessionId, alias)
         }

@@ -104,7 +104,6 @@ Page {
         id: aliasInputDialog
         initialAlias: root.deviceAlias
         onAliasSubmitted: function(alias) {
-            root.deviceAlias = alias
             if (root.sessionId && root.sessionId.length > 0)
                 root.deviceAliasChangedByUser(root.sessionId, alias)
         }
