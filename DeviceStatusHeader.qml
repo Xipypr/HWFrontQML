@@ -30,8 +30,8 @@ ToolBar {
         ToolButton {
             id: homeButton
             text: "⌂"
-            Layout.preferredWidth: 40
-            Layout.preferredHeight: 40
+            Layout.preferredWidth: root.height
+            Layout.preferredHeight: root.height
             Layout.alignment: Qt.AlignVCenter
             font.pixelSize: 24
             onClicked: root.homeClicked()
