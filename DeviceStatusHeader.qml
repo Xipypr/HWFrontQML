@@ -10,6 +10,7 @@ ToolBar {
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
     signal clicked()
+    signal homeClicked()
 
     implicitHeight: 56
     horizontalPadding: 16
@@ -25,6 +26,23 @@ ToolBar {
 
     contentItem: RowLayout {
         spacing: 12
+
+        ToolButton {
+            text: "⌂"
+            font.pixelSize: 18
+            onClicked: root.homeClicked()
+            background: Rectangle {
+                radius: 6
+                color: parent.down ? "#31405F" : "transparent"
+            }
+            contentItem: Label {
+                text: parent.text
+                color: "#E2E8F0"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                font: parent.font
+            }
+        }
 
         Label {
             id: nameLabel

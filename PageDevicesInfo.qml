@@ -14,6 +14,8 @@ Page {
 
     property int nextWidgetId: 1
 
+    signal homeRequested()
+
     ListModel {
         id: widgetModel
     }
@@ -70,6 +72,7 @@ Page {
         onClicked: {
             root.openDeviceSettingsDialog()
         }
+        onHomeClicked: root.homeRequested()
     }
 
     Component {
