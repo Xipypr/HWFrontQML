@@ -28,19 +28,23 @@ ToolBar {
         spacing: 12
 
         ToolButton {
+            id: homeButton
             text: "⌂"
-            font.pixelSize: 18
+            Layout.preferredWidth: 40
+            Layout.preferredHeight: 40
+            Layout.alignment: Qt.AlignVCenter
+            font.pixelSize: 24
             onClicked: root.homeClicked()
             background: Rectangle {
-                radius: 6
-                color: parent.down ? "#31405F" : "transparent"
+                radius: 8
+                color: homeButton.down ? "#31405F" : "transparent"
             }
             contentItem: Label {
-                text: parent.text
+                text: homeButton.text
                 color: "#E2E8F0"
                 horizontalAlignment: Text.AlignHCenter
                 verticalAlignment: Text.AlignVCenter
-                font: parent.font
+                font: homeButton.font
             }
         }
 
