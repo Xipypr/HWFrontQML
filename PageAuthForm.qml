@@ -21,51 +21,37 @@ Page {
                 onClicked: addDevice()
             }
 
-    // ListView для представления данных в виде списка
-        ListView {
-            id: listView
-            // Размещаем его в оставшейся части окна приложения
-            anchors.fill: parent
-            clip: true
-            readonly property real centeredVerticalMargin: Math.max(0, (height - contentHeight) / 2)
-            topMargin: centeredVerticalMargin
-            bottomMargin: centeredVerticalMargin
-            delegate: RawLayioutConnection{
-                id: delegate
-                width: listView.width
-                height: implicitHeight
-                onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
-                onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
-                onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
-            }
-
-            // Сама модель, в которой будут содержаться все элементы
-            model: ListModel {
-                id: listModel // задаём ей id для обращения
-            }
+    ListView {
+        id: listView
+        anchors.fill: parent
+        clip: true
+        readonly property real centeredVerticalMargin: Math.max(0, (height - contentHeight) / 2)
+        topMargin: centeredVerticalMargin
+        bottomMargin: centeredVerticalMargin
+        delegate: RawLayioutConnection{
+            width: listView.width
+            height: implicitHeight
+            sessionId: model.sessionId
+            onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
+            onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
+            onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
         }
 
-        Component.onCompleted: addDevice()
+        model: sessionManager.sessionsModel
+    }
 
-        function addDevice()
+    Component.onCompleted: addDevice()
+
+    function addDevice()
+    {
+        sessionManager.createSession("")
+    }
+
+    function removeDevice(index, removeConnectedDevicePage)
+    {
+        if (removeConnectedDevicePage)
         {
-            console.log("Adding deivce")
-            listModel.append({})
-            console.log(listView.count)
+            connectedDeviceDeleted()
         }
-
-        function removeDevice(index, removeConnectedDevicePage)
-        {
-            console.log("Deleting " + index)
-            if (index < 0 || index >= listModel.count) {
-                console.warn("Skip delete: invalid index " + index + ", count=" + listModel.count)
-                return
-            }
-            listModel.remove(index)
-            if (removeConnectedDevicePage)
-            {
-                connectedDeviceDeleted()
-            }
-            console.log(listView.count)
-        }
+    }
 }

@@ -10,6 +10,7 @@ CONFIG += c++17
 SOURCES += \
         core.cpp \
         main.cpp \
+        sessionlistmodel.cpp \
         sessionmanager.cpp
 
 RESOURCES += qml.qrc
@@ -60,6 +61,7 @@ DEPENDPATH += $$PWD/../DeviceBuilder/src
 HEADERS += \
     core.h \
     session.h \
+    sessionlistmodel.h \
     sessionmanager.h \
     sessionstate.h
 
