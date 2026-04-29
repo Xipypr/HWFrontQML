@@ -9,6 +9,7 @@ Item {
     property int horizontalMargin: 10
     property bool compactMode: width < 560
     property string connectedDeviceName: ""
+    property string deviceAlias: ""
     property bool awaitingDeviceCreation: false
     property string sessionId: ""
 
@@ -55,11 +56,12 @@ Item {
                 Layout.preferredWidth: 240
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
                 connected: root.connectionInitialized === 1
-                deviceName: root.connectedDeviceName
+                deviceName: root.deviceAlias.length > 0 ? root.deviceAlias : root.connectedDeviceName
                 onDeviceLabelClicked: {
                     if (root.hasValidSessionId(root.sessionId))
                         root.sessionSelected(root.sessionId)
                 }
+                onDeviceLabelRightClicked: aliasInputDialog.open()
             }
 
             Button{
@@ -134,6 +136,7 @@ Item {
                     connectionInitialized = 0
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
+                    root.deviceAlias = ""
                     if (root.hasValidSessionId(root.sessionId))
                         sessionManager.removeSession(root.sessionId)
                     root.sessionId = ""
@@ -142,6 +145,16 @@ Item {
                 }
             }
         }
+
+
+
+    AliasInputDialog {
+        id: aliasInputDialog
+        initialAlias: root.deviceAlias
+        onAliasSubmitted: function(alias) {
+            root.deviceAlias = alias
+        }
+    }
 
         Connections{
             target: sessionManager

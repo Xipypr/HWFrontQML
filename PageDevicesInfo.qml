@@ -10,6 +10,7 @@ Page {
     property var desktop_device: ({})
     property string sessionId: ""
     property string destop_name: ""
+    property string deviceAlias: ""
     property int nextWidgetId: 1
 
     ListModel {
@@ -64,7 +65,7 @@ Page {
 
     header: DeviceStatusHeader {
         width: root.width
-        headerText: destop_name
+        headerText: root.deviceAlias.length > 0 ? root.deviceAlias : destop_name
         onClicked: {
             root.openDeviceSettingsDialog()
         }
@@ -74,7 +75,7 @@ Page {
         id: deviceSettingsDialogComponent
         DeviceSettingsDialog {
             onSetDeviceNameSelected: {
-                console.log("Device settings: set device name clicked")
+                aliasInputDialog.open()
             }
 
             onChangeLayoutSelected: {
@@ -94,6 +95,14 @@ Page {
                 pendingOpen = false
                 item.open()
             }
+        }
+    }
+
+    AliasInputDialog {
+        id: aliasInputDialog
+        initialAlias: root.deviceAlias
+        onAliasSubmitted: function(alias) {
+            root.deviceAlias = alias
         }
     }
 
