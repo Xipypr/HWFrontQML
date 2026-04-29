@@ -44,14 +44,22 @@ QString SessionManager::createSessionInternal(const QString &target, bool startR
     Core *core = new Core(this);
 
     connect(core, &Core::sessionStateChanged, this, [this, sessionId = session.sessionId](const QString &state) {
-        SessionEntry &entry = m_sessions[sessionId];
+        auto it = m_sessions.find(sessionId);
+        if (it == m_sessions.end()) {
+            return;
+        }
+        SessionEntry &entry = it.value();
         const QMetaEnum enumMeta = QMetaEnum::fromType<SessionState>();
         entry.session.state = static_cast<SessionState>(enumMeta.keyToValue(state.toLatin1().constData()));
         m_sessionsModel.setSessionState(sessionId, state);
         emit sessionStateChanged(sessionId, state);
     });
     connect(core, &Core::deviceReady, this, [this, sessionId = session.sessionId](QObject *deviceRef) {
-        SessionEntry &entry = m_sessions[sessionId];
+        auto it = m_sessions.find(sessionId);
+        if (it == m_sessions.end()) {
+            return;
+        }
+        SessionEntry &entry = it.value();
         entry.session.hasDevice = true;
         entry.session.displayName = deviceRef ? deviceRef->property("name").toString() : entry.session.displayName;
         m_sessionsModel.upsertSession(entry.session);
