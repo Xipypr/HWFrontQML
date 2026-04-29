@@ -10,6 +10,10 @@ ApplicationWindow {
     title: qsTr("Hardware Monitor")
     id: root
 
+    function goToStartPage() {
+        swipeView.currentIndex = 0
+    }
+
     SwipeView {
         id: swipeView
         anchors.fill: parent
@@ -24,6 +28,7 @@ ApplicationWindow {
 
             delegate: PageDevicesInfo {
                 sessionId: modelData
+                onHomeRequested: root.goToStartPage()
             }
         }
     }

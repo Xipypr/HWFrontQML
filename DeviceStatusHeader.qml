@@ -9,7 +9,9 @@ ToolBar {
     property color indicatorColor: "#22C55E"
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
+    property bool showHomeButton: false
     signal clicked()
+    signal homeClicked()
 
     implicitHeight: 56
     horizontalPadding: 16
@@ -25,6 +27,30 @@ ToolBar {
 
     contentItem: RowLayout {
         spacing: 12
+
+        ToolButton {
+            visible: root.showHomeButton
+            id: homeButton
+            text: "⌂"
+            Layout.preferredWidth: root.height - root.verticalPadding
+            Layout.preferredHeight: root.height - root.verticalPadding
+            Layout.alignment: Qt.AlignVCenter
+            font.pixelSize: 24
+            onClicked: root.homeClicked()
+            background: Rectangle {
+                radius: 8
+                color: homeButton.down ? "#2D3F61" : "#223150"
+                border.color: "#3A4B6B"
+                border.width: 1
+            }
+            contentItem: Label {
+                text: homeButton.text
+                color: "#E2E8F0"
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                font: homeButton.font
+            }
+        }
 
         Label {
             id: nameLabel

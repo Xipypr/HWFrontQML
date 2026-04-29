@@ -14,6 +14,8 @@ Page {
 
     property int nextWidgetId: 1
 
+    signal homeRequested()
+
     ListModel {
         id: widgetModel
     }
@@ -67,9 +69,11 @@ Page {
     header: DeviceStatusHeader {
         width: root.width
         headerText: root.deviceAlias.length > 0 ? root.deviceAlias : destop_name
+        showHomeButton: true
         onClicked: {
             root.openDeviceSettingsDialog()
         }
+        onHomeClicked: root.homeRequested()
     }
 
     Component {
