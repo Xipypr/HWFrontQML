@@ -33,6 +33,7 @@ Item {
         spacing: 8
 
         Label {
+            visible: root.connectionInitialized !== 1
             text: "Введите IP-адрес"
             Layout.fillWidth: root.compactMode
             Layout.preferredWidth: controlsLayout.implicitWidth
