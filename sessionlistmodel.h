@@ -26,7 +26,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     void upsertSession(const Session &session);
-    void setSessionState(const QString &sessionId, const QString &state);
+    void setSessionState(const QString &sessionId, SessionState state);
     void removeSession(const QString &sessionId);
 
 private:

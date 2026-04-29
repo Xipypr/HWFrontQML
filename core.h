@@ -25,7 +25,7 @@ public slots:
     void onConnectorDisconnected();
 
 signals:
-    void sessionStateChanged(const QString &state);
+    void sessionStateChanged(SessionState state);
     void deviceReady(QObject *deviceRef);
 
     void testSignal();
