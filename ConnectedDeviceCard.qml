@@ -8,6 +8,7 @@ Item {
     property string deviceName: ""
     property alias inputText: hostInput.text
     readonly property bool acceptableInput: hostInput.acceptableInput
+    signal deviceLabelClicked()
 
     implicitHeight: hostInput.implicitHeight
 
@@ -24,6 +25,7 @@ Item {
     }
 
     Rectangle {
+        id: connectedCard
         anchors.fill: parent
         visible: root.connected
         radius: 6
@@ -66,10 +68,32 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: deviceNameLabel.truncated ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onPressed: pressAnimation.start()
+            onReleased: releaseAnimation.start()
+            onCanceled: releaseAnimation.start()
+            onClicked: root.deviceLabelClicked()
         }
 
         ToolTip.visible: cardHoverArea.containsMouse && deviceNameLabel.truncated
         ToolTip.delay: 300
         ToolTip.text: root.deviceName
+
+        NumberAnimation {
+            id: pressAnimation
+            target: connectedCard
+            property: "scale"
+            to: 0.97
+            duration: 90
+            easing.type: Easing.OutQuad
+        }
+
+        NumberAnimation {
+            id: releaseAnimation
+            target: connectedCard
+            property: "scale"
+            to: 1.0
+            duration: 120
+            easing.type: Easing.OutQuad
+        }
     }
 }

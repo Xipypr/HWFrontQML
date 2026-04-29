@@ -16,6 +16,7 @@ ApplicationWindow {
 
         PageAuthForm {
             id: pageAuth
+            onSessionSelected: (sessionId) => swipeToSessionPage(sessionId)
         }
 
         Repeater {
@@ -25,5 +26,16 @@ ApplicationWindow {
                 sessionId: modelData
             }
         }
+    }
+
+    function swipeToSessionPage(sessionId) {
+        if (!sessionId || sessionId.length === 0)
+            return
+
+        const sessionIndex = sessionManager.connectedSessionIds.indexOf(sessionId)
+        if (sessionIndex < 0)
+            return
+
+        swipeView.currentIndex = sessionIndex + 1
     }
 }
