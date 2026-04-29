@@ -3,7 +3,7 @@
 
 SessionManager::SessionManager(QObject *parent)
     : QObject(parent)
-    , m_sessionsModel(this)
+    , m_sessionsModel()
 {
 }
 
