@@ -21,10 +21,6 @@ Core::~Core()
 {
 }
 
-void Core::onStartMonitoring()
-{
-}
-
 void Core::onMakeGetRequest(const QString &target)
 {
     setState(SessionState::connecting);

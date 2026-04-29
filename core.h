@@ -18,7 +18,6 @@ public:
     Q_INVOKABLE QObject *device() const;
 
 public slots:
-    void onStartMonitoring();
     void onMakeGetRequest(const QString &target);
     void onDeviceCreated(DesktopDevice *device);
     void onConnectorError(const QString &errorText);
