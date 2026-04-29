@@ -32,14 +32,16 @@ ToolBar {
             visible: root.showHomeButton
             id: homeButton
             text: "⌂"
-            Layout.preferredWidth: root.height
-            Layout.preferredHeight: root.height
+            Layout.preferredWidth: root.height - root.verticalPadding
+            Layout.preferredHeight: root.height - root.verticalPadding
             Layout.alignment: Qt.AlignVCenter
             font.pixelSize: 24
             onClicked: root.homeClicked()
             background: Rectangle {
                 radius: 8
-                color: homeButton.down ? "#31405F" : "transparent"
+                color: homeButton.down ? "#3E5A87" : "#2A3B5C"
+                border.color: "#5E7BB0"
+                border.width: 1
             }
             contentItem: Label {
                 text: homeButton.text
