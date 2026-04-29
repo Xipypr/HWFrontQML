@@ -9,6 +9,7 @@ Item {
     property alias inputText: hostInput.text
     readonly property bool acceptableInput: hostInput.acceptableInput
     signal deviceLabelClicked()
+    signal deviceLabelRightClicked()
 
     implicitHeight: hostInput.implicitHeight
 
@@ -71,7 +72,13 @@ Item {
             onPressed: pressAnimation.start()
             onReleased: releaseAnimation.start()
             onCanceled: releaseAnimation.start()
-            onClicked: root.deviceLabelClicked()
+            acceptedButtons: Qt.LeftButton | Qt.RightButton
+            onClicked: function(mouse) {
+                if (mouse.button === Qt.RightButton)
+                    root.deviceLabelRightClicked()
+                else
+                    root.deviceLabelClicked()
+            }
         }
 
         ToolTip.visible: cardHoverArea.containsMouse && deviceNameLabel.truncated

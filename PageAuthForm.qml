@@ -32,6 +32,7 @@ Page {
             width: listView.width
             height: implicitHeight
             sessionId: model.sessionId
+            deviceAlias: model.alias
             onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
             onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
             onSessionSelected: (sessionId) => root.sessionSelected(sessionId)

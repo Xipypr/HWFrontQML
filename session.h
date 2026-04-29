@@ -14,6 +14,7 @@ struct Session
     Q_PROPERTY(QString sessionId MEMBER sessionId)
     Q_PROPERTY(QString target MEMBER target)
     Q_PROPERTY(QString displayName MEMBER displayName)
+    Q_PROPERTY(QString alias MEMBER alias)
     Q_PROPERTY(SessionState state MEMBER state)
     Q_PROPERTY(bool hasDevice MEMBER hasDevice)
 
@@ -26,6 +27,7 @@ public:
     QString sessionId;
     QString target;
     QString displayName;
+    QString alias;
     SessionState state = SessionState::idle;
     bool hasDevice = false;
 

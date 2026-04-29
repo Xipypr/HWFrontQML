@@ -15,6 +15,7 @@ public:
         SessionIdRole = Qt::UserRole + 1,
         TargetRole,
         DisplayNameRole,
+        AliasRole,
         StateRole,
         HasDeviceRole
     };
@@ -28,6 +29,8 @@ public:
     void upsertSession(const Session &session);
     void setSessionState(const QString &sessionId, SessionState state);
     void removeSession(const QString &sessionId);
+    void setSessionAlias(const QString &sessionId, const QString &alias);
+    QString deviceAliasForSession(const QString &sessionId) const;
     QStringList connectedSessionIds() const;
 
 private:

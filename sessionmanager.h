@@ -25,6 +25,8 @@ public:
     Q_INVOKABLE QObject *coreForSession(const QString &sessionId) const;
     Q_INVOKABLE QStringList sessionIds() const;
     Q_INVOKABLE QStringList connectedSessionIds() const;
+    Q_INVOKABLE void setDeviceAlias(const QString &sessionId, const QString &alias);
+    Q_INVOKABLE QString deviceAlias(const QString &sessionId) const;
     QAbstractListModel *sessionsModel();
 
 signals:
@@ -35,6 +37,7 @@ signals:
     void sessionRemoved(const QString &sessionId);
     void sessionStateChanged(const QString &sessionId, SessionState state);
     void deviceReady(const QString &sessionId, QObject *deviceRef);
+    void sessionAliasChanged(const QString &sessionId, const QString &alias);
 
 private:
     struct SessionEntry {

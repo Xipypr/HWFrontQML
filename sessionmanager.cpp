@@ -106,6 +106,28 @@ QStringList SessionManager::connectedSessionIds() const
     return m_sessionsModel.connectedSessionIds();
 }
 
+
+void SessionManager::setDeviceAlias(const QString &sessionId, const QString &alias)
+{
+    SessionEntry *entry = findSessionEntry(sessionId);
+    if (!entry) {
+        return;
+    }
+
+    entry->session.alias = alias;
+    m_sessionsModel.setSessionAlias(sessionId, alias);
+    emit sessionAliasChanged(sessionId, alias);
+}
+
+QString SessionManager::deviceAlias(const QString &sessionId) const
+{
+    if (sessionId.isEmpty()) {
+        return {};
+    }
+
+    return m_sessionsModel.deviceAliasForSession(sessionId);
+}
+
 QAbstractListModel *SessionManager::sessionsModel()
 {
     return &m_sessionsModel;

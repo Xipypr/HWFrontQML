@@ -13,5 +13,6 @@
         <file>DeviceSettingsDialog.qml</file>
         <file>WidgetLayoutDialog.qml</file>
         <file>ConnectedDeviceCard.qml</file>
+        <file>AliasInputDialog.qml</file>
     </qresource>
 </RCC>

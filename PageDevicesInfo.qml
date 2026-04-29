@@ -10,6 +10,8 @@ Page {
     property var desktop_device: ({})
     property string sessionId: ""
     property string destop_name: ""
+    property string deviceAlias: ""
+
     property int nextWidgetId: 1
 
     ListModel {
@@ -64,7 +66,7 @@ Page {
 
     header: DeviceStatusHeader {
         width: root.width
-        headerText: destop_name
+        headerText: root.deviceAlias.length > 0 ? root.deviceAlias : destop_name
         onClicked: {
             root.openDeviceSettingsDialog()
         }
@@ -74,7 +76,7 @@ Page {
         id: deviceSettingsDialogComponent
         DeviceSettingsDialog {
             onSetDeviceNameSelected: {
-                console.log("Device settings: set device name clicked")
+                aliasInputDialog.open()
             }
 
             onChangeLayoutSelected: {
@@ -97,6 +99,15 @@ Page {
         }
     }
 
+    AliasInputDialog {
+        id: aliasInputDialog
+        initialAlias: root.deviceAlias
+        onAliasSubmitted: function(alias) {
+            if (root.sessionId && root.sessionId.length > 0)
+                sessionManager.setDeviceAlias(root.sessionId, alias)
+        }
+    }
+
     WidgetLayoutDialog {
         id: widgetLayoutDialog
         widgetsModel: widgetModel
@@ -115,6 +126,16 @@ Page {
                     variant: item.variant
                 })
             }
+        }
+    }
+
+
+    Connections {
+        target: sessionManager
+
+        function onSessionAliasChanged(sessionId, alias) {
+            if (root.sessionId === sessionId)
+                root.deviceAlias = alias
         }
     }
 
