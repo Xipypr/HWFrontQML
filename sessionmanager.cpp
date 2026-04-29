@@ -1,5 +1,16 @@
 #include "sessionmanager.h"
 
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QSettings>
+#include <QSet>
+
+namespace {
+constexpr auto kSessionsStateKey = "sessions/state";
+
+}
+
 SessionManager::SessionManager(QObject *parent)
     : QObject(parent)
 {
@@ -68,6 +79,7 @@ QString SessionManager::createSession(const QString &target)
 
     emit sessionCreated(session.sessionId);
     emit sessionIdsChanged();
+    saveSessionsState();
 
     return session.sessionId;
 }
@@ -87,6 +99,7 @@ void SessionManager::removeSession(const QString &sessionId)
     emit sessionRemoved(sessionId);
     emit sessionIdsChanged();
     emit connectedSessionIdsChanged();
+    saveSessionsState();
     entry.core->deleteLater();
 }
 
@@ -117,6 +130,7 @@ void SessionManager::setDeviceAlias(const QString &sessionId, const QString &ali
     entry->session.alias = alias;
     m_sessionsModel.setSessionAlias(sessionId, alias);
     emit sessionAliasChanged(sessionId, alias);
+    saveSessionsState();
 }
 
 QString SessionManager::deviceAlias(const QString &sessionId) const
@@ -131,6 +145,82 @@ QString SessionManager::deviceAlias(const QString &sessionId) const
 QAbstractListModel *SessionManager::sessionsModel()
 {
     return &m_sessionsModel;
+}
+
+void SessionManager::saveSessionsState() const
+{
+    QJsonArray sessions;
+    sessions.reserve(m_sessions.size());
+
+    for (auto it = m_sessions.cbegin(); it != m_sessions.cend(); ++it) {
+        const Session &session = it.value().session;
+        QJsonObject object;
+        object.insert(QStringLiteral("sessionId"), session.sessionId);
+        object.insert(QStringLiteral("target"), session.target);
+        object.insert(QStringLiteral("alias"), session.alias);
+        object.insert(QStringLiteral("displayName"), session.displayName);
+        object.insert(QStringLiteral("hasDevice"), session.hasDevice);
+        sessions.append(object);
+    }
+
+    QSettings settings;
+    settings.setValue(QString::fromLatin1(kSessionsStateKey), QString::fromUtf8(QJsonDocument(sessions).toJson(QJsonDocument::Compact)));
+}
+
+void SessionManager::restoreSessionsState()
+{
+    QSettings settings;
+    const QString serialized = settings.value(QString::fromLatin1(kSessionsStateKey)).toString();
+    if (serialized.isEmpty()) {
+        return;
+    }
+
+    const QJsonDocument document = QJsonDocument::fromJson(serialized.toUtf8());
+    if (!document.isArray()) {
+        return;
+    }
+
+    QSet<QString> restoredTargets;
+
+    const QJsonArray sessions = document.array();
+    for (const QJsonValue &value : sessions) {
+        if (!value.isObject()) {
+            continue;
+        }
+
+        const QJsonObject object = value.toObject();
+        const QString sessionId = object.value(QStringLiteral("sessionId")).toString().trimmed();
+        const QString target = object.value(QStringLiteral("target")).toString().trimmed();
+        if (sessionId.isEmpty() || target.isEmpty()) {
+            continue;
+        }
+        if (m_sessions.contains(sessionId) || restoredTargets.contains(target)) {
+            continue;
+        }
+
+        Session session;
+        session.sessionId = sessionId;
+        session.target = target;
+        session.alias = object.value(QStringLiteral("alias")).toString();
+        session.displayName = object.value(QStringLiteral("displayName")).toString();
+        session.hasDevice = object.value(QStringLiteral("hasDevice")).toBool(false);
+
+        SessionEntry entry;
+        entry.session = session;
+        entry.core = nullptr;
+        m_sessions.insert(session.sessionId, entry);
+        m_sessionsModel.upsertSession(session);
+        restoredTargets.insert(target);
+    }
+
+    emit sessionIdsChanged();
+    emit connectedSessionIdsChanged();
+}
+
+void SessionManager::clearSavedSessionsState()
+{
+    QSettings settings;
+    settings.remove(QString::fromLatin1(kSessionsStateKey));
 }
 
 SessionManager::SessionEntry *SessionManager::findSessionEntry(const QString &sessionId)
