@@ -73,15 +73,13 @@ Item {
                 }
 
                 function sendRequest(){
-                    let createdNewSession = false
                     if (!root.sessionId || root.sessionId.length === 0) {
                         root.sessionId = sessionManager.createSession(hostInfo.inputText)
-                        createdNewSession = true
                     }
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
                     root.sessionSelected(root.sessionId)
-                    if (!createdNewSession && root.sessionId && root.sessionId.length > 0) {
+                    if (root.sessionId && root.sessionId.length > 0) {
                         const sessionCore = sessionManager.coreForSession(root.sessionId)
                         if (sessionCore)
                             sessionCore.onMakeGetRequest(hostInfo.inputText)

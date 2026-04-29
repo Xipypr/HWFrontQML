@@ -95,5 +95,5 @@ void Core::setState(SessionState newState, const QString &errorText)
         qWarning().noquote() << QStringLiteral("Core error: %1").arg(errorText);
     }
 
-    emit sessionStateChanged(SessionStateNs::toString(newState));
+    emit sessionStateChanged(newState);
 }
