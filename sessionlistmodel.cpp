@@ -30,6 +30,8 @@ QVariant SessionListModel::data(const QModelIndex &index, int role) const
         return row.displayName;
     case StateRole:
         return SessionStateNs::toString(row.state);
+    case HasDeviceRole:
+        return row.hasDevice;
     default:
         return {};
     }
@@ -41,7 +43,8 @@ QHash<int, QByteArray> SessionListModel::roleNames() const
         { SessionIdRole, "sessionId" },
         { TargetRole, "target" },
         { DisplayNameRole, "displayName" },
-        { StateRole, "state" }
+        { StateRole, "state" },
+        { HasDeviceRole, "hasDevice" }
     };
 }
 

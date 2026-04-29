@@ -52,6 +52,7 @@ QString SessionManager::createSessionInternal(const QString &target, bool startR
     });
     connect(core, &Core::deviceReady, this, [this, sessionId = session.sessionId](QObject *deviceRef) {
         SessionEntry &entry = m_sessions[sessionId];
+        entry.session.hasDevice = true;
         entry.session.displayName = deviceRef ? deviceRef->property("name").toString() : entry.session.displayName;
         m_sessionsModel.upsertSession(entry.session);
         emit deviceReady(sessionId, deviceRef);

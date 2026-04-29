@@ -21,8 +21,11 @@ ApplicationWindow {
         Repeater {
             model: sessionManager.sessionsModel
 
-            delegate: PageDevicesInfo {
-                sessionId: model.sessionId
+            delegate: Loader {
+                active: model.hasDevice
+                sourceComponent: PageDevicesInfo {
+                    sessionId: model.sessionId
+                }
             }
         }
     }

@@ -15,7 +15,8 @@ public:
         SessionIdRole = Qt::UserRole + 1,
         TargetRole,
         DisplayNameRole,
-        StateRole
+        StateRole,
+        HasDeviceRole
     };
 
     explicit SessionListModel(QObject *parent = nullptr);
