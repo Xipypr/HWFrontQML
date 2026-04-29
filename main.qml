@@ -24,8 +24,6 @@ ApplicationWindow {
 
             delegate: PageDevicesInfo {
                 sessionId: modelData
-                deviceAlias: sessionManager.aliasForSession(modelData)
-                onDeviceAliasChangedByUser: (sessionId, alias) => sessionManager.setSessionAlias(sessionId, alias)
             }
         }
     }

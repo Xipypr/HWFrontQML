@@ -12,7 +12,6 @@ Page {
     property string destop_name: ""
     property string deviceAlias: ""
 
-    signal deviceAliasChangedByUser(string sessionId, string alias)
     property int nextWidgetId: 1
 
     ListModel {
@@ -105,7 +104,7 @@ Page {
         initialAlias: root.deviceAlias
         onAliasSubmitted: function(alias) {
             if (root.sessionId && root.sessionId.length > 0)
-                root.deviceAliasChangedByUser(root.sessionId, alias)
+                sessionManager.setSessionAlias(root.sessionId, alias)
         }
     }
 

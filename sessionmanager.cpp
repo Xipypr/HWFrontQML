@@ -109,10 +109,6 @@ QStringList SessionManager::connectedSessionIds() const
 
 void SessionManager::setSessionAlias(const QString &sessionId, const QString &alias)
 {
-    if (sessionId.isEmpty()) {
-        return;
-    }
-
     SessionEntry *entry = findSessionEntry(sessionId);
     if (!entry) {
         return;
