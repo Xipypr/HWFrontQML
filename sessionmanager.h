@@ -33,7 +33,7 @@ signals:
     void sessionsModelChanged();
     void sessionCreated(const QString &sessionId);
     void sessionRemoved(const QString &sessionId);
-    void sessionStateChanged(const QString &sessionId, const QString &state);
+    void sessionStateChanged(const QString &sessionId, SessionState state);
     void deviceReady(const QString &sessionId, QObject *deviceRef);
 
 private:

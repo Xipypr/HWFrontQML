@@ -36,7 +36,7 @@ QString SessionManager::createSession(const QString &target)
         }
         entry->session.state = state;
         m_sessionsModel.setSessionState(sessionId, state);
-        emit sessionStateChanged(sessionId, SessionStateNs::toString(state));
+        emit sessionStateChanged(sessionId, state);
     });
     connect(core, &Core::deviceReady, this, [this, sessionId = session.sessionId](QObject *deviceRef) {
         SessionEntry *entry = findSessionEntry(sessionId);
