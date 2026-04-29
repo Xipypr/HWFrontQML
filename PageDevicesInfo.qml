@@ -104,7 +104,7 @@ Page {
         initialAlias: root.deviceAlias
         onAliasSubmitted: function(alias) {
             if (root.sessionId && root.sessionId.length > 0)
-                sessionManager.setSessionAlias(root.sessionId, alias)
+                sessionManager.setDeviceAlias(root.sessionId, alias)
         }
     }
 

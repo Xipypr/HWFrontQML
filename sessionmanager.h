@@ -25,8 +25,8 @@ public:
     Q_INVOKABLE QObject *coreForSession(const QString &sessionId) const;
     Q_INVOKABLE QStringList sessionIds() const;
     Q_INVOKABLE QStringList connectedSessionIds() const;
-    Q_INVOKABLE void setSessionAlias(const QString &sessionId, const QString &alias);
-    Q_INVOKABLE QString aliasForSession(const QString &sessionId) const;
+    Q_INVOKABLE void setDeviceAlias(const QString &sessionId, const QString &alias);
+    Q_INVOKABLE QString deviceAlias(const QString &sessionId) const;
     QAbstractListModel *sessionsModel();
 
 signals:

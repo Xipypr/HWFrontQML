@@ -30,7 +30,7 @@ public:
     void setSessionState(const QString &sessionId, SessionState state);
     void removeSession(const QString &sessionId);
     void setSessionAlias(const QString &sessionId, const QString &alias);
-    QString aliasForSession(const QString &sessionId) const;
+    QString deviceAliasForSession(const QString &sessionId) const;
     QStringList connectedSessionIds() const;
 
 private:

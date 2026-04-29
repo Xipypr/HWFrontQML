@@ -16,7 +16,7 @@ Dialog {
     focus: true
     padding: 20
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    title: "Алиас устройства"
+    title: "Псевдоним устройства"
 
     onOpened: {
         aliasField.text = initialAlias
@@ -26,13 +26,6 @@ Dialog {
 
     contentItem: ColumnLayout {
         spacing: 10
-
-        Label {
-            Layout.fillWidth: true
-            text: "Введите алиас устройства"
-            color: "#E2E8F0"
-            wrapMode: Text.WordWrap
-        }
 
         TextField {
             id: aliasField

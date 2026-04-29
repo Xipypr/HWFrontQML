@@ -138,7 +138,7 @@ Item {
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
                     if (root.hasValidSessionId(root.sessionId))
-                        sessionManager.setSessionAlias(root.sessionId, "")
+                        sessionManager.setDeviceAlias(root.sessionId, "")
                     if (root.hasValidSessionId(root.sessionId))
                         sessionManager.removeSession(root.sessionId)
                     root.sessionId = ""
@@ -155,7 +155,7 @@ Item {
         initialAlias: root.deviceAlias
         onAliasSubmitted: function(alias) {
             if (root.hasValidSessionId(root.sessionId))
-                sessionManager.setSessionAlias(root.sessionId, alias)
+                sessionManager.setDeviceAlias(root.sessionId, alias)
         }
     }
 

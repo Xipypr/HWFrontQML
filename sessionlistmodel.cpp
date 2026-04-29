@@ -95,7 +95,7 @@ void SessionListModel::setSessionAlias(const QString &sessionId, const QString &
     emit dataChanged(index(idx, 0), index(idx, 0));
 }
 
-QString SessionListModel::aliasForSession(const QString &sessionId) const
+QString SessionListModel::deviceAliasForSession(const QString &sessionId) const
 {
     const int idx = indexOf(sessionId);
     if (idx < 0) {
