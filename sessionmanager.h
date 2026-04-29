@@ -38,7 +38,7 @@ signals:
     void deviceReady(const QString &sessionId, QObject *deviceRef);
 
 private:
-    QString createSessionInternal(const QString &target, bool startRequest);
+    QString createSessionInternal(const QString &target);
 
     struct SessionEntry {
         Session session;

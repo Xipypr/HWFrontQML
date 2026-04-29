@@ -1,21 +1,8 @@
 #include <QMetaEnum>
 #include "sessionmanager.h"
 
-namespace {
-// Creates a new Session and applies target-related fields in one place to avoid
-// repeating this initialization in ID-collision retry paths.
-Session makeSessionForTarget(const QString &target)
-{
-    Session session;
-    session.target = target;
-    session.displayName = target;
-    return session;
-}
-}
-
 SessionManager::SessionManager(QObject *parent)
     : QObject(parent)
-    , m_sessionsModel()
 {
 }
 
@@ -33,20 +20,22 @@ SessionManager::~SessionManager()
 
 QString SessionManager::createSession(const QString &target)
 {
-    return createSessionInternal(target, true);
+    return createSessionInternal(target);
 }
 
 QString SessionManager::appendSession()
 {
-    return createSessionInternal(QString(), false);
+    return createSessionInternal(QString());
 }
 
-QString SessionManager::createSessionInternal(const QString &target, bool startRequest)
+QString SessionManager::createSessionInternal(const QString &target)
 {
-    Session session = makeSessionForTarget(target);
+    Session session;
+    session.target = target;
 
     while (m_sessions.contains(session.sessionId)) {
-        session = makeSessionForTarget(target);
+        session = Session();
+        session.target = target;
     }
 
     Core *core = new Core(this);
@@ -91,9 +80,6 @@ QString SessionManager::createSessionInternal(const QString &target, bool startR
     emit sessionCreated(session.sessionId);
     emit sessionIdsChanged();
 
-    if (startRequest) {
-        core->onMakeGetRequest(target);
-    }
     return session.sessionId;
 }
 

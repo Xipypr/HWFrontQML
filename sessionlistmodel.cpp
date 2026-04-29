@@ -71,6 +71,8 @@ void SessionListModel::setSessionState(const QString &sessionId, const QString &
 
     Session &row = m_rows[idx];
     row.displayName = row.displayName.isEmpty() ? row.target : row.displayName;
+    // sessionStateChanged comes as a string key (e.g. "connected"), so we
+    // resolve it via Qt meta-enum and store the corresponding SessionState.
     const QMetaEnum enumMeta = QMetaEnum::fromType<SessionState>();
     row.state = static_cast<SessionState>(enumMeta.keyToValue(state.toLatin1().constData()));
     emit dataChanged(index(idx, 0), index(idx, 0));
