@@ -9,12 +9,13 @@ ToolBar {
     property color indicatorColor: "#22C55E"
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
+    property bool showHomeButton: false
     signal clicked()
     signal homeClicked()
 
     implicitHeight: 56
     horizontalPadding: 16
-    verticalPadding: 8
+    verticalPadding: 0
 
     background: Rectangle {
         color: headerTap.pressed ? root.pressedBackgroundColor : root.backgroundColor
@@ -28,6 +29,7 @@ ToolBar {
         spacing: 12
 
         ToolButton {
+            visible: root.showHomeButton
             id: homeButton
             text: "⌂"
             Layout.preferredWidth: root.height

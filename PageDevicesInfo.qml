@@ -69,6 +69,7 @@ Page {
     header: DeviceStatusHeader {
         width: root.width
         headerText: root.deviceAlias.length > 0 ? root.deviceAlias : destop_name
+        showHomeButton: true
         onClicked: {
             root.openDeviceSettingsDialog()
         }
