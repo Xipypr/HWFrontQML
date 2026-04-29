@@ -55,6 +55,7 @@ QString SessionManager::createSessionInternal(const QString &target, bool startR
         entry.session.hasDevice = true;
         entry.session.displayName = deviceRef ? deviceRef->property("name").toString() : entry.session.displayName;
         m_sessionsModel.upsertSession(entry.session);
+        emit connectedSessionIdsChanged();
         emit deviceReady(sessionId, deviceRef);
     });
 
@@ -63,6 +64,7 @@ QString SessionManager::createSessionInternal(const QString &target, bool startR
             m_sessionsModel.removeSession(sessionId);
             emit sessionRemoved(sessionId);
             emit sessionIdsChanged();
+            emit connectedSessionIdsChanged();
         }
     });
 
@@ -95,6 +97,7 @@ void SessionManager::removeSession(const QString &sessionId)
     m_sessionsModel.removeSession(sessionId);
     emit sessionRemoved(sessionId);
     emit sessionIdsChanged();
+    emit connectedSessionIdsChanged();
     entry.core->deleteLater();
 }
 
@@ -106,6 +109,18 @@ QObject *SessionManager::coreForSession(const QString &sessionId) const
 QStringList SessionManager::sessionIds() const
 {
     return m_sessions.keys();
+}
+
+QStringList SessionManager::connectedSessionIds() const
+{
+    QStringList ids;
+    ids.reserve(m_sessions.size());
+    for (auto it = m_sessions.constBegin(); it != m_sessions.constEnd(); ++it) {
+        if (it.value().session.hasDevice) {
+            ids.push_back(it.key());
+        }
+    }
+    return ids;
 }
 
 QAbstractListModel *SessionManager::sessionsModel()

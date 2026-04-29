@@ -13,6 +13,7 @@ class SessionManager : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QStringList sessionIds READ sessionIds NOTIFY sessionIdsChanged)
+    Q_PROPERTY(QStringList connectedSessionIds READ connectedSessionIds NOTIFY connectedSessionIdsChanged)
     Q_PROPERTY(QAbstractListModel *sessionsModel READ sessionsModel NOTIFY sessionsModelChanged)
 
 public:
@@ -24,10 +25,12 @@ public:
     Q_INVOKABLE void removeSession(const QString &sessionId);
     Q_INVOKABLE QObject *coreForSession(const QString &sessionId) const;
     Q_INVOKABLE QStringList sessionIds() const;
+    Q_INVOKABLE QStringList connectedSessionIds() const;
     QAbstractListModel *sessionsModel();
 
 signals:
     void sessionIdsChanged();
+    void connectedSessionIdsChanged();
     void sessionsModelChanged();
     void sessionCreated(const QString &sessionId);
     void sessionRemoved(const QString &sessionId);

@@ -19,13 +19,10 @@ ApplicationWindow {
         }
 
         Repeater {
-            model: sessionManager.sessionsModel
+            model: sessionManager.connectedSessionIds
 
-            delegate: Loader {
-                active: model.hasDevice
-                sourceComponent: PageDevicesInfo {
-                    sessionId: model.sessionId
-                }
+            delegate: PageDevicesInfo {
+                sessionId: modelData
             }
         }
     }
