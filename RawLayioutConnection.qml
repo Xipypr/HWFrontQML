@@ -18,6 +18,10 @@ Item {
     signal connectionStateChanged(bool allowDevicePageActivation)
     signal sessionSelected(string sessionId)
 
+    function hasValidSessionId(sessionId) {
+        return !!sessionId && sessionId.length > 0
+    }
+
     ColumnLayout {
         id: contentLayout
         anchors.top: parent.top
@@ -52,7 +56,7 @@ Item {
                 connected: root.connectionInitialized === 1
                 deviceName: root.connectedDeviceName
                 onDeviceLabelClicked: {
-                    if (root.sessionId && root.sessionId.length > 0)
+                    if (root.hasValidSessionId(root.sessionId))
                         root.sessionSelected(root.sessionId)
                 }
             }
@@ -77,12 +81,12 @@ Item {
                 }
 
                 function sendRequest(){
-                    if (!root.sessionId || root.sessionId.length === 0) {
+                    if (!root.hasValidSessionId(root.sessionId)) {
                         root.sessionId = sessionManager.createSession(hostInfo.inputText)
                     }
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
-                    if (root.sessionId && root.sessionId.length > 0) {
+                    if (root.hasValidSessionId(root.sessionId)) {
                         const sessionCore = sessionManager.coreForSession(root.sessionId)
                         if (sessionCore)
                             sessionCore.onMakeGetRequest(hostInfo.inputText)
@@ -129,7 +133,7 @@ Item {
                     connectionInitialized = 0
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
-                    if (root.sessionId && root.sessionId.length > 0)
+                    if (root.hasValidSessionId(root.sessionId))
                         sessionManager.removeSession(root.sessionId)
                     root.sessionId = ""
                     root.connectionStateChanged(false)
