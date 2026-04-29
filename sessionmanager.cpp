@@ -38,6 +38,7 @@ QString SessionManager::createSession(const QString &target)
         m_sessionsModel.setSessionState(sessionId, state);
         emit sessionStateChanged(sessionId, state);
     });
+
     connect(core, &Core::deviceReady, this, [this, sessionId = session.sessionId](QObject *deviceRef) {
         SessionEntry *entry = findSessionEntry(sessionId);
         if (!entry) {
@@ -101,6 +102,7 @@ QStringList SessionManager::sessionIds() const
 
 QStringList SessionManager::connectedSessionIds() const
 {
+    //To avoid creating pages for empty devices we filter model to find only existing ones
     QStringList ids;
     ids.reserve(m_sessions.size());
     for (auto it = m_sessions.constBegin(); it != m_sessions.constEnd(); ++it) {
