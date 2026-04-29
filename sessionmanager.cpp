@@ -3,11 +3,18 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QSettings>
+#include <QDir>
+#include <QFile>
+#include <QFileInfo>
+#include <QStandardPaths>
 #include <QSet>
 
 namespace {
-constexpr auto kSessionsStateKey = "sessions/state";
+QString sessionsStateFilePath()
+{
+    const QString appDataDir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    return appDataDir + QStringLiteral("/sessions.json");
+}
 
 }
 
@@ -163,19 +170,29 @@ void SessionManager::saveSessionsState() const
         sessions.append(object);
     }
 
-    QSettings settings;
-    settings.setValue(QString::fromLatin1(kSessionsStateKey), QString::fromUtf8(QJsonDocument(sessions).toJson(QJsonDocument::Compact)));
+    const QString filePath = sessionsStateFilePath();
+    const QFileInfo info(filePath);
+    QDir().mkpath(info.absolutePath());
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+        return;
+    }
+
+    file.write(QJsonDocument(sessions).toJson(QJsonDocument::Compact));
+    file.close();
 }
 
 void SessionManager::restoreSessionsState()
 {
-    QSettings settings;
-    const QString serialized = settings.value(QString::fromLatin1(kSessionsStateKey)).toString();
-    if (serialized.isEmpty()) {
+    QFile file(sessionsStateFilePath());
+    if (!file.open(QIODevice::ReadOnly)) {
         return;
     }
+    const QByteArray serialized = file.readAll();
+    file.close();
 
-    const QJsonDocument document = QJsonDocument::fromJson(serialized.toUtf8());
+    const QJsonDocument document = QJsonDocument::fromJson(serialized);
     if (!document.isArray()) {
         return;
     }
@@ -215,12 +232,6 @@ void SessionManager::restoreSessionsState()
 
     emit sessionIdsChanged();
     emit connectedSessionIdsChanged();
-}
-
-void SessionManager::clearSavedSessionsState()
-{
-    QSettings settings;
-    settings.remove(QString::fromLatin1(kSessionsStateKey));
 }
 
 SessionManager::SessionEntry *SessionManager::findSessionEntry(const QString &sessionId)

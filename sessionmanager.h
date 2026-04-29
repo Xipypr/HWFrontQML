@@ -29,7 +29,6 @@ public:
     Q_INVOKABLE QString deviceAlias(const QString &sessionId) const;
     Q_INVOKABLE void saveSessionsState() const;
     Q_INVOKABLE void restoreSessionsState();
-    Q_INVOKABLE void clearSavedSessionsState();
     QAbstractListModel *sessionsModel();
 
 signals:
