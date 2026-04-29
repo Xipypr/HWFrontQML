@@ -45,6 +45,8 @@ private:
         Core *core = nullptr;
     };
 
+    SessionEntry *findSessionEntry(const QString &sessionId);
+
     QMap<QString, SessionEntry> m_sessions;
     SessionListModel m_sessionsModel;
 };

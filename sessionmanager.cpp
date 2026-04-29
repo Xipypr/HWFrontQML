@@ -52,25 +52,23 @@ QString SessionManager::createSessionInternal(const QString &target, bool startR
     Core *core = new Core(this);
 
     connect(core, &Core::sessionStateChanged, this, [this, sessionId = session.sessionId](const QString &state) {
-        auto it = m_sessions.find(sessionId);
-        if (it == m_sessions.end()) {
+        SessionEntry *entry = findSessionEntry(sessionId);
+        if (!entry) {
             return;
         }
-        SessionEntry &entry = it.value();
         const QMetaEnum enumMeta = QMetaEnum::fromType<SessionState>();
-        entry.session.state = static_cast<SessionState>(enumMeta.keyToValue(state.toLatin1().constData()));
+        entry->session.state = static_cast<SessionState>(enumMeta.keyToValue(state.toLatin1().constData()));
         m_sessionsModel.setSessionState(sessionId, state);
         emit sessionStateChanged(sessionId, state);
     });
     connect(core, &Core::deviceReady, this, [this, sessionId = session.sessionId](QObject *deviceRef) {
-        auto it = m_sessions.find(sessionId);
-        if (it == m_sessions.end()) {
+        SessionEntry *entry = findSessionEntry(sessionId);
+        if (!entry) {
             return;
         }
-        SessionEntry &entry = it.value();
-        entry.session.hasDevice = true;
-        entry.session.displayName = deviceRef ? deviceRef->property("name").toString() : entry.session.displayName;
-        m_sessionsModel.upsertSession(entry.session);
+        entry->session.hasDevice = true;
+        entry->session.displayName = deviceRef ? deviceRef->property("name").toString() : entry->session.displayName;
+        m_sessionsModel.upsertSession(entry->session);
         emit connectedSessionIdsChanged();
         emit deviceReady(sessionId, deviceRef);
     });
@@ -142,4 +140,13 @@ QStringList SessionManager::connectedSessionIds() const
 QAbstractListModel *SessionManager::sessionsModel()
 {
     return &m_sessionsModel;
+}
+
+SessionManager::SessionEntry *SessionManager::findSessionEntry(const QString &sessionId)
+{
+    // We intentionally avoid m_sessions[sessionId] here: operator[] inserts a
+    // default element for missing keys, which can resurrect a removed session
+    // when delayed async signals arrive.
+    auto it = m_sessions.find(sessionId);
+    return it == m_sessions.end() ? nullptr : &it.value();
 }
