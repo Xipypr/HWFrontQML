@@ -155,12 +155,17 @@ Page {
                 if (!root.sessionId || root.sessionId !== sessionId)
                     return
 
+                if (!deviceRef)
+                    return
+
                 desktop_device = deviceRef
                 if (desktop_device.type === Device.DESKTOP)
                 {
-                    destop_name = desktop_device.name
-                    objectsArray = desktop_device.devicesList()
-                    parseDevices()
+                    destop_name = desktop_device.name || ""
+                    if (typeof desktop_device.devicesList === "function") {
+                        objectsArray = desktop_device.devicesList()
+                        parseDevices()
+                    }
                 }
             }
 

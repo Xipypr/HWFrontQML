@@ -146,7 +146,11 @@ Item {
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
                 connectionInitialized = 1
-                root.connectedDeviceName = deviceRef.name
+                if (!deviceRef) {
+                    root.connectedDeviceName = hostInfo.inputText
+                    return
+                }
+                root.connectedDeviceName = deviceRef && deviceRef.name ? deviceRef.name : hostInfo.inputText
                 root.sessionSelected(sessionId)
             }
         }
