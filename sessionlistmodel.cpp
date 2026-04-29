@@ -28,6 +28,8 @@ QVariant SessionListModel::data(const QModelIndex &index, int role) const
         return row.target;
     case DisplayNameRole:
         return row.displayName;
+    case AliasRole:
+        return row.alias;
     case StateRole:
         return SessionStateNs::toString(row.state);
     case HasDeviceRole:
@@ -43,6 +45,7 @@ QHash<int, QByteArray> SessionListModel::roleNames() const
         { SessionIdRole, "sessionId" },
         { TargetRole, "target" },
         { DisplayNameRole, "displayName" },
+        { AliasRole, "alias" },
         { StateRole, "state" },
         { HasDeviceRole, "hasDevice" }
     };
@@ -73,6 +76,33 @@ void SessionListModel::setSessionState(const QString &sessionId, SessionState st
     row.displayName = row.displayName.isEmpty() ? row.target : row.displayName;
     row.state = state;
     emit dataChanged(index(idx, 0), index(idx, 0));
+}
+
+
+void SessionListModel::setSessionAlias(const QString &sessionId, const QString &alias)
+{
+    const int idx = indexOf(sessionId);
+    if (idx < 0) {
+        return;
+    }
+
+    Session &row = m_rows[idx];
+    if (row.alias == alias) {
+        return;
+    }
+
+    row.alias = alias;
+    emit dataChanged(index(idx, 0), index(idx, 0));
+}
+
+QString SessionListModel::aliasForSession(const QString &sessionId) const
+{
+    const int idx = indexOf(sessionId);
+    if (idx < 0) {
+        return {};
+    }
+
+    return m_rows.at(idx).alias;
 }
 
 void SessionListModel::removeSession(const QString &sessionId)

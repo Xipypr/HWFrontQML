@@ -7,8 +7,6 @@ Page {
     signal connectionStateChanged(bool allowDevicePageActivation)
     signal settingsRequested()
     signal sessionSelected(string sessionId)
-    signal deviceAliasChangedByUser(string sessionId, string alias)
-    property var aliasForSessionCallback: null
 
     header: DeviceStatusHeader {
         width: root.width
@@ -34,11 +32,10 @@ Page {
             width: listView.width
             height: implicitHeight
             sessionId: model.sessionId
-            deviceAlias: model.sessionId && model.sessionId.length > 0 && root.aliasForSessionCallback ? root.aliasForSessionCallback(model.sessionId) : ""
+            deviceAlias: model.alias
             onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
             onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
             onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
-            onDeviceAliasChangedByUser: (sessionId, alias) => root.deviceAliasChangedByUser(sessionId, alias)
         }
 
         model: sessionManager.sessionsModel
