@@ -37,6 +37,7 @@ signals:
     void sessionRemoved(const QString &sessionId);
     void sessionStateChanged(const QString &sessionId, SessionState state);
     void deviceReady(const QString &sessionId, QObject *deviceRef);
+    void sessionAliasChanged(const QString &sessionId, const QString &alias);
 
 private:
     struct SessionEntry {

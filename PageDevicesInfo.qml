@@ -130,6 +130,16 @@ Page {
         }
     }
 
+
+    Connections {
+        target: sessionManager
+
+        function onSessionAliasChanged(sessionId, alias) {
+            if (root.sessionId === sessionId)
+                root.deviceAlias = alias
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 16

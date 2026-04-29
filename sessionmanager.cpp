@@ -120,6 +120,7 @@ void SessionManager::setSessionAlias(const QString &sessionId, const QString &al
 
     entry->session.alias = alias;
     m_sessionsModel.setSessionAlias(sessionId, alias);
+    emit sessionAliasChanged(sessionId, alias);
 }
 
 QString SessionManager::aliasForSession(const QString &sessionId) const
