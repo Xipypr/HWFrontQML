@@ -35,8 +35,6 @@ public:
 
 private:
     int indexOf(const QString &sessionId) const;
-    Session *findMutableBySessionId(const QString &sessionId);
-    const Session *findBySessionId(const QString &sessionId) const;
 
     QVector<Session> m_rows;
 };

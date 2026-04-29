@@ -67,44 +67,42 @@ void SessionListModel::upsertSession(const Session &session)
 
 void SessionListModel::setSessionState(const QString &sessionId, SessionState state)
 {
-    Session *row = findMutableBySessionId(sessionId);
-    if (!row) {
+    const int idx = indexOf(sessionId);
+    if (idx < 0) {
         return;
     }
 
-    row->displayName = row->displayName.isEmpty() ? row->target : row->displayName;
-    row->state = state;
-
-    const int idx = indexOf(sessionId);
+    Session &row = m_rows[idx];
+    row.displayName = row.displayName.isEmpty() ? row.target : row.displayName;
+    row.state = state;
     emit dataChanged(index(idx, 0), index(idx, 0));
 }
 
 
 void SessionListModel::setSessionAlias(const QString &sessionId, const QString &alias)
 {
-    Session *row = findMutableBySessionId(sessionId);
-    if (!row) {
-        return;
-    }
-
-    if (row->alias == alias) {
-        return;
-    }
-
-    row->alias = alias;
-
     const int idx = indexOf(sessionId);
+    if (idx < 0) {
+        return;
+    }
+
+    Session &row = m_rows[idx];
+    if (row.alias == alias) {
+        return;
+    }
+
+    row.alias = alias;
     emit dataChanged(index(idx, 0), index(idx, 0));
 }
 
 QString SessionListModel::aliasForSession(const QString &sessionId) const
 {
-    const Session *row = findBySessionId(sessionId);
-    if (!row) {
+    const int idx = indexOf(sessionId);
+    if (idx < 0) {
         return {};
     }
 
-    return row->alias;
+    return m_rows.at(idx).alias;
 }
 
 void SessionListModel::removeSession(const QString &sessionId)
@@ -142,24 +140,4 @@ int SessionListModel::indexOf(const QString &sessionId) const
     }
 
     return -1;
-}
-
-Session *SessionListModel::findMutableBySessionId(const QString &sessionId)
-{
-    const int idx = indexOf(sessionId);
-    if (idx < 0) {
-        return nullptr;
-    }
-
-    return &m_rows[idx];
-}
-
-const Session *SessionListModel::findBySessionId(const QString &sessionId) const
-{
-    const int idx = indexOf(sessionId);
-    if (idx < 0) {
-        return nullptr;
-    }
-
-    return &m_rows.at(idx);
 }
