@@ -19,7 +19,7 @@ Item {
     signal sessionSelected(string sessionId)
 
     function hasValidSessionId(sessionId) {
-        return sessionId !== null && sessionId !== undefined && sessionId.length > 0
+        return !!sessionId && sessionId.length > 0
     }
 
     ColumnLayout {
