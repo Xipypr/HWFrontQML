@@ -29,13 +29,9 @@ public:
     void removeSession(const QString &sessionId);
 
 private:
-    struct SessionRow {
-        Session session;
-    };
-
     int indexOf(const QString &sessionId) const;
 
-    QVector<SessionRow> m_rows;
+    QVector<Session> m_rows;
 };
 
 #endif // SESSIONLISTMODEL_H

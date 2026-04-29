@@ -20,16 +20,16 @@ QVariant SessionListModel::data(const QModelIndex &index, int role) const
         return {};
     }
 
-    const SessionRow &row = m_rows.at(index.row());
+    const Session &row = m_rows.at(index.row());
     switch (role) {
     case SessionIdRole:
-        return row.session.sessionId;
+        return row.sessionId;
     case TargetRole:
-        return row.session.target;
+        return row.target;
     case DisplayNameRole:
-        return row.session.displayName;
+        return row.displayName;
     case StateRole:
-        return SessionStateNs::toString(row.session.state);
+        return SessionStateNs::toString(row.state);
     default:
         return {};
     }
@@ -49,14 +49,13 @@ void SessionListModel::upsertSession(const Session &session)
 {
     const int idx = indexOf(session.sessionId);
     if (idx >= 0) {
-        SessionRow &row = m_rows[idx];
-        row.session = session;
+        m_rows[idx] = session;
         emit dataChanged(index(idx, 0), index(idx, 0));
         return;
     }
 
     beginInsertRows(QModelIndex(), m_rows.size(), m_rows.size());
-    m_rows.push_back({session});
+    m_rows.push_back(session);
     endInsertRows();
 }
 
@@ -67,10 +66,10 @@ void SessionListModel::setSessionState(const QString &sessionId, const QString &
         return;
     }
 
-    SessionRow &row = m_rows[idx];
-    row.session.displayName = row.session.displayName.isEmpty() ? row.session.target : row.session.displayName;
+    Session &row = m_rows[idx];
+    row.displayName = row.displayName.isEmpty() ? row.target : row.displayName;
     const QMetaEnum enumMeta = QMetaEnum::fromType<SessionState>();
-    row.session.state = static_cast<SessionState>(enumMeta.keyToValue(state.toLatin1().constData()));
+    row.state = static_cast<SessionState>(enumMeta.keyToValue(state.toLatin1().constData()));
     emit dataChanged(index(idx, 0), index(idx, 0));
 }
 
@@ -89,7 +88,7 @@ void SessionListModel::removeSession(const QString &sessionId)
 int SessionListModel::indexOf(const QString &sessionId) const
 {
     for (int i = 0; i < m_rows.size(); ++i) {
-        if (m_rows.at(i).session.sessionId == sessionId) {
+        if (m_rows.at(i).sessionId == sessionId) {
             return i;
         }
     }
