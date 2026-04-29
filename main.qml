@@ -10,13 +10,37 @@ ApplicationWindow {
     title: qsTr("Hardware Monitor")
     id: root
 
+    property var deviceAliasBySession: ({})
+
+    function aliasForSession(sessionId) {
+        if (!sessionId || sessionId.length === 0)
+            return ""
+
+        return deviceAliasBySession[sessionId] || ""
+    }
+
+    function setAliasForSession(sessionId, alias) {
+        if (!sessionId || sessionId.length === 0)
+            return
+
+        const mapCopy = Object.assign({}, deviceAliasBySession)
+        if (alias && alias.length > 0)
+            mapCopy[sessionId] = alias
+        else
+            delete mapCopy[sessionId]
+
+        deviceAliasBySession = mapCopy
+    }
+
     SwipeView {
         id: swipeView
         anchors.fill: parent
 
         PageAuthForm {
             id: pageAuth
+            aliasForSessionCallback: root.aliasForSession
             onSessionSelected: (sessionId) => swipeToSessionPage(sessionId)
+            onDeviceAliasChangedByUser: (sessionId, alias) => setAliasForSession(sessionId, alias)
         }
 
         Repeater {
@@ -24,6 +48,8 @@ ApplicationWindow {
 
             delegate: PageDevicesInfo {
                 sessionId: modelData
+                deviceAlias: root.aliasForSession(modelData)
+                onDeviceAliasChangedByUser: (sessionId, alias) => root.setAliasForSession(sessionId, alias)
             }
         }
     }

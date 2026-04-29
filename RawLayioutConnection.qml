@@ -10,6 +10,8 @@ Item {
     property bool compactMode: width < 560
     property string connectedDeviceName: ""
     property string deviceAlias: ""
+
+    signal deviceAliasChangedByUser(string sessionId, string alias)
     property bool awaitingDeviceCreation: false
     property string sessionId: ""
 
@@ -138,6 +140,8 @@ Item {
                     root.connectedDeviceName = ""
                     root.deviceAlias = ""
                     if (root.hasValidSessionId(root.sessionId))
+                        root.deviceAliasChangedByUser(root.sessionId, "")
+                    if (root.hasValidSessionId(root.sessionId))
                         sessionManager.removeSession(root.sessionId)
                     root.sessionId = ""
                     root.connectionStateChanged(false)
@@ -153,6 +157,8 @@ Item {
         initialAlias: root.deviceAlias
         onAliasSubmitted: function(alias) {
             root.deviceAlias = alias
+            if (root.hasValidSessionId(root.sessionId))
+                root.deviceAliasChangedByUser(root.sessionId, alias)
         }
     }
 
