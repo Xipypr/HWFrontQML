@@ -6,7 +6,16 @@ ToolBar {
     id: root
     property string headerText: ""
     property bool showIndicator: true
-    property color indicatorColor: "#22C55E"
+    property string sessionState: "idle"
+    property color indicatorColor: sessionState === "connected"
+                                   ? "#22C55E"
+                                   : sessionState === "connecting"
+                                     ? "#F59E0B"
+                                     : sessionState === "error"
+                                       ? "#EF4444"
+                                       : sessionState === "disconnected"
+                                         ? "#94A3B8"
+                                         : "#60A5FA"
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
     property bool showHomeButton: false
@@ -72,7 +81,7 @@ ToolBar {
             color: root.indicatorColor
 
             SequentialAnimation on opacity {
-                running: true
+                running: root.sessionState === "connecting"
                 loops: Animation.Infinite
                 NumberAnimation { to: 0.35; duration: 700; easing.type: Easing.InOutQuad }
                 NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }

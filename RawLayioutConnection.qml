@@ -10,6 +10,7 @@ Item {
     property bool compactMode: width < 560
     property string connectedDeviceName: ""
     property string deviceAlias: ""
+    property string sessionState: "idle"
 
     property bool awaitingDeviceCreation: false
     property string sessionId: ""
@@ -58,6 +59,7 @@ Item {
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
                 connected: root.connectionInitialized === 1
                 deviceName: root.deviceAlias.length > 0 ? root.deviceAlias : root.connectedDeviceName
+                sessionState: root.sessionState
                 onDeviceLabelClicked: {
                     if (root.hasValidSessionId(root.sessionId))
                         root.sessionSelected(root.sessionId)
@@ -173,6 +175,11 @@ Item {
                 root.connectedDeviceName = deviceRef.name
                 if (sessionManager.sessionsModel.rowCount() === 1)
                     root.sessionSelected(sessionId)
+            }
+
+            function onSessionStateChanged(sessionId, state) {
+                if (root.sessionId === sessionId)
+                    root.sessionState = state
             }
         }
     }

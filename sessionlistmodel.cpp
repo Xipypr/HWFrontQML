@@ -105,6 +105,16 @@ QString SessionListModel::deviceAliasForSession(const QString &sessionId) const
     return m_rows.at(idx).alias;
 }
 
+QString SessionListModel::stateForSession(const QString &sessionId) const
+{
+    const int idx = indexOf(sessionId);
+    if (idx < 0) {
+        return {};
+    }
+
+    return SessionStateNs::toString(m_rows.at(idx).state);
+}
+
 void SessionListModel::removeSession(const QString &sessionId)
 {
     const int idx = indexOf(sessionId);

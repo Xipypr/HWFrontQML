@@ -5,6 +5,7 @@ Item {
     id: root
 
     property bool connected: false
+    property string sessionState: "idle"
     property string deviceName: ""
     property alias inputText: hostInput.text
     readonly property bool acceptableInput: hostInput.acceptableInput
@@ -54,10 +55,18 @@ Item {
             width: 10
             height: 10
             radius: width / 2
-            color: "#22C55E"
+            color: root.sessionState === "connected"
+                   ? "#22C55E"
+                   : root.sessionState === "connecting"
+                     ? "#F59E0B"
+                     : root.sessionState === "error"
+                       ? "#EF4444"
+                       : root.sessionState === "disconnected"
+                         ? "#94A3B8"
+                         : "#60A5FA"
 
             SequentialAnimation on opacity {
-                running: true
+                running: root.sessionState === "connecting"
                 loops: Animation.Infinite
                 NumberAnimation { to: 0.35; duration: 700; easing.type: Easing.InOutQuad }
                 NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }

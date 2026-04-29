@@ -9,6 +9,7 @@ Page {
     property var objectsArray: []
     property var desktop_device: ({})
     property string sessionId: ""
+    property string sessionState: "idle"
     property string destop_name: ""
     property string deviceAlias: ""
 
@@ -64,11 +65,16 @@ Page {
         deviceSettingsDialogLoader.pendingOpen = true
     }
 
-    Component.onCompleted: resetDefaultWidgets()
+    Component.onCompleted: {
+        resetDefaultWidgets()
+        if (root.sessionId.length > 0)
+            root.sessionState = sessionManager.sessionState(root.sessionId)
+    }
 
     header: DeviceStatusHeader {
         width: root.width
         headerText: root.deviceAlias.length > 0 ? root.deviceAlias : destop_name
+        sessionState: root.sessionState
         showHomeButton: true
         onClicked: {
             root.openDeviceSettingsDialog()
@@ -140,6 +146,11 @@ Page {
         function onSessionAliasChanged(sessionId, alias) {
             if (root.sessionId === sessionId)
                 root.deviceAlias = alias
+        }
+
+        function onSessionStateChanged(sessionId, state) {
+            if (root.sessionId === sessionId)
+                root.sessionState = state
         }
     }
 

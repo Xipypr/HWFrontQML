@@ -33,6 +33,7 @@ Page {
             height: implicitHeight
             sessionId: model.sessionId
             deviceAlias: model.alias
+            sessionState: model.state
             onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
             onConnectionStateChanged: (allowDevicePageActivation) => root.connectionStateChanged(allowDevicePageActivation)
             onSessionSelected: (sessionId) => root.sessionSelected(sessionId)
