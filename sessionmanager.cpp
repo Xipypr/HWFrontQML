@@ -102,15 +102,8 @@ QStringList SessionManager::sessionIds() const
 
 QStringList SessionManager::connectedSessionIds() const
 {
-    //To avoid creating pages for empty devices we filter model to find only existing ones
-    QStringList ids;
-    ids.reserve(m_sessions.size());
-    for (auto it = m_sessions.constBegin(); it != m_sessions.constEnd(); ++it) {
-        if (it.value().session.hasDevice) {
-            ids.push_back(it.key());
-        }
-    }
-    return ids;
+    // Keep the same chronological order as SessionListModel (oldest -> newest).
+    return m_sessionsModel.connectedSessionIds();
 }
 
 QAbstractListModel *SessionManager::sessionsModel()
