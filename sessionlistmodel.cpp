@@ -30,10 +30,6 @@ QVariant SessionListModel::data(const QModelIndex &index, int role) const
         return row.session.displayName;
     case StateRole:
         return SessionStateNs::toString(row.session.state);
-    case HasDeviceRole:
-        return row.hasDevice;
-    case LastErrorRole:
-        return row.lastError;
     default:
         return {};
     }
@@ -45,30 +41,26 @@ QHash<int, QByteArray> SessionListModel::roleNames() const
         { SessionIdRole, "sessionId" },
         { TargetRole, "target" },
         { DisplayNameRole, "displayName" },
-        { StateRole, "state" },
-        { HasDeviceRole, "hasDevice" },
-        { LastErrorRole, "lastError" }
+        { StateRole, "state" }
     };
 }
 
-void SessionListModel::upsertSession(const Session &session, bool hasDevice, const QString &lastError)
+void SessionListModel::upsertSession(const Session &session)
 {
     const int idx = indexOf(session.sessionId);
     if (idx >= 0) {
         SessionRow &row = m_rows[idx];
         row.session = session;
-        row.hasDevice = hasDevice;
-        row.lastError = lastError;
         emit dataChanged(index(idx, 0), index(idx, 0));
         return;
     }
 
     beginInsertRows(QModelIndex(), m_rows.size(), m_rows.size());
-    m_rows.push_back({session, hasDevice, lastError});
+    m_rows.push_back({session});
     endInsertRows();
 }
 
-void SessionListModel::setSessionState(const QString &sessionId, const QString &state, const QString &lastError)
+void SessionListModel::setSessionState(const QString &sessionId, const QString &state)
 {
     const int idx = indexOf(sessionId);
     if (idx < 0) {
@@ -76,25 +68,9 @@ void SessionListModel::setSessionState(const QString &sessionId, const QString &
     }
 
     SessionRow &row = m_rows[idx];
-    row.lastError = lastError;
     row.session.displayName = row.session.displayName.isEmpty() ? row.session.target : row.session.displayName;
     const QMetaEnum enumMeta = QMetaEnum::fromType<SessionState>();
     row.session.state = static_cast<SessionState>(enumMeta.keyToValue(state.toLatin1().constData()));
-    emit dataChanged(index(idx, 0), index(idx, 0));
-}
-
-void SessionListModel::setDeviceReady(const QString &sessionId, const QString &displayName)
-{
-    const int idx = indexOf(sessionId);
-    if (idx < 0) {
-        return;
-    }
-
-    SessionRow &row = m_rows[idx];
-    row.hasDevice = true;
-    if (!displayName.isEmpty()) {
-        row.session.displayName = displayName;
-    }
     emit dataChanged(index(idx, 0), index(idx, 0));
 }
 

@@ -40,8 +40,6 @@ private:
     struct SessionEntry {
         Session session;
         Core *core = nullptr;
-        bool hasDevice = false;
-        QString lastError;
     };
 
     QMap<QString, SessionEntry> m_sessions;

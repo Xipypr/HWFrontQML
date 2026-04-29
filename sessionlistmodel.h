@@ -15,9 +15,7 @@ public:
         SessionIdRole = Qt::UserRole + 1,
         TargetRole,
         DisplayNameRole,
-        StateRole,
-        HasDeviceRole,
-        LastErrorRole
+        StateRole
     };
 
     explicit SessionListModel(QObject *parent = nullptr);
@@ -26,16 +24,13 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void upsertSession(const Session &session, bool hasDevice, const QString &lastError);
-    void setSessionState(const QString &sessionId, const QString &state, const QString &lastError = QString());
-    void setDeviceReady(const QString &sessionId, const QString &displayName);
+    void upsertSession(const Session &session);
+    void setSessionState(const QString &sessionId, const QString &state);
     void removeSession(const QString &sessionId);
 
 private:
     struct SessionRow {
         Session session;
-        bool hasDevice = false;
-        QString lastError;
     };
 
     int indexOf(const QString &sessionId) const;
