@@ -24,7 +24,6 @@ public:
     Q_INVOKABLE void removeSession(const QString &sessionId);
     Q_INVOKABLE QObject *coreForSession(const QString &sessionId) const;
     Q_INVOKABLE QStringList sessionIds() const;
-    Q_INVOKABLE bool hasDeviceForSession(const QString &sessionId) const;
     QAbstractListModel *sessionsModel();
 
 signals:

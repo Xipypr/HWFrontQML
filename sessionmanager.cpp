@@ -111,11 +111,6 @@ QStringList SessionManager::sessionIds() const
     return m_sessions.keys();
 }
 
-bool SessionManager::hasDeviceForSession(const QString &sessionId) const
-{
-    return m_sessions.value(sessionId, SessionEntry{}).hasDevice;
-}
-
 QAbstractListModel *SessionManager::sessionsModel()
 {
     return &m_sessionsModel;
