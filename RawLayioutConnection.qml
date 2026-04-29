@@ -51,6 +51,10 @@ Item {
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
                 connected: root.connectionInitialized === 1
                 deviceName: root.connectedDeviceName
+                onDeviceLabelClicked: {
+                    if (root.sessionId && root.sessionId.length > 0)
+                        root.sessionSelected(root.sessionId)
+                }
             }
 
             Button{

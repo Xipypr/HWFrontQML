@@ -8,6 +8,7 @@ Item {
     property string deviceName: ""
     property alias inputText: hostInput.text
     readonly property bool acceptableInput: hostInput.acceptableInput
+    signal deviceLabelClicked()
 
     implicitHeight: hostInput.implicitHeight
 
@@ -66,6 +67,7 @@ Item {
             anchors.fill: parent
             hoverEnabled: true
             cursorShape: deviceNameLabel.truncated ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: root.deviceLabelClicked()
         }
 
         ToolTip.visible: cardHoverArea.containsMouse && deviceNameLabel.truncated
