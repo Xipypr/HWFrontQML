@@ -15,6 +15,7 @@ struct Session
     Q_PROPERTY(QString target MEMBER target)
     Q_PROPERTY(QString displayName MEMBER displayName)
     Q_PROPERTY(SessionState state MEMBER state)
+    Q_PROPERTY(bool hasDevice MEMBER hasDevice)
 
 public:
     Session()
@@ -26,6 +27,7 @@ public:
     QString target;
     QString displayName;
     SessionState state = SessionState::idle;
+    bool hasDevice = false;
 
     static Session createDefault()
     {
