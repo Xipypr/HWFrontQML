@@ -143,6 +143,11 @@ Page {
             if (root.sessionId === sessionId)
                 root.deviceAlias = alias
         }
+
+        function onSessionStateChanged(sessionId, state) {
+            if (root.sessionId === sessionId)
+                root.sessionState = state
+        }
     }
 
     ColumnLayout {
