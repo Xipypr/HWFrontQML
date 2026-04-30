@@ -40,12 +40,10 @@ ApplicationWindow {
         if (!sessionId || sessionId.length === 0)
             return
 
-        for (let i = 0; i < sessionManager.connectedSessionsModel.rowCount(); ++i) {
-            const row = sessionManager.connectedSessionsModel.get(i)
-            if (row.sessionId === sessionId) {
-                swipeView.currentIndex = i + 1
-                return
-            }
-        }
+        const sessionIndex = sessionManager.indexOfConnectedSession(sessionId)
+        if (sessionIndex < 0)
+            return
+
+        swipeView.currentIndex = sessionIndex + 1
     }
 }

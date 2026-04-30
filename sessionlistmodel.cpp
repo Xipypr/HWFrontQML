@@ -31,7 +31,7 @@ QVariant SessionListModel::data(const QModelIndex &index, int role) const
     case AliasRole:
         return row.alias;
     case StateRole:
-        return QVariant::fromValue(row.state);
+        return row.state;
     case HasDeviceRole:
         return row.hasDevice;
     default:

@@ -147,23 +147,27 @@ QString SessionManager::deviceAlias(const QString &sessionId) const
 }
 
 
-int SessionManager::sessionState(const QString &sessionId) const
-{
-    if (sessionId.isEmpty()) {
-        return static_cast<int>(SessionState::IDLE);
-    }
-
-    const auto it = m_sessions.constFind(sessionId);
-    if (it == m_sessions.constEnd()) {
-        return static_cast<int>(SessionState::IDLE);
-    }
-
-    return static_cast<int>(it.value().session.state);
-}
 
 QAbstractListModel *SessionManager::sessionsModel()
 {
     return &m_sessionsModel;
+}
+
+int SessionManager::indexOfConnectedSession(const QString &sessionId) const
+{
+    if (sessionId.isEmpty() || !m_connectedSessionsModel) {
+        return -1;
+    }
+
+    const int count = m_connectedSessionsModel->rowCount();
+    for (int i = 0; i < count; ++i) {
+        const QModelIndex index = m_connectedSessionsModel->index(i, 0);
+        if (m_connectedSessionsModel->data(index, SessionListModel::SessionIdRole).toString() == sessionId) {
+            return i;
+        }
+    }
+
+    return -1;
 }
 
 QAbstractItemModel *SessionManager::connectedSessionsModel()

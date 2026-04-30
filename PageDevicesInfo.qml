@@ -144,7 +144,6 @@ Page {
             if (root.sessionId === sessionId)
                 root.deviceAlias = alias
         }
-
     }
 
     ColumnLayout {
