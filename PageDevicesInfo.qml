@@ -77,7 +77,10 @@ Page {
         deviceSettingsDialogLoader.pendingOpen = true
     }
 
-    Component.onCompleted: resetDefaultWidgets()
+    Component.onCompleted: {
+        resetDefaultWidgets()
+        root.sessionState = sessionManager.sessionState(root.sessionId)
+    }
 
     header: DeviceStatusHeader {
         width: root.width
