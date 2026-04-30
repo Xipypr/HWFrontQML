@@ -146,8 +146,6 @@ QString SessionManager::deviceAlias(const QString &sessionId) const
     return m_sessionsModel.deviceAliasForSession(sessionId);
 }
 
-
-
 QAbstractListModel *SessionManager::sessionsModel()
 {
     return &m_sessionsModel;
