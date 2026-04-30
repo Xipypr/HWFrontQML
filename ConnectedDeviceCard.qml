@@ -6,6 +6,7 @@ Item {
 
     property bool connected: false
     property string deviceName: ""
+    property string sessionState: "IDLE"
     property alias inputText: hostInput.text
     readonly property bool acceptableInput: hostInput.acceptableInput
     signal deviceLabelClicked()
@@ -46,22 +47,12 @@ Item {
             text: root.deviceName
         }
 
-        Rectangle {
+        StatusIndicator {
             id: statusDot
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
             anchors.rightMargin: 10
-            width: 10
-            height: 10
-            radius: width / 2
-            color: "#22C55E"
-
-            SequentialAnimation on opacity {
-                running: true
-                loops: Animation.Infinite
-                NumberAnimation { to: 0.35; duration: 700; easing.type: Easing.InOutQuad }
-                NumberAnimation { to: 1.0; duration: 700; easing.type: Easing.InOutQuad }
-            }
+            sessionState: root.sessionState
         }
 
         MouseArea {

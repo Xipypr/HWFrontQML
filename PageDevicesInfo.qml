@@ -11,6 +11,7 @@ Page {
     property string sessionId: ""
     property string destop_name: ""
     property string deviceAlias: ""
+    property string sessionState: "IDLE"
 
     property int nextWidgetId: 1
 
@@ -18,6 +19,18 @@ Page {
 
     ListModel {
         id: widgetModel
+    }
+
+    function stateToString(state) {
+        switch (state) {
+        case 0: return "IDLE"
+        case 1: return "CONNECTING"
+        case 2: return "CONNECTED"
+        case 3: return "ERROR"
+        case 4: return "DISCONNECTED"
+        case 5: return "RECONNECTING"
+        default: return "IDLE"
+        }
     }
 
     function resetDefaultWidgets() {
@@ -70,6 +83,7 @@ Page {
         width: root.width
         headerText: root.deviceAlias.length > 0 ? root.deviceAlias : destop_name
         showHomeButton: true
+        sessionState: root.sessionState
         onClicked: {
             root.openDeviceSettingsDialog()
         }
@@ -175,6 +189,11 @@ Page {
 
         Connections {
             target: sessionManager
+
+            function onSessionStateChanged(sessionId, state) {
+                if (root.sessionId === sessionId)
+                    root.sessionState = root.stateToString(state)
+            }
 
             function onDeviceReady(sessionId, deviceRef) {
                 if (!root.sessionId || root.sessionId !== sessionId)

@@ -13,12 +13,25 @@ Item {
 
     property bool awaitingDeviceCreation: false
     property string sessionId: ""
+    property string sessionState: "IDLE"
 
     implicitHeight: contentLayout.implicitHeight + 20
 
     signal removeThisObject(bool removeConnectedDevicePage)
     signal connectionStateChanged(bool allowDevicePageActivation)
     signal sessionSelected(string sessionId)
+
+    function stateToString(state) {
+        switch (state) {
+        case 0: return "IDLE"
+        case 1: return "CONNECTING"
+        case 2: return "CONNECTED"
+        case 3: return "ERROR"
+        case 4: return "DISCONNECTED"
+        case 5: return "RECONNECTING"
+        default: return "IDLE"
+        }
+    }
 
     function hasValidSessionId(sessionId) {
         return !!sessionId && sessionId.length > 0
@@ -58,6 +71,7 @@ Item {
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
                 connected: root.connectionInitialized === 1
                 deviceName: root.deviceAlias.length > 0 ? root.deviceAlias : root.connectedDeviceName
+                sessionState: root.sessionState
                 onDeviceLabelClicked: {
                     if (root.hasValidSessionId(root.sessionId))
                         root.sessionSelected(root.sessionId)
@@ -164,6 +178,13 @@ Item {
 
         Connections{
             target: sessionManager
+
+            function onSessionStateChanged(sessionId, state) {
+                if (root.sessionId !== sessionId)
+                    return
+
+                root.sessionState = root.stateToString(state)
+            }
 
             function onDeviceReady(sessionId, deviceRef) {
                 if (!awaitingDeviceCreation || root.sessionId !== sessionId)
