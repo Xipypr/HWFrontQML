@@ -14,5 +14,6 @@
         <file>WidgetLayoutDialog.qml</file>
         <file>ConnectedDeviceCard.qml</file>
         <file>AliasInputDialog.qml</file>
+        <file>StatusIndicator.qml</file>
     </qresource>
 </RCC>
