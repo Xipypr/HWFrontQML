@@ -21,8 +21,7 @@ public slots:
     void onMakeGetRequest(const QString &target);
     void onCloseConnection();
     void onDeviceCreated(DesktopDevice *device);
-    void onConnectorError(const QString &errorText);
-    void onConnectorDisconnected();
+    void onStatusChanged(HWConnector::ConnectionStatus status);
 
 signals:
     void sessionStateChanged(SessionState state);
@@ -38,7 +37,7 @@ private:
     DeviceBuilder *m_deviceCreator;
     // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
     QPointer<DesktopDevice> m_device;
-    SessionState m_state = SessionState::idle;
+    SessionState m_state = SessionState::IDLE;
 };
 
 #endif // CORE_H
