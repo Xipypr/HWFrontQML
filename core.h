@@ -49,10 +49,12 @@ private:
             case HWConnector::ERROR:
                 return SessionState::ERROR;
         }
+
+        return SessionState::ERROR;
     }
 
     bool isValidTransition(SessionState from, SessionState to) const;
-    void setState(SessionState newState, const QString &errorText = QString());
+    void setState(SessionState newState);
 
     HWConnector *m_connector;
     DeviceBuilder *m_deviceCreator;

@@ -73,7 +73,7 @@ bool Core::isValidTransition(SessionState from, SessionState to) const
     return false;
 }
 
-void Core::setState(SessionState newState, const QString &errorText)
+void Core::setState(SessionState newState)
 {
     const SessionState oldState = m_state;
 
@@ -82,20 +82,10 @@ void Core::setState(SessionState newState, const QString &errorText)
     }
 
     if (!isValidTransition(oldState, newState)) {
-        qWarning().noquote() << QStringLiteral("Core: invalid transition %1 -> %2")
-                                    .arg(SessionStateNs::toString(oldState),
-                                         SessionStateNs::toString(newState));
         return;
     }
 
     m_state = newState;
-    qInfo().noquote() << QStringLiteral("Core: state %1 -> %2")
-                             .arg(SessionStateNs::toString(oldState),
-                                  SessionStateNs::toString(newState));
-
-    if (!errorText.isEmpty()) {
-        qWarning().noquote() << QStringLiteral("Core error: %1").arg(errorText);
-    }
 
     emit sessionStateChanged(newState);
 }
