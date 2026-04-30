@@ -12,7 +12,8 @@ enum SessionState {
     CONNECTING,
     CONNECTED,
     ERROR,
-    DISCONNECTED
+    DISCONNECTED,
+    RECONNECTING
 };
 Q_ENUM_NS(SessionState)
 

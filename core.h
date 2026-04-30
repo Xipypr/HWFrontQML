@@ -18,7 +18,7 @@ public:
     Q_INVOKABLE QObject *device() const;
 
 public slots:
-    void onMakeGetRequest(const QString &target);
+    void onStartConnection(const QString &target);
     void onCloseConnection();
     void onDeviceCreated(DesktopDevice *device);
     void onStatusChanged(HWConnector::ConnectionStatus status);
@@ -30,6 +30,27 @@ signals:
     void testSignal();
 
 private:
+    static constexpr SessionState convertConnectorEnum(HWConnector::ConnectionStatus status)
+    {
+        switch (status)
+        {
+            case HWConnector::CONNECTED:
+                return SessionState::CONNECTED;
+
+            case HWConnector::CONNECTING:
+                return SessionState::CONNECTING;
+
+            case HWConnector::DISCONNECTED:
+                return SessionState::DISCONNECTED;
+
+            case HWConnector::RECONNECTING:
+                return SessionState::RECONNECTING;
+
+            case HWConnector::ERROR:
+                return SessionState::ERROR;
+        }
+    }
+
     bool isValidTransition(SessionState from, SessionState to) const;
     void setState(SessionState newState, const QString &errorText = QString());
 

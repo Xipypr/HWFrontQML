@@ -19,15 +19,13 @@ Core::~Core()
 {
 }
 
-void Core::onMakeGetRequest(const QString &target)
+void Core::onStartConnection(const QString &target)
 {
-    setState(SessionState::CONNECTING);
     m_connector->makeGetRequest(target);
 }
 
 void Core::onCloseConnection()
 {
-    setState(SessionState::DISCONNECTED);
     m_connector->closeConnection();
 }
 
@@ -36,12 +34,12 @@ void Core::onDeviceCreated(DesktopDevice *device)
     // Core is a non-owning observer by design. Ownership stays outside Core.
     m_device = device;
 
-    setState(SessionState::CONNECTED);
     emit deviceReady(device);
 }
 
 void Core::onStatusChanged(HWConnector::ConnectionStatus status)
 {
+    setState(convertConnectorEnum(status));
 }
 
 QObject *Core::device() const
