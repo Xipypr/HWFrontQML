@@ -168,13 +168,6 @@ Item {
         Connections{
             target: sessionManager
 
-            function onSessionStateChanged(sessionId, state) {
-                if (root.sessionId !== sessionId)
-                    return
-
-                root.sessionState = state
-            }
-
             function onDeviceReady(sessionId, deviceRef) {
                 if (!awaitingDeviceCreation || root.sessionId !== sessionId)
                     return

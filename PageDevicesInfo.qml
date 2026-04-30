@@ -11,7 +11,7 @@ Page {
     property string sessionId: ""
     property string destop_name: ""
     property string deviceAlias: ""
-    property int sessionState: SessionState.IDLE
+    readonly property var sessionCore: sessionManager.coreForSession(root.sessionId)
 
     property int nextWidgetId: 1
 
@@ -20,7 +20,6 @@ Page {
     ListModel {
         id: widgetModel
     }
-
 
     function resetDefaultWidgets() {
         widgetModel.clear()
@@ -66,16 +65,13 @@ Page {
         deviceSettingsDialogLoader.pendingOpen = true
     }
 
-    Component.onCompleted: {
-        resetDefaultWidgets()
-        root.sessionState = sessionManager.sessionState(root.sessionId)
-    }
+    Component.onCompleted: resetDefaultWidgets()
 
     header: DeviceStatusHeader {
         width: root.width
         headerText: root.deviceAlias.length > 0 ? root.deviceAlias : destop_name
         showHomeButton: true
-        sessionState: root.sessionState
+        sessionState: root.sessionCore ? root.sessionCore.state : SessionState.IDLE
         onClicked: {
             root.openDeviceSettingsDialog()
         }
@@ -181,11 +177,6 @@ Page {
 
         Connections {
             target: sessionManager
-
-            function onSessionStateChanged(sessionId, state) {
-                if (root.sessionId === sessionId)
-                    root.sessionState = state
-            }
 
             function onDeviceReady(sessionId, deviceRef) {
                 if (!root.sessionId || root.sessionId !== sessionId)
