@@ -15,7 +15,7 @@ class SessionManager : public QObject
     Q_PROPERTY(QStringList sessionIds READ sessionIds NOTIFY sessionIdsChanged)
     Q_PROPERTY(QStringList connectedSessionIds READ connectedSessionIds NOTIFY connectedSessionIdsChanged)
     Q_PROPERTY(QAbstractListModel *sessionsModel READ sessionsModel NOTIFY sessionsModelChanged)
-    Q_PROPERTY(QAbstractListModel *connectedSessionsModel READ connectedSessionsModel NOTIFY connectedSessionsModelChanged)
+    Q_PROPERTY(QAbstractItemModel *connectedSessionsModel READ connectedSessionsModel NOTIFY connectedSessionsModelChanged)
 
 public:
     explicit SessionManager(QObject *parent = nullptr);
@@ -30,7 +30,7 @@ public:
     Q_INVOKABLE QString deviceAlias(const QString &sessionId) const;
     Q_INVOKABLE int sessionState(const QString &sessionId) const;
     QAbstractListModel *sessionsModel();
-    QAbstractListModel *connectedSessionsModel();
+    QAbstractItemModel *connectedSessionsModel();
 
 signals:
     void sessionIdsChanged();
@@ -53,7 +53,7 @@ private:
 
     QMap<QString, SessionEntry> m_sessions;
     SessionListModel m_sessionsModel;
-    QAbstractListModel *m_connectedSessionsModel = nullptr;
+    QAbstractItemModel *m_connectedSessionsModel = nullptr;
 };
 
 #endif // SESSIONMANAGER_H

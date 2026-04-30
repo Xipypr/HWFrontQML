@@ -166,7 +166,7 @@ QAbstractListModel *SessionManager::sessionsModel()
     return &m_sessionsModel;
 }
 
-QAbstractListModel *SessionManager::connectedSessionsModel()
+QAbstractItemModel *SessionManager::connectedSessionsModel()
 {
     return m_connectedSessionsModel;
 }
