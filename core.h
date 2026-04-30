@@ -11,13 +11,11 @@
 class Core : public QObject
 {
     Q_OBJECT
-    Q_PROPERTY(SessionState state READ state NOTIFY sessionStateChanged)
 public:
     explicit Core(QObject *parent = nullptr);
     ~Core();
 
     Q_INVOKABLE QObject *device() const;
-    SessionState state() const { return m_state; }
 
 public slots:
     void onStartConnection(const QString &target);
