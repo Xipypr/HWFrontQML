@@ -6,7 +6,7 @@ ToolBar {
     id: root
     property string headerText: ""
     property bool showIndicator: true
-    property string sessionState: "IDLE"
+    property int sessionState: SessionState.IDLE
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
     property bool showHomeButton: false

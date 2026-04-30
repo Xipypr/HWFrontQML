@@ -3,29 +3,29 @@ import QtQuick 2.15
 Rectangle {
     id: root
 
-    property string sessionState: "IDLE"
+    property int sessionState: SessionState.IDLE
 
     readonly property color indicatorColor: {
         switch (sessionState) {
-        case "CONNECTED":
+        case SessionState.CONNECTED:
             return "#22C55E"
-        case "CONNECTING":
+        case SessionState.CONNECTING:
             return "#3B82F6"
-        case "RECONNECTING":
+        case SessionState.RECONNECTING:
             return "#EAB308"
-        case "ERROR":
+        case SessionState.ERROR:
             return "#EF4444"
-        case "IDLE":
-        case "DISCONNECTED":
+        case SessionState.IDLE:
+        case SessionState.DISCONNECTED:
         default:
             return "#9CA3AF"
         }
     }
 
-    readonly property bool pulse: sessionState === "CONNECTED"
-                                 || sessionState === "CONNECTING"
-                                 || sessionState === "RECONNECTING"
-                                 || sessionState === "ERROR"
+    readonly property bool pulse: sessionState === SessionState.CONNECTED
+                                 || sessionState === SessionState.CONNECTING
+                                 || sessionState === SessionState.RECONNECTING
+                                 || sessionState === SessionState.ERROR
 
     width: 10
     height: 10

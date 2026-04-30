@@ -13,7 +13,7 @@ Item {
 
     property bool awaitingDeviceCreation: false
     property string sessionId: ""
-    property string sessionState: "IDLE"
+    property int sessionState: SessionState.IDLE
 
     implicitHeight: contentLayout.implicitHeight + 20
 
@@ -21,17 +21,6 @@ Item {
     signal connectionStateChanged(bool allowDevicePageActivation)
     signal sessionSelected(string sessionId)
 
-    function stateToString(state) {
-        switch (state) {
-        case 0: return "IDLE"
-        case 1: return "CONNECTING"
-        case 2: return "CONNECTED"
-        case 3: return "ERROR"
-        case 4: return "DISCONNECTED"
-        case 5: return "RECONNECTING"
-        default: return "IDLE"
-        }
-    }
 
     function hasValidSessionId(sessionId) {
         return !!sessionId && sessionId.length > 0
@@ -183,7 +172,7 @@ Item {
                 if (root.sessionId !== sessionId)
                     return
 
-                root.sessionState = root.stateToString(state)
+                root.sessionState = state
             }
 
             function onDeviceReady(sessionId, deviceRef) {

@@ -129,18 +129,18 @@ QString SessionManager::deviceAlias(const QString &sessionId) const
 }
 
 
-QString SessionManager::sessionState(const QString &sessionId) const
+int SessionManager::sessionState(const QString &sessionId) const
 {
     if (sessionId.isEmpty()) {
-        return SessionStateNs::toString(SessionState::IDLE);
+        return static_cast<int>(SessionState::IDLE);
     }
 
     const auto it = m_sessions.constFind(sessionId);
     if (it == m_sessions.constEnd()) {
-        return SessionStateNs::toString(SessionState::IDLE);
+        return static_cast<int>(SessionState::IDLE);
     }
 
-    return SessionStateNs::toString(it.value().session.state);
+    return static_cast<int>(it.value().session.state);
 }
 
 QAbstractListModel *SessionManager::sessionsModel()

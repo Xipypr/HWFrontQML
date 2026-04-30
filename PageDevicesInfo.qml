@@ -11,7 +11,7 @@ Page {
     property string sessionId: ""
     property string destop_name: ""
     property string deviceAlias: ""
-    property string sessionState: "IDLE"
+    property int sessionState: SessionState.IDLE
 
     property int nextWidgetId: 1
 
@@ -21,17 +21,6 @@ Page {
         id: widgetModel
     }
 
-    function stateToString(state) {
-        switch (state) {
-        case 0: return "IDLE"
-        case 1: return "CONNECTING"
-        case 2: return "CONNECTED"
-        case 3: return "ERROR"
-        case 4: return "DISCONNECTED"
-        case 5: return "RECONNECTING"
-        default: return "IDLE"
-        }
-    }
 
     function resetDefaultWidgets() {
         widgetModel.clear()
@@ -195,7 +184,7 @@ Page {
 
             function onSessionStateChanged(sessionId, state) {
                 if (root.sessionId === sessionId)
-                    root.sessionState = root.stateToString(state)
+                    root.sessionState = state
             }
 
             function onDeviceReady(sessionId, deviceRef) {

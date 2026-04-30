@@ -6,7 +6,7 @@ Item {
 
     property bool connected: false
     property string deviceName: ""
-    property string sessionState: "IDLE"
+    property int sessionState: SessionState.IDLE
     property alias inputText: hostInput.text
     readonly property bool acceptableInput: hostInput.acceptableInput
     signal deviceLabelClicked()
