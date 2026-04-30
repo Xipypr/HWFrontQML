@@ -54,11 +54,17 @@ bool Core::isValidTransition(SessionState from, SessionState to) const
         return to == SessionState::CONNECTING;
     case SessionState::CONNECTING:
         return to == SessionState::CONNECTED
+               || to == SessionState::RECONNECTING
                || to == SessionState::ERROR
                || to == SessionState::DISCONNECTED;
     case SessionState::CONNECTED:
-        return to == SessionState::DISCONNECTED
+        return to == SessionState::RECONNECTING
+               || to == SessionState::DISCONNECTED
                || to == SessionState::ERROR;
+    case SessionState::RECONNECTING:
+        return to == SessionState::CONNECTED
+               || to == SessionState::ERROR
+               || to == SessionState::DISCONNECTED;
     case SessionState::ERROR:
     case SessionState::DISCONNECTED:
         return to == SessionState::CONNECTING;
