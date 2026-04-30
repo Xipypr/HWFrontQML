@@ -8,11 +8,9 @@ Core::Core(QObject *parent)
 {
     m_connector = new HWConnector(this);
     m_deviceCreator = new DeviceBuilder(this);
-    connect(m_connector, &HWConnector::documentReceived, m_deviceCreator, &DeviceBuilder::onDocumentRecieved);
 
-    //TODO FIX
-    connect(m_connector, SIGNAL(errorOccurred(QString)), this, SLOT(onConnectorError(QString)));
-    connect(m_connector, SIGNAL(disconnected()), this, SLOT(onConnectorDisconnected()));
+    connect(m_connector, &HWConnector::connectionStatusChanged, this, &Core::onStatusChanged);
+    connect(m_connector, &HWConnector::documentReceived, m_deviceCreator, &DeviceBuilder::onDocumentRecieved);
 
     connect(m_deviceCreator, &DeviceBuilder::desktopCreated, this, &Core::onDeviceCreated);
 }
@@ -21,15 +19,13 @@ Core::~Core()
 {
 }
 
-void Core::onMakeGetRequest(const QString &target)
+void Core::onStartConnection(const QString &target)
 {
-    setState(SessionState::connecting);
     m_connector->makeGetRequest(target);
 }
 
 void Core::onCloseConnection()
 {
-    setState(SessionState::disconnected);
     m_connector->closeConnection();
 }
 
@@ -38,18 +34,12 @@ void Core::onDeviceCreated(DesktopDevice *device)
     // Core is a non-owning observer by design. Ownership stays outside Core.
     m_device = device;
 
-    setState(SessionState::connected);
     emit deviceReady(device);
 }
 
-void Core::onConnectorError(const QString &errorText)
+void Core::onStatusChanged(HWConnector::ConnectionStatus status)
 {
-    setState(SessionState::error, errorText);
-}
-
-void Core::onConnectorDisconnected()
-{
-    setState(SessionState::disconnected);
+    setState(convertConnectorEnum(status));
 }
 
 QObject *Core::device() const
@@ -60,18 +50,24 @@ QObject *Core::device() const
 bool Core::isValidTransition(SessionState from, SessionState to) const
 {
     switch (from) {
-    case SessionState::idle:
-        return to == SessionState::connecting;
-    case SessionState::connecting:
-        return to == SessionState::connected
-               || to == SessionState::error
-               || to == SessionState::disconnected;
-    case SessionState::connected:
-        return to == SessionState::disconnected
-               || to == SessionState::error;
-    case SessionState::error:
-    case SessionState::disconnected:
-        return to == SessionState::connecting;
+    case SessionState::IDLE:
+        return to == SessionState::CONNECTING;
+    case SessionState::CONNECTING:
+        return to == SessionState::CONNECTED
+               || to == SessionState::RECONNECTING
+               || to == SessionState::ERROR
+               || to == SessionState::DISCONNECTED;
+    case SessionState::CONNECTED:
+        return to == SessionState::RECONNECTING
+               || to == SessionState::DISCONNECTED
+               || to == SessionState::ERROR;
+    case SessionState::RECONNECTING:
+        return to == SessionState::CONNECTED
+               || to == SessionState::ERROR
+               || to == SessionState::DISCONNECTED;
+    case SessionState::ERROR:
+    case SessionState::DISCONNECTED:
+        return to == SessionState::CONNECTING;
     }
 
     return false;

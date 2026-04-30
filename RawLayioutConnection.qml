@@ -93,7 +93,7 @@ Item {
                     if (root.hasValidSessionId(root.sessionId)) {
                         const sessionCore = sessionManager.coreForSession(root.sessionId)
                         if (sessionCore)
-                            sessionCore.onMakeGetRequest(hostInfo.inputText)
+                            sessionCore.onStartConnection(hostInfo.inputText)
                     }
                     connectButton.text = "Stop"
                     connectingIndicator.running = true

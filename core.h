@@ -18,11 +18,10 @@ public:
     Q_INVOKABLE QObject *device() const;
 
 public slots:
-    void onMakeGetRequest(const QString &target);
+    void onStartConnection(const QString &target);
     void onCloseConnection();
     void onDeviceCreated(DesktopDevice *device);
-    void onConnectorError(const QString &errorText);
-    void onConnectorDisconnected();
+    void onStatusChanged(HWConnector::ConnectionStatus status);
 
 signals:
     void sessionStateChanged(SessionState state);
@@ -31,6 +30,27 @@ signals:
     void testSignal();
 
 private:
+    static constexpr SessionState convertConnectorEnum(HWConnector::ConnectionStatus status)
+    {
+        switch (status)
+        {
+            case HWConnector::CONNECTED:
+                return SessionState::CONNECTED;
+
+            case HWConnector::CONNECTING:
+                return SessionState::CONNECTING;
+
+            case HWConnector::DISCONNECTED:
+                return SessionState::DISCONNECTED;
+
+            case HWConnector::RECONNECTING:
+                return SessionState::RECONNECTING;
+
+            case HWConnector::ERROR:
+                return SessionState::ERROR;
+        }
+    }
+
     bool isValidTransition(SessionState from, SessionState to) const;
     void setState(SessionState newState, const QString &errorText = QString());
 
@@ -38,7 +58,7 @@ private:
     DeviceBuilder *m_deviceCreator;
     // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
     QPointer<DesktopDevice> m_device;
-    SessionState m_state = SessionState::idle;
+    SessionState m_state = SessionState::IDLE;
 };
 
 #endif // CORE_H

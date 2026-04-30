@@ -8,11 +8,12 @@ namespace SessionStateNs {
 Q_NAMESPACE
 
 enum SessionState {
-    idle,
-    connecting,
-    connected,
-    error,
-    disconnected
+    IDLE,
+    CONNECTING,
+    CONNECTED,
+    ERROR,
+    DISCONNECTED,
+    RECONNECTING
 };
 Q_ENUM_NS(SessionState)
 

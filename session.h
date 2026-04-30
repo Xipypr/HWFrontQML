@@ -28,7 +28,7 @@ public:
     QString target;
     QString displayName;
     QString alias;
-    SessionState state = SessionState::idle;
+    SessionState state = SessionState::IDLE;
     bool hasDevice = false;
 
     static Session createDefault()
