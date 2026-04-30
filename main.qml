@@ -14,6 +14,13 @@ ApplicationWindow {
         swipeView.currentIndex = 0
     }
 
+    Component {
+        id: devicePageComponent
+        PageDevicesInfo {
+            onHomeRequested: root.goToStartPage()
+        }
+    }
+
     SwipeView {
         id: swipeView
         anchors.fill: parent
@@ -24,11 +31,23 @@ ApplicationWindow {
         }
 
         Repeater {
-            model: sessionManager.connectedSessionIds
+            model: sessionManager.sessionsModel
 
-            delegate: PageDevicesInfo {
-                sessionId: modelData
-                onHomeRequested: root.goToStartPage()
+            delegate: Loader {
+                active: model.hasDevice
+                sourceComponent: devicePageComponent
+
+                property string delegateSessionId: model.sessionId
+                property string delegateAlias: model.alias
+                property int delegateState: model.state
+
+                onLoaded: {
+                    if (!item)
+                        return
+                    item.sessionId = delegateSessionId
+                    item.deviceAlias = delegateAlias
+                    item.sessionState = delegateState
+                }
             }
         }
     }
@@ -37,10 +56,16 @@ ApplicationWindow {
         if (!sessionId || sessionId.length === 0)
             return
 
-        const sessionIndex = sessionManager.connectedSessionIds.indexOf(sessionId)
-        if (sessionIndex < 0)
-            return
-
-        swipeView.currentIndex = sessionIndex + 1
+        let connectedIndex = 0
+        for (let i = 0; i < sessionManager.sessionsModel.rowCount(); ++i) {
+            const row = sessionManager.sessionsModel.get(i)
+            if (!row.hasDevice)
+                continue
+            if (row.sessionId === sessionId) {
+                swipeView.currentIndex = connectedIndex + 1
+                return
+            }
+            connectedIndex += 1
+        }
     }
 }

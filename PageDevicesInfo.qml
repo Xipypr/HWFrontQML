@@ -11,7 +11,7 @@ Page {
     property string sessionId: ""
     property string destop_name: ""
     property string deviceAlias: ""
-    readonly property var sessionCore: sessionManager.coreForSession(root.sessionId)
+    property int sessionState: SessionState.IDLE
 
     property int nextWidgetId: 1
 
@@ -71,7 +71,7 @@ Page {
         width: root.width
         headerText: root.deviceAlias.length > 0 ? root.deviceAlias : destop_name
         showHomeButton: true
-        sessionState: root.sessionCore ? root.sessionCore.state : SessionState.IDLE
+        sessionState: root.sessionState
         onClicked: {
             root.openDeviceSettingsDialog()
         }
