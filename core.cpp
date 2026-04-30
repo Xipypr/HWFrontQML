@@ -8,7 +8,7 @@ Core::Core(QObject *parent)
 {
     m_connector = new HWConnector(this);
     m_deviceCreator = new DeviceBuilder(this);
-    connect(m_connector, &HWConnector::documentRecieved, m_deviceCreator, &DeviceBuilder::onDocumentRecieved);
+    connect(m_connector, &HWConnector::documentReceived, m_deviceCreator, &DeviceBuilder::onDocumentRecieved);
 
     //TODO FIX
     connect(m_connector, SIGNAL(errorOccurred(QString)), this, SLOT(onConnectorError(QString)));
