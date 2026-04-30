@@ -24,21 +24,14 @@ ApplicationWindow {
         }
 
         Repeater {
-            model: sessionManager.connectedSessionIds
+            model: sessionManager.connectedSessionsModel
 
             delegate: PageDevicesInfo {
                 id: devicePage
-                sessionId: modelData
-                sessionState: sessionManager.sessionState(modelData)
+                sessionId: model.sessionId
+                deviceAlias: model.alias
+                sessionState: model.state
                 onHomeRequested: root.goToStartPage()
-
-                Connections {
-                    target: sessionManager
-                    function onSessionStateChanged(sessionId, state) {
-                        if (devicePage.sessionId === sessionId)
-                            devicePage.sessionState = state
-                    }
-                }
             }
         }
     }
@@ -47,10 +40,12 @@ ApplicationWindow {
         if (!sessionId || sessionId.length === 0)
             return
 
-        const sessionIndex = sessionManager.connectedSessionIds.indexOf(sessionId)
-        if (sessionIndex < 0)
-            return
-
-        swipeView.currentIndex = sessionIndex + 1
+        for (let i = 0; i < sessionManager.connectedSessionsModel.rowCount(); ++i) {
+            const row = sessionManager.connectedSessionsModel.get(i)
+            if (row.sessionId === sessionId) {
+                swipeView.currentIndex = i + 1
+                return
+            }
+        }
     }
 }

@@ -1,8 +1,26 @@
+#include <QSortFilterProxyModel>
 #include "sessionmanager.h"
+
+class ConnectedSessionsProxyModel : public QSortFilterProxyModel
+{
+public:
+    using QSortFilterProxyModel::QSortFilterProxyModel;
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override
+    {
+        const QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+        return sourceModel()->data(idx, SessionListModel::HasDeviceRole).toBool();
+    }
+};
 
 SessionManager::SessionManager(QObject *parent)
     : QObject(parent)
 {
+    auto *proxy = new ConnectedSessionsProxyModel(this);
+    proxy->setSourceModel(&m_sessionsModel);
+    proxy->setDynamicSortFilter(true);
+    m_connectedSessionsModel = proxy;
 }
 
 SessionManager::~SessionManager()
@@ -146,6 +164,11 @@ int SessionManager::sessionState(const QString &sessionId) const
 QAbstractListModel *SessionManager::sessionsModel()
 {
     return &m_sessionsModel;
+}
+
+QAbstractListModel *SessionManager::connectedSessionsModel()
+{
+    return m_connectedSessionsModel;
 }
 
 SessionManager::SessionEntry *SessionManager::findSessionEntry(const QString &sessionId)
