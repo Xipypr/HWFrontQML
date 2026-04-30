@@ -27,9 +27,18 @@ ApplicationWindow {
             model: sessionManager.connectedSessionIds
 
             delegate: PageDevicesInfo {
+                id: devicePage
                 sessionId: modelData
                 sessionState: sessionManager.sessionState(modelData)
                 onHomeRequested: root.goToStartPage()
+
+                Connections {
+                    target: sessionManager
+                    function onSessionStateChanged(sessionId, state) {
+                        if (devicePage.sessionId === sessionId)
+                            devicePage.sessionState = state
+                    }
+                }
             }
         }
     }
