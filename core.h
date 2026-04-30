@@ -19,6 +19,7 @@ public:
 
 public slots:
     void onMakeGetRequest(const QString &target);
+    void onCloseConnection();
     void onDeviceCreated(DesktopDevice *device);
     void onConnectorError(const QString &errorText);
     void onConnectorDisconnected();

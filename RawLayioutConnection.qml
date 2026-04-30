@@ -104,6 +104,9 @@ Item {
                     root.connectionStateChanged(false)
                     connectButton.text = "Connect Device"
                     connectingIndicator.running = false
+                    const sessionCore = sessionManager.coreForSession(root.sessionId)
+                    if (sessionCore)
+                        sessionCore.onCloseConnection()
                 }
 
             }

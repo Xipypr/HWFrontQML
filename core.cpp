@@ -27,6 +27,12 @@ void Core::onMakeGetRequest(const QString &target)
     m_connector->makeGetRequest(target);
 }
 
+void Core::onCloseConnection()
+{
+    setState(SessionState::disconnected);
+    m_connector->closeConnection();
+}
+
 void Core::onDeviceCreated(DesktopDevice *device)
 {
     // Core is a non-owning observer by design. Ownership stays outside Core.
