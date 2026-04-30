@@ -1,8 +1,26 @@
+#include <QSortFilterProxyModel>
 #include "sessionmanager.h"
+
+class ConnectedSessionsProxyModel : public QSortFilterProxyModel
+{
+public:
+    using QSortFilterProxyModel::QSortFilterProxyModel;
+
+protected:
+    bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override
+    {
+        const QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+        return sourceModel()->data(idx, SessionListModel::HasDeviceRole).toBool();
+    }
+};
 
 SessionManager::SessionManager(QObject *parent)
     : QObject(parent)
 {
+    auto *proxy = new ConnectedSessionsProxyModel(this);
+    proxy->setSourceModel(&m_sessionsModel);
+    proxy->setDynamicSortFilter(true);
+    m_connectedSessionsModel = proxy;
 }
 
 SessionManager::~SessionManager()
@@ -131,6 +149,28 @@ QString SessionManager::deviceAlias(const QString &sessionId) const
 QAbstractListModel *SessionManager::sessionsModel()
 {
     return &m_sessionsModel;
+}
+
+int SessionManager::indexOfConnectedSession(const QString &sessionId) const
+{
+    if (sessionId.isEmpty() || !m_connectedSessionsModel) {
+        return -1;
+    }
+
+    const int count = m_connectedSessionsModel->rowCount();
+    for (int i = 0; i < count; ++i) {
+        const QModelIndex index = m_connectedSessionsModel->index(i, 0);
+        if (m_connectedSessionsModel->data(index, SessionListModel::SessionIdRole).toString() == sessionId) {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+QAbstractItemModel *SessionManager::connectedSessionsModel()
+{
+    return m_connectedSessionsModel;
 }
 
 SessionManager::SessionEntry *SessionManager::findSessionEntry(const QString &sessionId)

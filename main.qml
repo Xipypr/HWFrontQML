@@ -24,10 +24,13 @@ ApplicationWindow {
         }
 
         Repeater {
-            model: sessionManager.connectedSessionIds
+            model: sessionManager.connectedSessionsModel
 
             delegate: PageDevicesInfo {
-                sessionId: modelData
+                id: devicePage
+                sessionId: model.sessionId
+                deviceAlias: model.alias
+                sessionState: model.state
                 onHomeRequested: root.goToStartPage()
             }
         }
@@ -37,7 +40,7 @@ ApplicationWindow {
         if (!sessionId || sessionId.length === 0)
             return
 
-        const sessionIndex = sessionManager.connectedSessionIds.indexOf(sessionId)
+        const sessionIndex = sessionManager.indexOfConnectedSession(sessionId)
         if (sessionIndex < 0)
             return
 

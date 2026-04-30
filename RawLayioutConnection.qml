@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.0
+import SessionState 1.0
 
 Item {
     id: root
@@ -13,12 +14,14 @@ Item {
 
     property bool awaitingDeviceCreation: false
     property string sessionId: ""
+    property int sessionState: SessionState.IDLE
 
     implicitHeight: contentLayout.implicitHeight + 20
 
     signal removeThisObject(bool removeConnectedDevicePage)
     signal connectionStateChanged(bool allowDevicePageActivation)
     signal sessionSelected(string sessionId)
+
 
     function hasValidSessionId(sessionId) {
         return !!sessionId && sessionId.length > 0
@@ -58,6 +61,7 @@ Item {
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
                 connected: root.connectionInitialized === 1
                 deviceName: root.deviceAlias.length > 0 ? root.deviceAlias : root.connectedDeviceName
+                sessionState: root.sessionState
                 onDeviceLabelClicked: {
                     if (root.hasValidSessionId(root.sessionId))
                         root.sessionSelected(root.sessionId)
