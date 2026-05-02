@@ -22,11 +22,59 @@ Page {
         id: widgetModel
     }
 
+    function defaultWidgetDefinitions() {
+        return [
+            { key: Device.PROCESSOR, title: "CPU", value: 0, variant: "arc180" },
+            { key: Device.MEMORY, title: "RAM", value: 0, variant: "segments" },
+            { key: Device.VIDEO_CARD, title: "GPU", value: 0, variant: "linear" },
+            { key: Device.HARD_DISK, title: "HDD", value: 0, variant: "linear" }
+        ]
+    }
+
     function resetDefaultWidgets() {
+        applyDiscoveredLayout(defaultWidgetDefinitions())
+    }
+
+    function metricConfigForKey(metricKey) {
+        const defaults = defaultWidgetDefinitions()
+        for (let i = 0; i < defaults.length; ++i) {
+            if (defaults[i].key === metricKey)
+                return defaults[i]
+        }
+        return null
+    }
+
+    function hasMetricAvailable(metricType) {
+        if (metricType === -1)
+            return false
+
+        for (let i = 0; i < objectsArray.length; ++i) {
+            if (objectsArray[i].type === metricType)
+                return true
+        }
+
+        return false
+    }
+
+    function applyDiscoveredLayout(layoutItems) {
         widgetModel.clear()
-        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "arc180" })
-        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "segments" })
-        widgetModel.append({ uid: nextWidgetId++, key: "gpu", title: "GPU", value: 68, variant: "linear" })
+        const isListModel = layoutItems && layoutItems.count !== undefined && layoutItems.get !== undefined
+        const itemsCount = isListModel ? layoutItems.count : layoutItems.length
+        for (let i = 0; i < itemsCount; ++i) {
+            const item = isListModel ? layoutItems.get(i) : layoutItems[i]
+            const config = metricConfigForKey(item.key)
+            const metricType = item.key
+            if (!hasMetricAvailable(metricType))
+                continue
+
+            widgetModel.append({
+                uid: item.uid !== undefined ? item.uid : nextWidgetId++,
+                key: metricType,
+                title: item.title !== undefined ? item.title : (config ? config.title : "METRIC"),
+                value: item.value !== undefined ? item.value : (config ? config.value : 0),
+                variant: item.variant !== undefined ? item.variant : (config ? config.variant : "linear")
+            })
+        }
     }
 
     function findWidgetIndex(widgetKey) {
@@ -37,8 +85,8 @@ Page {
         return -1
     }
 
-    function updateWidgetData(widgetKey, widgetTitle, widgetValue) {
-        const index = findWidgetIndex(widgetKey)
+    function updateWidgetData(metricType, widgetTitle, widgetValue) {
+        const index = findWidgetIndex(metricType)
         if (index >= 0) {
             widgetModel.setProperty(index, "title", widgetTitle)
             widgetModel.setProperty(index, "value", widgetValue)
@@ -65,8 +113,6 @@ Page {
 
         deviceSettingsDialogLoader.pendingOpen = true
     }
-
-    Component.onCompleted: resetDefaultWidgets()
 
     header: DeviceStatusHeader {
         width: root.width
@@ -121,18 +167,25 @@ Page {
 
         onApplyLayout: function(widgets) {
             const latestValues = currentValuesById()
-            widgetModel.clear()
+            const filtered = []
+
             for (let i = 0; i < widgets.length; ++i) {
                 const item = widgets[i]
+                const metricType = item.key
+                if (!hasMetricAvailable(metricType))
+                    continue
+
                 const uid = item.uid !== undefined ? item.uid : nextWidgetId++
-                widgetModel.append({
+                filtered.push({
                     uid: uid,
-                    key: item.key,
+                    key: metricType,
                     title: item.title,
                     value: latestValues[uid] !== undefined ? latestValues[uid] : item.value,
                     variant: item.variant
                 })
             }
+
+            applyDiscoveredLayout(filtered)
         }
     }
 
@@ -143,6 +196,7 @@ Page {
         spacing: 12
 
         GridLayout {
+            visible: widgetModel.count > 0
             Layout.fillWidth: true
             Layout.fillHeight: true
             columns: width > 900 ? 3 : width > 580 ? 2 : 1
@@ -167,6 +221,17 @@ Page {
             }
         }
 
+        Label {
+            visible: widgetModel.count === 0
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            text: "Нет доступных метрик"
+            color: "#808080"
+            font.pixelSize: 18
+        }
+
         Connections {
             target: sessionManager
 
@@ -179,6 +244,10 @@ Page {
                 {
                     destop_name = desktop_device.name
                     objectsArray = desktop_device.devicesList()
+                    if (widgetModel.count > 0)
+                        applyDiscoveredLayout(widgetModel)
+                    else
+                        resetDefaultWidgets()
                     parseDevices()
                 }
             }
@@ -217,25 +286,25 @@ Page {
             function parseProc(iter)
             {
                 let procObject = objectsArray[iter]
-                updateWidgetData("cpu", procObject.name.substring(0, 12), procObject.loading)
+                updateWidgetData(Device.PROCESSOR, procObject.name.substring(0, 12), procObject.loading)
             }
 
             function parseMemory(iter)
             {
                 let memObject = objectsArray[iter]
-                updateWidgetData("ram", "RAM", memObject.loading)
+                updateWidgetData(Device.MEMORY, "RAM", memObject.loading)
             }
 
             function parseVideocard(iter)
             {
                 let videoObject = objectsArray[iter]
-                updateWidgetData("gpu", videoObject.name.substring(0, 12), videoObject.loading)
+                updateWidgetData(Device.VIDEO_CARD, videoObject.name.substring(0, 12), videoObject.loading)
             }
 
             function parseHdd(iter)
             {
                 let hddObject = objectsArray[iter]
-                updateWidgetData("hdd", hddObject.name.substring(0, 12), hddObject.loading)
+                updateWidgetData(Device.HARD_DISK, hddObject.name.substring(0, 12), hddObject.loading)
             }
         }
     }
