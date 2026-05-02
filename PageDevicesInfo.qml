@@ -57,11 +57,15 @@ Page {
     }
 
     function applyDiscoveredLayout(layoutItems) {
-        widgetModel.clear()
+        const copiedItems = []
         const isListModel = layoutItems && layoutItems.count !== undefined && layoutItems.get !== undefined
         const itemsCount = isListModel ? layoutItems.count : layoutItems.length
-        for (let i = 0; i < itemsCount; ++i) {
-            const item = isListModel ? layoutItems.get(i) : layoutItems[i]
+        for (let i = 0; i < itemsCount; ++i)
+            copiedItems.push(isListModel ? layoutItems.get(i) : layoutItems[i])
+
+        widgetModel.clear()
+        for (let i = 0; i < copiedItems.length; ++i) {
+            const item = copiedItems[i]
             const config = metricConfigForKey(item.key)
             const metricType = item.key
             if (!hasMetricAvailable(metricType))
