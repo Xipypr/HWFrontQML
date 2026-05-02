@@ -248,6 +248,12 @@ Page {
                 {
                     destop_name = desktop_device.name
                     objectsArray = desktop_device.devicesList()
+                    if (objectsArray.length === 0) {
+                        if (widgetModel.count === 0)
+                            resetDefaultWidgets()
+                        return
+                    }
+
                     if (widgetModel.count > 0)
                         applyDiscoveredLayout(widgetModel)
                     else
