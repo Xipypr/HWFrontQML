@@ -17,52 +17,14 @@ Dialog {
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
     readonly property var widgetTemplates: [
-        { label: "CPU", widgetId: "cpu", title: "CPU", variant: "segments" },
-        { label: "RAM", widgetId: "ram", title: "RAM", variant: "ring" },
-        { label: "GPU", widgetId: "gpu", title: "GPU", variant: "linear" },
-        { label: "HDD (180°)", widgetId: "hdd", title: "HDD", variant: "arc180" },
-        { label: "Новый виджет", widgetId: "custom", title: "Новый виджет", variant: "segments" }
+        { label: "CPU", key: "cpu" },
+        { label: "RAM", key: "ram" },
+        { label: "GPU", key: "gpu" },
+        { label: "HDD (180°)", key: "hdd" },
+        { label: "Новый виджет", key: "custom" }
     ]
 
     property int selectedTemplateIndex: 0
-
-    function nextCustomWidgetId() {
-        let maxNumber = 0
-        if (!root.widgetsModel)
-            return "custom-1"
-
-        for (let i = 0; i < root.widgetsModel.count; ++i) {
-            const item = root.widgetsModel.get(i)
-            const match = /^custom-(\d+)$/.exec(item.widgetId)
-            if (!match || match.length < 2)
-                continue
-
-            const number = parseInt(match[1], 10)
-            if (!isNaN(number))
-                maxNumber = Math.max(maxNumber, number)
-        }
-
-        return "custom-" + (maxNumber + 1)
-    }
-
-    function nextCustomWidgetTitle() {
-        let maxNumber = 0
-        if (!root.widgetsModel)
-            return "Новый виджет 1"
-
-        for (let i = 0; i < root.widgetsModel.count; ++i) {
-            const item = root.widgetsModel.get(i)
-            const match = /^Новый виджет\s+(\d+)$/.exec(item.title)
-            if (!match || match.length < 2)
-                continue
-
-            const number = parseInt(match[1], 10)
-            if (!isNaN(number))
-                maxNumber = Math.max(maxNumber, number)
-        }
-
-        return "Новый виджет " + (maxNumber + 1)
-    }
 
     contentItem: ColumnLayout {
         spacing: 12
@@ -112,7 +74,7 @@ Dialog {
 
                     ToolButton {
                         text: "↓"
-                        enabled: root.widgetsModel && index < root.widgetsModel.count - 1
+                        enabled: root.widgetsModel && index < widgetsList.count - 1
                         onClicked: root.widgetsModel.moveWidget(index, index + 1)
                     }
 
@@ -140,9 +102,7 @@ Dialog {
                 text: "Добавить"
                 onClicked: {
                     const item = root.widgetTemplates[root.selectedTemplateIndex]
-                    const id = item.widgetId === "custom" ? root.nextCustomWidgetId() : item.widgetId
-                    const title = item.widgetId === "custom" ? root.nextCustomWidgetTitle() : item.title
-                    root.widgetsModel.addWidget(id, title, 0, item.variant, true)
+                    root.widgetsModel.addWidgetByType(item.key)
                 }
             }
         }
@@ -154,7 +114,7 @@ Dialog {
             Item { Layout.fillWidth: true }
 
             Button {
-                text: "Закрыть"
+                text: "Отмена"
                 onClicked: root.close()
             }
         }

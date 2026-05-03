@@ -75,8 +75,31 @@ bool DashboardMetricsModel::addWidget(const QString &widgetId,
     beginInsertRows(QModelIndex(), insertRow, insertRow);
     m_items.push_back({ widgetId, title, value, variant, available });
     endInsertRows();
-    emit countChanged();
     return true;
+}
+
+
+bool DashboardMetricsModel::addWidgetByType(const QString &type)
+{
+    if (type == "cpu")
+        return addWidget("cpu", "CPU", 0, "segments", true);
+    if (type == "ram")
+        return addWidget("ram", "RAM", 0, "ring", true);
+    if (type == "gpu")
+        return addWidget("gpu", "GPU", 0, "linear", true);
+    if (type == "hdd")
+        return addWidget("hdd", "HDD", 0, "arc180", true);
+
+    if (type == "custom") {
+        const int number = nextCustomNumber();
+        return addWidget(QString("custom-%1").arg(number),
+                         QString::fromUtf8("Новый виджет %1").arg(number),
+                         0,
+                         "segments",
+                         true);
+    }
+
+    return false;
 }
 
 bool DashboardMetricsModel::removeWidget(const QString &widgetId)
@@ -88,7 +111,6 @@ bool DashboardMetricsModel::removeWidget(const QString &widgetId)
     beginRemoveRows(QModelIndex(), index, index);
     m_items.removeAt(index);
     endRemoveRows();
-    emit countChanged();
     return true;
 }
 
@@ -149,4 +171,22 @@ int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
     }
 
     return -1;
+}
+
+int DashboardMetricsModel::nextCustomNumber() const
+{
+    int maxNumber = 0;
+    const QString prefix("custom-");
+
+    for (const WidgetItem &item : m_items) {
+        if (!item.widgetId.startsWith(prefix))
+            continue;
+
+        bool ok = false;
+        const int number = item.widgetId.mid(prefix.size()).toInt(&ok);
+        if (ok && number > maxNumber)
+            maxNumber = number;
+    }
+
+    return maxNumber + 1;
 }

@@ -23,7 +23,7 @@ Page {
     }
 
     function resetDefaultWidgets() {
-        if (widgetModel.count > 0)
+        if (widgetModel.rowCount() > 0)
             return
 
         widgetModel.addWidget("cpu", "CPU", 45, "arc180", true)

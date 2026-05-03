@@ -7,7 +7,6 @@
 class DashboardMetricsModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
 
 public:
     enum Roles {
@@ -31,6 +30,7 @@ public:
                                int value,
                                const QString &variant,
                                bool available = true);
+    Q_INVOKABLE bool addWidgetByType(const QString &type);
     Q_INVOKABLE bool removeWidget(const QString &widgetId);
     Q_INVOKABLE bool moveWidget(int from, int to);
     Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);
@@ -39,8 +39,6 @@ public:
                                   int value,
                                   bool available = true);
 
-signals:
-    void countChanged();
 
 private:
     struct WidgetItem {
@@ -52,6 +50,7 @@ private:
     };
 
     int findWidgetIndex(const QString &widgetId) const;
+    int nextCustomNumber() const;
 
     QVector<WidgetItem> m_items;
 };
