@@ -3,6 +3,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import DeviceData 1.0
 import SessionState 1.0
+import DashboardModels 1.0
 
 Page {
     id: root
@@ -14,44 +15,24 @@ Page {
     property string deviceAlias: ""
     property int sessionState: SessionState.IDLE
 
-    property int nextWidgetId: 1
 
     signal homeRequested()
 
-    ListModel {
+    DashboardMetricsModel {
         id: widgetModel
     }
 
     function resetDefaultWidgets() {
-        widgetModel.clear()
-        widgetModel.append({ uid: nextWidgetId++, key: "cpu", title: "CPU", value: 45, variant: "arc180" })
-        widgetModel.append({ uid: nextWidgetId++, key: "ram", title: "RAM", value: 76, variant: "segments" })
-        widgetModel.append({ uid: nextWidgetId++, key: "gpu", title: "GPU", value: 68, variant: "linear" })
+        if (widgetModel.count > 0)
+            return
+
+        widgetModel.addWidget("cpu", "CPU", 45, "arc180", true)
+        widgetModel.addWidget("ram", "RAM", 76, "segments", true)
+        widgetModel.addWidget("gpu", "GPU", 68, "linear", true)
     }
 
-    function findWidgetIndex(widgetKey) {
-        for (let i = 0; i < widgetModel.count; ++i) {
-            if (widgetModel.get(i).key === widgetKey)
-                return i
-        }
-        return -1
-    }
-
-    function updateWidgetData(widgetKey, widgetTitle, widgetValue) {
-        const index = findWidgetIndex(widgetKey)
-        if (index >= 0) {
-            widgetModel.setProperty(index, "title", widgetTitle)
-            widgetModel.setProperty(index, "value", widgetValue)
-        }
-    }
-
-    function currentValuesById() {
-        const values = ({})
-        for (let i = 0; i < widgetModel.count; ++i) {
-            const item = widgetModel.get(i)
-            values[item.uid] = item.value
-        }
-        return values
+    function updateWidgetData(widgetId, widgetTitle, widgetValue) {
+        widgetModel.updateWidget(widgetId, widgetTitle, widgetValue, true)
     }
 
     function openDeviceSettingsDialog() {
@@ -118,22 +99,6 @@ Page {
     WidgetLayoutDialog {
         id: widgetLayoutDialog
         widgetsModel: widgetModel
-
-        onApplyLayout: function(widgets) {
-            const latestValues = currentValuesById()
-            widgetModel.clear()
-            for (let i = 0; i < widgets.length; ++i) {
-                const item = widgets[i]
-                const uid = item.uid !== undefined ? item.uid : nextWidgetId++
-                widgetModel.append({
-                    uid: uid,
-                    key: item.key,
-                    title: item.title,
-                    value: latestValues[uid] !== undefined ? latestValues[uid] : item.value,
-                    variant: item.variant
-                })
-            }
-        }
     }
 
 
@@ -161,7 +126,7 @@ Page {
                     value: model.value
                     variant: model.variant
                     onVariantSelected: function(mode) {
-                        widgetModel.setProperty(index, "variant", mode)
+                        widgetModel.setVariant(model.widgetId, mode)
                     }
                 }
             }
