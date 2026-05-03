@@ -90,14 +90,6 @@ bool DashboardMetricsModel::addWidgetByType(const QString &type)
     if (type == "hdd")
         return addWidget("hdd", "HDD", 0, "arc180", true);
 
-    if (type == "custom") {
-        const int number = nextCustomNumber();
-        return addWidget(QString("custom-%1").arg(number),
-                         QString::fromUtf8("Новый виджет %1").arg(number),
-                         0,
-                         "segments",
-                         true);
-    }
 
     return false;
 }
@@ -173,20 +165,3 @@ int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
     return -1;
 }
 
-int DashboardMetricsModel::nextCustomNumber() const
-{
-    int maxNumber = 0;
-    const QString prefix("custom-");
-
-    for (const WidgetItem &item : m_items) {
-        if (!item.widgetId.startsWith(prefix))
-            continue;
-
-        bool ok = false;
-        const int number = item.widgetId.mid(prefix.size()).toInt(&ok);
-        if (ok && number > maxNumber)
-            maxNumber = number;
-    }
-
-    return maxNumber + 1;
-}

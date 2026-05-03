@@ -50,7 +50,6 @@ private:
     };
 
     int findWidgetIndex(const QString &widgetId) const;
-    int nextCustomNumber() const;
 
     QVector<WidgetItem> m_items;
 };

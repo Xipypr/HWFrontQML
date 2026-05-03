@@ -20,8 +20,7 @@ Dialog {
         { label: "CPU", key: "cpu" },
         { label: "RAM", key: "ram" },
         { label: "GPU", key: "gpu" },
-        { label: "HDD (180°)", key: "hdd" },
-        { label: "Новый виджет", key: "custom" }
+        { label: "HDD (180°)", key: "hdd" }
     ]
 
     property int selectedTemplateIndex: 0
