@@ -94,6 +94,17 @@ bool DashboardMetricsModel::addWidgetByType(const QString &type)
     return false;
 }
 
+
+QVariantList DashboardMetricsModel::widgetTypeOptions() const
+{
+    return {
+        QVariantMap{{"label", "CPU"}, {"key", "cpu"}},
+        QVariantMap{{"label", "RAM"}, {"key", "ram"}},
+        QVariantMap{{"label", "GPU"}, {"key", "gpu"}},
+        QVariantMap{{"label", "HDD (180°)"}, {"key", "hdd"}}
+    };
+}
+
 bool DashboardMetricsModel::removeWidget(const QString &widgetId)
 {
     const int index = findWidgetIndex(widgetId);

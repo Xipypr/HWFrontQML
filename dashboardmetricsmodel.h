@@ -31,6 +31,7 @@ public:
                                const QString &variant,
                                bool available = true);
     Q_INVOKABLE bool addWidgetByType(const QString &type);
+    Q_INVOKABLE QVariantList widgetTypeOptions() const;
     Q_INVOKABLE bool removeWidget(const QString &widgetId);
     Q_INVOKABLE bool moveWidget(int from, int to);
     Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);

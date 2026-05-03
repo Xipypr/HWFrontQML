@@ -16,12 +16,6 @@ Dialog {
     padding: 20
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-    readonly property var widgetTemplates: [
-        { label: "CPU", key: "cpu" },
-        { label: "RAM", key: "ram" },
-        { label: "GPU", key: "gpu" },
-        { label: "HDD (180°)", key: "hdd" }
-    ]
 
     property int selectedTemplateIndex: 0
 
@@ -92,7 +86,7 @@ Dialog {
             ComboBox {
                 id: addWidgetCombo
                 Layout.fillWidth: true
-                model: root.widgetTemplates
+                model: root.widgetsModel ? root.widgetsModel.widgetTypeOptions() : []
                 textRole: "label"
                 onCurrentIndexChanged: root.selectedTemplateIndex = currentIndex
             }
@@ -100,7 +94,7 @@ Dialog {
             Button {
                 text: "Добавить"
                 onClicked: {
-                    const item = root.widgetTemplates[root.selectedTemplateIndex]
+                    const item = addWidgetCombo.model[root.selectedTemplateIndex]
                     root.widgetsModel.addWidgetByType(item.key)
                 }
             }
@@ -113,7 +107,7 @@ Dialog {
             Item { Layout.fillWidth: true }
 
             Button {
-                text: "Отмена"
+                text: "Закрыть"
                 onClicked: root.close()
             }
         }
