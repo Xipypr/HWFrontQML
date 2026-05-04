@@ -18,6 +18,7 @@ Dialog {
 
 
     property int selectedTemplateIndex: 0
+    readonly property var availableWidgetTypes: widgetsModel ? widgetsModel.widgetTypeOptions() : []
 
     contentItem: ColumnLayout {
         spacing: 12
@@ -86,7 +87,7 @@ Dialog {
             ComboBox {
                 id: addWidgetCombo
                 Layout.fillWidth: true
-                model: root.widgetsModel ? root.widgetsModel.widgetTypeOptions() : []
+                model: root.availableWidgetTypes
                 textRole: "label"
                 onCurrentIndexChanged: root.selectedTemplateIndex = currentIndex
             }
@@ -95,6 +96,9 @@ Dialog {
                 text: "Добавить"
                 onClicked: {
                     const item = addWidgetCombo.model[root.selectedTemplateIndex]
+                    if (!item || !item.key)
+                        return
+
                     root.widgetsModel.addWidgetByType(item.key)
                 }
             }
