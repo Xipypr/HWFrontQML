@@ -163,6 +163,36 @@ bool DashboardMetricsModel::updateWidget(const QString &widgetId,
     return true;
 }
 
+
+void DashboardMetricsModel::applyDeviceSnapshot(const QVariantList &devices)
+{
+    for (const QVariant &entry : devices) {
+        QObject *deviceObject = entry.value<QObject *>();
+        if (!deviceObject)
+            continue;
+
+        const int type = deviceObject->property("type").toInt();
+        const int loading = deviceObject->property("loading").toInt();
+
+        switch (type) {
+        case 2: // Device.PROCESSOR
+            setWidgetValue("cpu", loading, true);
+            break;
+        case 3: // Device.MEMORY
+            setWidgetValue("ram", loading, true);
+            break;
+        case 4: // Device.VIDEO_CARD
+            setWidgetValue("gpu", loading, true);
+            break;
+        case 5: // Device.HARD_DISK
+            setWidgetValue("hdd", loading, true);
+            break;
+        default:
+            break;
+        }
+    }
+}
+
 int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
 {
     for (int i = 0; i < m_items.size(); ++i) {
@@ -187,4 +217,21 @@ DashboardMetricsModel::WidgetDescriptor DashboardMetricsModel::descriptorForType
     default:
         return {};
     }
+}
+
+void DashboardMetricsModel::setWidgetValue(const QString &widgetId, int value, bool available)
+{
+    const int index = findWidgetIndex(widgetId);
+    if (index < 0)
+        return;
+
+    WidgetItem &item = m_items[index];
+    if (item.value == value && item.available == available)
+        return;
+
+    item.value = value;
+    item.available = available;
+
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, { ValueRole, AvailableRole });
 }

@@ -32,9 +32,6 @@ Page {
 
     }
 
-    function updateWidgetData(widgetId, widgetValue) {
-        widgetModel.updateWidget(widgetId, widgetValue, true)
-    }
 
     function openDeviceSettingsDialog() {
         if (!deviceSettingsDialogLoader.active)
@@ -145,64 +142,10 @@ Page {
                 {
                     destop_name = desktop_device.name
                     objectsArray = desktop_device.devicesList()
-                    parseDevices()
+                    widgetModel.applyDeviceSnapshot(objectsArray)
                 }
             }
 
-            function parseDevices() {
-                for (let i = 0; i < objectsArray.length; ++i) {
-                    switch (objectsArray[i].type) {
-                    case Device.MOTHERBOARD:
-                        parseMotherBoard(i)
-                        break
-
-                    case Device.PROCESSOR:
-                        parseProc(i)
-                        break
-
-                    case Device.MEMORY:
-                        parseMemory(i)
-                        break
-
-                    case Device.VIDEO_CARD:
-                        parseVideocard(i)
-                        break
-
-                    case Device.HARD_DISK:
-                        parseHdd(i)
-                        break
-                    }
-                }
-            }
-
-            function parseMotherBoard(iter)
-            {
-                //console.log(objectsArray[iter].name)
-            }
-
-            function parseProc(iter)
-            {
-                let procObject = objectsArray[iter]
-                updateWidgetData("cpu", procObject.loading)
-            }
-
-            function parseMemory(iter)
-            {
-                let memObject = objectsArray[iter]
-                updateWidgetData("ram", memObject.loading)
-            }
-
-            function parseVideocard(iter)
-            {
-                let videoObject = objectsArray[iter]
-                updateWidgetData("gpu", videoObject.loading)
-            }
-
-            function parseHdd(iter)
-            {
-                let hddObject = objectsArray[iter]
-                updateWidgetData("hdd", hddObject.loading)
-            }
         }
     }
 }

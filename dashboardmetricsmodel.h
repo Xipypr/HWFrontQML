@@ -3,6 +3,7 @@
 
 #include <QAbstractListModel>
 #include <QVector>
+#include <QVariantList>
 
 class DashboardMetricsModel : public QAbstractListModel
 {
@@ -45,6 +46,7 @@ public:
     Q_INVOKABLE bool updateWidget(const QString &widgetId,
                                   int value,
                                   bool available = true);
+    Q_INVOKABLE void applyDeviceSnapshot(const QVariantList &devices);
 
 private:
     struct WidgetItem {
@@ -64,6 +66,7 @@ private:
 
     int findWidgetIndex(const QString &widgetId) const;
     WidgetDescriptor descriptorForType(WidgetType type) const;
+    void setWidgetValue(const QString &widgetId, int value, bool available);
 
     QVector<WidgetItem> m_items;
 };
