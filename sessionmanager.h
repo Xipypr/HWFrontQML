@@ -9,6 +9,8 @@
 #include <QObject>
 #include <QStringList>
 
+class DesktopDevice;
+
 class SessionManager : public QObject
 {
     Q_OBJECT
@@ -40,7 +42,7 @@ signals:
     void sessionCreated(const QString &sessionId);
     void sessionRemoved(const QString &sessionId);
     void sessionStateChanged(const QString &sessionId, SessionState state);
-    void deviceReady(const QString &sessionId, QObject *deviceRef);
+    void deviceReady(const QString &sessionId, DesktopDevice *deviceRef);
     void sessionAliasChanged(const QString &sessionId, const QString &alias);
 
 private:

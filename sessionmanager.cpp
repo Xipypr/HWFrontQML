@@ -1,3 +1,4 @@
+#include "devicebuilder.h"
 #include <QSortFilterProxyModel>
 #include "sessionmanager.h"
 
@@ -66,7 +67,7 @@ QString SessionManager::createSession(const QString &target)
         entry->session.displayName = deviceRef ? deviceRef->property("name").toString() : entry->session.displayName;
         m_sessionsModel.upsertSession(entry->session);
         emit connectedSessionIdsChanged();
-        emit deviceReady(sessionId, deviceRef);
+        emit deviceReady(sessionId, qobject_cast<DesktopDevice *>(deviceRef));
     });
 
     connect(core, &QObject::destroyed, this, [this, sessionId = session.sessionId]() {

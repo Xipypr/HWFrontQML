@@ -6,6 +6,7 @@
 #include <QVariantList>
 
 class SessionManager;
+class DesktopDevice;
 
 class DashboardMetricsModel : public QAbstractListModel
 {
@@ -63,7 +64,7 @@ signals:
     void sessionIdChanged();
 
 private slots:
-    void onDeviceReady(const QString &sessionId, QObject *deviceRef);
+    void onDeviceReady(const QString &sessionId, DesktopDevice *deviceRef);
 
 private:
     struct WidgetItem {

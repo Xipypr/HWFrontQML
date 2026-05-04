@@ -1,4 +1,5 @@
 #include "sessionmanager.h"
+#include "devicebuilder.h"
 
 #include "dashboardmetricsmodel.h"
 
@@ -24,8 +25,8 @@ void DashboardMetricsModel::setSessionManager(QObject *sessionManager)
     m_sessionManager = sessionManager;
 
     if (m_sessionManager) {
-        connect(m_sessionManager, SIGNAL(deviceReady(QString,QObject*)),
-                this, SLOT(onDeviceReady(QString,QObject*)));
+        connect(m_sessionManager, SIGNAL(deviceReady(QString,DesktopDevice*)),
+                this, SLOT(onDeviceReady(QString,DesktopDevice*)));
     }
 
     emit sessionManagerChanged();
@@ -234,19 +235,12 @@ void DashboardMetricsModel::applyDeviceSnapshot(const QVariantList &devices)
 }
 
 
-void DashboardMetricsModel::onDeviceReady(const QString &sessionId, QObject *deviceRef)
+void DashboardMetricsModel::onDeviceReady(const QString &sessionId, DesktopDevice *deviceRef)
 {
     if (m_sessionId.isEmpty() || m_sessionId != sessionId || !deviceRef)
         return;
 
-    QVariant devicesVariant;
-    const bool ok = QMetaObject::invokeMethod(deviceRef,
-                                               "devicesList",
-                                               Q_RETURN_ARG(QVariant, devicesVariant));
-    if (!ok)
-        return;
-
-    applyDeviceSnapshot(devicesVariant.toList());
+    applyDeviceSnapshot(deviceRef->devicesList());
 }
 
 int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
