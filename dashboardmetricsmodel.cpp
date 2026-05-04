@@ -71,7 +71,7 @@ bool DashboardMetricsModel::addWidget(const QString &widgetId,
 
     const int insertRow = m_items.size();
     beginInsertRows(QModelIndex(), insertRow, insertRow);
-    m_items.push_back({ widgetId, widgetId.toUpper(), 0, variant, available });
+    m_items.push_back({ widgetId, "unknown", 0, variant, available });
     endInsertRows();
     return true;
 }
