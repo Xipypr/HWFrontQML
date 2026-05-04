@@ -205,10 +205,17 @@ bool DashboardMetricsModel::updateWidget(const QString &widgetId,
 }
 
 
-void DashboardMetricsModel::applyDeviceSnapshot(const QVariantList &devices)
+void DashboardMetricsModel::onDeviceReady(const QString &sessionId, DesktopDevice *deviceRef)
 {
-    for (const QVariant &entry : devices) {
-        QObject *deviceObject = entry.value<QObject *>();
+    if (m_sessionId.isEmpty() || m_sessionId != sessionId || !deviceRef)
+        return;
+
+    applyDeviceSnapshot(deviceRef->devicesList());
+}
+
+void DashboardMetricsModel::applyDeviceSnapshot(const QList<Device *> &devices)
+{
+    for (Device *deviceObject : devices) {
         if (!deviceObject)
             continue;
 
@@ -232,15 +239,6 @@ void DashboardMetricsModel::applyDeviceSnapshot(const QVariantList &devices)
             break;
         }
     }
-}
-
-
-void DashboardMetricsModel::onDeviceReady(const QString &sessionId, DesktopDevice *deviceRef)
-{
-    if (m_sessionId.isEmpty() || m_sessionId != sessionId || !deviceRef)
-        return;
-
-    applyDeviceSnapshot(deviceRef->devicesList());
 }
 
 int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const

@@ -7,6 +7,7 @@
 
 class SessionManager;
 class DesktopDevice;
+class Device;
 
 class DashboardMetricsModel : public QAbstractListModel
 {
@@ -57,7 +58,6 @@ public:
     Q_INVOKABLE bool updateWidget(const QString &widgetId,
                                   int value,
                                   bool available = true);
-    Q_INVOKABLE void applyDeviceSnapshot(const QVariantList &devices);
 
 signals:
     void sessionManagerChanged();
@@ -85,6 +85,7 @@ private:
     int findWidgetIndex(const QString &widgetId) const;
     WidgetDescriptor descriptorForType(WidgetType type) const;
     void setWidgetValue(const QString &widgetId, int value, bool available);
+    void applyDeviceSnapshot(const QList<Device *> &devices);
 
     QVector<WidgetItem> m_items;
     QObject *m_sessionManager = nullptr;
