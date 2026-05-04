@@ -123,6 +123,9 @@ bool DashboardMetricsModel::addWidgetByType(DashboardMetricsModel::WidgetType ty
     if (descriptor.type == Unknown)
         return false;
 
+    if (findWidgetIndex(descriptor.widgetId) >= 0)
+        return false;
+
     const int insertRow = m_items.size();
     beginInsertRows(QModelIndex(), insertRow, insertRow);
     m_items.push_back({ descriptor.widgetId, descriptor.title, 0, descriptor.variant, true });
@@ -215,30 +218,52 @@ void DashboardMetricsModel::onDeviceReady(const QString &sessionId, DesktopDevic
 
 void DashboardMetricsModel::applyDeviceSnapshot(const QList<Device *> &devices)
 {
+    bool hasCpu = false;
+    bool hasRam = false;
+    bool hasGpu = false;
+    bool hasHdd = false;
+
     for (Device *deviceObject : devices) {
         if (!deviceObject)
             continue;
 
         const int type = deviceObject->property("type").toInt();
         const int loading = deviceObject->property("loading").toInt();
+        const QString className = QString::fromLatin1(deviceObject->metaObject()->className()).toLower();
 
-        switch (type) {
-        case 2: // Device.PROCESSOR
+        const bool isCpu = (type == 1 || type == 2 || className.contains("processor") || className.contains("cpu"));
+        const bool isRam = (type == 2 || type == 3 || className.contains("memory") || className.contains("ram"));
+        const bool isGpu = (type == 3 || type == 4 || className.contains("video") || className.contains("gpu"));
+        const bool isHdd = (type == 4 || type == 5 || className.contains("disk") || className.contains("hdd"));
+
+        if (isCpu) {
             setWidgetValue("cpu", loading, true);
-            break;
-        case 3: // Device.MEMORY
+            hasCpu = true;
+            continue;
+        }
+
+        if (isRam) {
             setWidgetValue("ram", loading, true);
-            break;
-        case 4: // Device.VIDEO_CARD
+            hasRam = true;
+            continue;
+        }
+
+        if (isGpu) {
             setWidgetValue("gpu", loading, true);
-            break;
-        case 5: // Device.HARD_DISK
+            hasGpu = true;
+            continue;
+        }
+
+        if (isHdd) {
             setWidgetValue("hdd", loading, true);
-            break;
-        default:
-            break;
+            hasHdd = true;
         }
     }
+
+    setWidgetValue("cpu", 0, hasCpu);
+    setWidgetValue("ram", 0, hasRam);
+    setWidgetValue("gpu", 0, hasGpu);
+    setWidgetValue("hdd", 0, hasHdd);
 }
 
 int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
