@@ -3,6 +3,8 @@
 
 #include "dashboardmetricsmodel.h"
 
+#include <QMetaEnum>
+
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
     : QAbstractListModel(parent)
 {
@@ -231,10 +233,20 @@ void DashboardMetricsModel::applyDeviceSnapshot(const QList<Device *> &devices)
         const int loading = deviceObject->property("loading").toInt();
         const QString className = QString::fromLatin1(deviceObject->metaObject()->className()).toLower();
 
-        const bool isCpu = (type == 1 || type == 2 || className.contains("processor") || className.contains("cpu"));
-        const bool isRam = (type == 2 || type == 3 || className.contains("memory") || className.contains("ram"));
-        const bool isGpu = (type == 3 || type == 4 || className.contains("video") || className.contains("gpu"));
-        const bool isHdd = (type == 4 || type == 5 || className.contains("disk") || className.contains("hdd"));
+        QString typeKey;
+        const QMetaObject *mo = deviceObject->metaObject();
+        const int enumIndex = mo->indexOfEnumerator("Type");
+        if (enumIndex >= 0) {
+            const QMetaEnum typeEnum = mo->enumerator(enumIndex);
+            const char *key = typeEnum.valueToKey(type);
+            if (key)
+                typeKey = QString::fromLatin1(key).toUpper();
+        }
+
+        const bool isCpu = (typeKey == "PROCESSOR" || className.contains("processor") || className.contains("cpu") || type == 2);
+        const bool isRam = (typeKey == "MEMORY" || className.contains("memory") || className.contains("ram") || type == 3);
+        const bool isGpu = (typeKey == "VIDEO_CARD" || className.contains("video") || className.contains("gpu") || type == 4);
+        const bool isHdd = (typeKey == "HARD_DISK" || className.contains("disk") || className.contains("hdd") || type == 5);
 
         if (isCpu) {
             setWidgetValue("cpu", loading, true);
