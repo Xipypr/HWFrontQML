@@ -1,5 +1,6 @@
 #include "sessionmanager.h"
 #include "devicebuilder.h"
+#include "core.h"
 
 #include "dashboardmetricsmodel.h"
 
@@ -32,6 +33,10 @@ void DashboardMetricsModel::setSessionManager(QObject *sessionManager)
     }
 
     emit sessionManagerChanged();
+
+    if (!m_sessionId.isEmpty()) {
+        onDeviceReady(m_sessionId, nullptr);
+    }
 }
 
 QString DashboardMetricsModel::sessionId() const
@@ -46,6 +51,8 @@ void DashboardMetricsModel::setSessionId(const QString &sessionId)
 
     m_sessionId = sessionId;
     emit sessionIdChanged();
+
+    onDeviceReady(m_sessionId, nullptr);
 }
 
 int DashboardMetricsModel::rowCount(const QModelIndex &parent) const
@@ -212,10 +219,26 @@ bool DashboardMetricsModel::updateWidget(const QString &widgetId,
 
 void DashboardMetricsModel::onDeviceReady(const QString &sessionId, DesktopDevice *deviceRef)
 {
-    if (m_sessionId.isEmpty() || m_sessionId != sessionId || !deviceRef)
+    if (m_sessionId.isEmpty() || m_sessionId != sessionId)
         return;
 
-    applyDeviceSnapshot(deviceRef->devicesList());
+    DesktopDevice *resolvedDevice = deviceRef;
+    if (!resolvedDevice) {
+        SessionManager *manager = qobject_cast<SessionManager *>(m_sessionManager);
+        if (!manager)
+            return;
+
+        Core *core = qobject_cast<Core *>(manager->coreForSession(m_sessionId));
+        if (!core)
+            return;
+
+        resolvedDevice = qobject_cast<DesktopDevice *>(core->device());
+    }
+
+    if (!resolvedDevice)
+        return;
+
+    applyDeviceSnapshot(resolvedDevice->devicesList());
 }
 
 void DashboardMetricsModel::applyDeviceSnapshot(const QList<Device *> &devices)
