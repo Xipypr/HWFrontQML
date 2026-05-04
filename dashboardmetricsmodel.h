@@ -5,9 +5,13 @@
 #include <QVector>
 #include <QVariantList>
 
+class SessionManager;
+
 class DashboardMetricsModel : public QAbstractListModel
 {
     Q_OBJECT
+    Q_PROPERTY(QObject *sessionManager READ sessionManager WRITE setSessionManager NOTIFY sessionManagerChanged)
+    Q_PROPERTY(QString sessionId READ sessionId WRITE setSessionId NOTIFY sessionIdChanged)
 
 public:
     enum Roles {
@@ -30,6 +34,12 @@ public:
 
     explicit DashboardMetricsModel(QObject *parent = nullptr);
 
+    QObject *sessionManager() const;
+    void setSessionManager(QObject *sessionManager);
+
+    QString sessionId() const;
+    void setSessionId(const QString &sessionId);
+
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
@@ -47,6 +57,13 @@ public:
                                   int value,
                                   bool available = true);
     Q_INVOKABLE void applyDeviceSnapshot(const QVariantList &devices);
+
+signals:
+    void sessionManagerChanged();
+    void sessionIdChanged();
+
+private slots:
+    void onDeviceReady(const QString &sessionId, QObject *deviceRef);
 
 private:
     struct WidgetItem {
@@ -69,6 +86,8 @@ private:
     void setWidgetValue(const QString &widgetId, int value, bool available);
 
     QVector<WidgetItem> m_items;
+    QObject *m_sessionManager = nullptr;
+    QString m_sessionId;
 };
 
 #endif // DASHBOARDMETRICSMODEL_H

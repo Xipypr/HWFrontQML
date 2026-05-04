@@ -20,6 +20,8 @@ Page {
 
     DashboardMetricsModel {
         id: widgetModel
+        sessionManager: sessionManager
+        sessionId: root.sessionId
     }
 
     function resetDefaultWidgets() {
@@ -130,22 +132,5 @@ Page {
             }
         }
 
-        Connections {
-            target: sessionManager
-
-            function onDeviceReady(sessionId, deviceRef) {
-                if (!root.sessionId || root.sessionId !== sessionId)
-                    return
-
-                desktop_device = deviceRef
-                if (desktop_device.type === Device.DESKTOP)
-                {
-                    destop_name = desktop_device.name
-                    objectsArray = desktop_device.devicesList()
-                    widgetModel.applyDeviceSnapshot(objectsArray)
-                }
-            }
-
-        }
     }
 }

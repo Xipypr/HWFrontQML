@@ -1,8 +1,48 @@
+#include "sessionmanager.h"
+
 #include "dashboardmetricsmodel.h"
 
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
     : QAbstractListModel(parent)
 {
+}
+
+QObject *DashboardMetricsModel::sessionManager() const
+{
+    return m_sessionManager;
+}
+
+void DashboardMetricsModel::setSessionManager(QObject *sessionManager)
+{
+    if (m_sessionManager == sessionManager)
+        return;
+
+    if (m_sessionManager) {
+        disconnect(m_sessionManager, nullptr, this, nullptr);
+    }
+
+    m_sessionManager = sessionManager;
+
+    if (m_sessionManager) {
+        connect(m_sessionManager, SIGNAL(deviceReady(QString,QObject*)),
+                this, SLOT(onDeviceReady(QString,QObject*)));
+    }
+
+    emit sessionManagerChanged();
+}
+
+QString DashboardMetricsModel::sessionId() const
+{
+    return m_sessionId;
+}
+
+void DashboardMetricsModel::setSessionId(const QString &sessionId)
+{
+    if (m_sessionId == sessionId)
+        return;
+
+    m_sessionId = sessionId;
+    emit sessionIdChanged();
 }
 
 int DashboardMetricsModel::rowCount(const QModelIndex &parent) const
@@ -191,6 +231,22 @@ void DashboardMetricsModel::applyDeviceSnapshot(const QVariantList &devices)
             break;
         }
     }
+}
+
+
+void DashboardMetricsModel::onDeviceReady(const QString &sessionId, QObject *deviceRef)
+{
+    if (m_sessionId.isEmpty() || m_sessionId != sessionId || !deviceRef)
+        return;
+
+    QVariant devicesVariant;
+    const bool ok = QMetaObject::invokeMethod(deviceRef,
+                                               "devicesList",
+                                               Q_RETURN_ARG(QVariant, devicesVariant));
+    if (!ok)
+        return;
+
+    applyDeviceSnapshot(devicesVariant.toList());
 }
 
 int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
