@@ -27,9 +27,10 @@ void DashboardMetricsModel::setSessionManager(QObject *sessionManager)
 
     m_sessionManager = sessionManager;
 
-    if (m_sessionManager) {
-        connect(m_sessionManager, SIGNAL(deviceReady(QString,DesktopDevice*)),
-                this, SLOT(onDeviceReady(QString,DesktopDevice*)));
+    SessionManager *manager = qobject_cast<SessionManager *>(m_sessionManager);
+    if (manager) {
+        connect(manager, &SessionManager::deviceReady,
+                this, &DashboardMetricsModel::onDeviceReady);
     }
 
     emit sessionManagerChanged();
