@@ -35,7 +35,6 @@ public:
 
     Q_INVOKABLE QVariantMap get(int row) const;
     Q_INVOKABLE bool addWidget(const QString &widgetId,
-                               const QString &title,
                                const QString &variant,
                                bool available = true);
     Q_INVOKABLE bool addWidgetByType(WidgetType type);
@@ -44,7 +43,6 @@ public:
     Q_INVOKABLE bool moveWidget(int from, int to);
     Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);
     Q_INVOKABLE bool updateWidget(const QString &widgetId,
-                                  const QString &title,
                                   int value,
                                   bool available = true);
 

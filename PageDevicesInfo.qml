@@ -32,8 +32,8 @@ Page {
 
     }
 
-    function updateWidgetData(widgetId, widgetTitle, widgetValue) {
-        widgetModel.updateWidget(widgetId, widgetTitle, widgetValue, true)
+    function updateWidgetData(widgetId, widgetValue) {
+        widgetModel.updateWidget(widgetId, widgetValue, true)
     }
 
     function openDeviceSettingsDialog() {
@@ -183,25 +183,25 @@ Page {
             function parseProc(iter)
             {
                 let procObject = objectsArray[iter]
-                updateWidgetData("cpu", procObject.name.substring(0, 12), procObject.loading)
+                updateWidgetData("cpu", procObject.loading)
             }
 
             function parseMemory(iter)
             {
                 let memObject = objectsArray[iter]
-                updateWidgetData("ram", "RAM", memObject.loading)
+                updateWidgetData("ram", memObject.loading)
             }
 
             function parseVideocard(iter)
             {
                 let videoObject = objectsArray[iter]
-                updateWidgetData("gpu", videoObject.name.substring(0, 12), videoObject.loading)
+                updateWidgetData("gpu", videoObject.loading)
             }
 
             function parseHdd(iter)
             {
                 let hddObject = objectsArray[iter]
-                updateWidgetData("hdd", hddObject.name.substring(0, 12), hddObject.loading)
+                updateWidgetData("hdd", hddObject.loading)
             }
         }
     }

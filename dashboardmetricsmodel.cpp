@@ -63,7 +63,6 @@ QVariantMap DashboardMetricsModel::get(int row) const
 }
 
 bool DashboardMetricsModel::addWidget(const QString &widgetId,
-                                      const QString &title,
                                       const QString &variant,
                                       bool available)
 {
@@ -72,7 +71,7 @@ bool DashboardMetricsModel::addWidget(const QString &widgetId,
 
     const int insertRow = m_items.size();
     beginInsertRows(QModelIndex(), insertRow, insertRow);
-    m_items.push_back({ widgetId, title, 0, variant, available });
+    m_items.push_back({ widgetId, widgetId.toUpper(), 0, variant, available });
     endInsertRows();
     return true;
 }
@@ -83,7 +82,11 @@ bool DashboardMetricsModel::addWidgetByType(DashboardMetricsModel::WidgetType ty
     if (descriptor.type == Unknown)
         return false;
 
-    return addWidget(descriptor.widgetId, descriptor.title, descriptor.variant, true);
+    const int insertRow = m_items.size();
+    beginInsertRows(QModelIndex(), insertRow, insertRow);
+    m_items.push_back({ descriptor.widgetId, descriptor.title, 0, descriptor.variant, true });
+    endInsertRows();
+    return true;
 }
 
 QVariantList DashboardMetricsModel::widgetTypeOptions() const
@@ -144,7 +147,6 @@ bool DashboardMetricsModel::setVariant(const QString &widgetId, const QString &v
 }
 
 bool DashboardMetricsModel::updateWidget(const QString &widgetId,
-                                         const QString &title,
                                          int value,
                                          bool available)
 {
@@ -153,12 +155,11 @@ bool DashboardMetricsModel::updateWidget(const QString &widgetId,
         return false;
 
     WidgetItem &item = m_items[index];
-    item.title = title;
     item.value = value;
     item.available = available;
 
     const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, { TitleRole, ValueRole, AvailableRole });
+    emit dataChanged(modelIndex, modelIndex, { ValueRole, AvailableRole });
     return true;
 }
 
