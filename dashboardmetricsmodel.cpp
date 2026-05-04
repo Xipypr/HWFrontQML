@@ -78,31 +78,28 @@ bool DashboardMetricsModel::addWidget(const QString &widgetId,
     return true;
 }
 
-
-bool DashboardMetricsModel::addWidgetByType(const QString &type)
+bool DashboardMetricsModel::addWidgetByType(int type)
 {
-    if (type == "cpu")
-        return addWidget("cpu", "CPU", 0, "segments", true);
-    if (type == "ram")
-        return addWidget("ram", "RAM", 0, "ring", true);
-    if (type == "gpu")
-        return addWidget("gpu", "GPU", 0, "linear", true);
-    if (type == "hdd")
-        return addWidget("hdd", "HDD", 0, "arc180", true);
+    const WidgetDescriptor descriptor = descriptorForType(static_cast<WidgetType>(type));
+    if (descriptor.type == Unknown)
+        return false;
 
-
-    return false;
+    return addWidget(descriptor.widgetId, descriptor.title, 0, descriptor.variant, true);
 }
-
 
 QVariantList DashboardMetricsModel::widgetTypeOptions() const
 {
-    return {
-        QVariantMap{{"label", "CPU"}, {"key", "cpu"}},
-        QVariantMap{{"label", "RAM"}, {"key", "ram"}},
-        QVariantMap{{"label", "GPU"}, {"key", "gpu"}},
-        QVariantMap{{"label", "HDD (180°)"}, {"key", "hdd"}}
-    };
+    const QList<WidgetType> types = { Cpu, Ram, Gpu, Hdd };
+    QVariantList options;
+    for (WidgetType type : types) {
+        const WidgetDescriptor descriptor = descriptorForType(type);
+        options.push_back(QVariantMap{
+            { "label", descriptor.title == "HDD" ? "HDD (180°)" : descriptor.title },
+            { "key", static_cast<int>(type) }
+        });
+    }
+
+    return options;
 }
 
 bool DashboardMetricsModel::removeWidget(const QString &widgetId)
@@ -176,3 +173,18 @@ int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
     return -1;
 }
 
+DashboardMetricsModel::WidgetDescriptor DashboardMetricsModel::descriptorForType(DashboardMetricsModel::WidgetType type) const
+{
+    switch (type) {
+    case Cpu:
+        return { Cpu, "cpu", "CPU", "segments" };
+    case Ram:
+        return { Ram, "ram", "RAM", "ring" };
+    case Gpu:
+        return { Gpu, "gpu", "GPU", "linear" };
+    case Hdd:
+        return { Hdd, "hdd", "HDD", "arc180" };
+    default:
+        return {};
+    }
+}

@@ -26,9 +26,12 @@ Page {
         if (widgetModel.rowCount() > 0)
             return
 
-        widgetModel.addWidget("cpu", "CPU", 45, "arc180", true)
-        widgetModel.addWidget("ram", "RAM", 76, "segments", true)
-        widgetModel.addWidget("gpu", "GPU", 68, "linear", true)
+        widgetModel.addWidgetByType(DashboardMetricsModel.Cpu)
+        widgetModel.addWidgetByType(DashboardMetricsModel.Ram)
+        widgetModel.addWidgetByType(DashboardMetricsModel.Gpu)
+
+        widgetModel.setVariant("cpu", "arc180")
+        widgetModel.setVariant("ram", "segments")
     }
 
     function updateWidgetData(widgetId, widgetTitle, widgetValue) {

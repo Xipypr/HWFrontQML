@@ -18,6 +18,15 @@ public:
     };
     Q_ENUM(Roles)
 
+    enum WidgetType {
+        Cpu = 0,
+        Ram,
+        Gpu,
+        Hdd,
+        Unknown
+    };
+    Q_ENUM(WidgetType)
+
     explicit DashboardMetricsModel(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -30,7 +39,7 @@ public:
                                int value,
                                const QString &variant,
                                bool available = true);
-    Q_INVOKABLE bool addWidgetByType(const QString &type);
+    Q_INVOKABLE bool addWidgetByType(int type);
     Q_INVOKABLE QVariantList widgetTypeOptions() const;
     Q_INVOKABLE bool removeWidget(const QString &widgetId);
     Q_INVOKABLE bool moveWidget(int from, int to);
@@ -39,7 +48,6 @@ public:
                                   const QString &title,
                                   int value,
                                   bool available = true);
-
 
 private:
     struct WidgetItem {
@@ -50,7 +58,15 @@ private:
         bool available = true;
     };
 
+    struct WidgetDescriptor {
+        WidgetType type = Unknown;
+        QString widgetId;
+        QString title;
+        QString variant;
+    };
+
     int findWidgetIndex(const QString &widgetId) const;
+    WidgetDescriptor descriptorForType(WidgetType type) const;
 
     QVector<WidgetItem> m_items;
 };
