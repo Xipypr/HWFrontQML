@@ -78,9 +78,9 @@ bool DashboardMetricsModel::addWidget(const QString &widgetId,
     return true;
 }
 
-bool DashboardMetricsModel::addWidgetByType(int type)
+bool DashboardMetricsModel::addWidgetByType(DashboardMetricsModel::WidgetType type)
 {
-    const WidgetDescriptor descriptor = descriptorForType(static_cast<WidgetType>(type));
+    const WidgetDescriptor descriptor = descriptorForType(type);
     if (descriptor.type == Unknown)
         return false;
 
@@ -179,11 +179,11 @@ DashboardMetricsModel::WidgetDescriptor DashboardMetricsModel::descriptorForType
     case Cpu:
         return { Cpu, "cpu", "CPU", "segments" };
     case Ram:
-        return { Ram, "ram", "RAM", "ring" };
+        return { Ram, "ram", "RAM", "segments" };
     case Gpu:
-        return { Gpu, "gpu", "GPU", "linear" };
+        return { Gpu, "gpu", "GPU", "segments" };
     case Hdd:
-        return { Hdd, "hdd", "HDD", "arc180" };
+        return { Hdd, "hdd", "HDD", "segments" };
     default:
         return {};
     }
