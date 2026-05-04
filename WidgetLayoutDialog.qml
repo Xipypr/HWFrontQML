@@ -5,7 +5,7 @@ import QtQuick.Layouts 1.3
 Dialog {
     id: root
 
-    property var widgetsModel: null
+    required property var widgetsModel
 
     parent: Overlay.overlay
     x: (parent.width - width) / 2
@@ -86,7 +86,7 @@ Dialog {
             ComboBox {
                 id: addWidgetCombo
                 Layout.fillWidth: true
-                model: root.widgetsModel ? root.widgetsModel.widgetTypeOptions() : []
+                model: root.widgetsModel.widgetTypeOptions()
                 textRole: "label"
                 onCurrentIndexChanged: root.selectedTemplateIndex = currentIndex
             }
