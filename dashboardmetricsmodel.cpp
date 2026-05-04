@@ -64,7 +64,6 @@ QVariantMap DashboardMetricsModel::get(int row) const
 
 bool DashboardMetricsModel::addWidget(const QString &widgetId,
                                       const QString &title,
-                                      int value,
                                       const QString &variant,
                                       bool available)
 {
@@ -73,7 +72,7 @@ bool DashboardMetricsModel::addWidget(const QString &widgetId,
 
     const int insertRow = m_items.size();
     beginInsertRows(QModelIndex(), insertRow, insertRow);
-    m_items.push_back({ widgetId, title, value, variant, available });
+    m_items.push_back({ widgetId, title, 0, variant, available });
     endInsertRows();
     return true;
 }
@@ -84,7 +83,7 @@ bool DashboardMetricsModel::addWidgetByType(DashboardMetricsModel::WidgetType ty
     if (descriptor.type == Unknown)
         return false;
 
-    return addWidget(descriptor.widgetId, descriptor.title, 0, descriptor.variant, true);
+    return addWidget(descriptor.widgetId, descriptor.title, descriptor.variant, true);
 }
 
 QVariantList DashboardMetricsModel::widgetTypeOptions() const

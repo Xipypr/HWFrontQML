@@ -36,7 +36,6 @@ public:
     Q_INVOKABLE QVariantMap get(int row) const;
     Q_INVOKABLE bool addWidget(const QString &widgetId,
                                const QString &title,
-                               int value,
                                const QString &variant,
                                bool available = true);
     Q_INVOKABLE bool addWidgetByType(WidgetType type);
