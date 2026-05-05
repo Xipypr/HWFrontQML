@@ -9,6 +9,7 @@ CONFIG += c++17
 
 SOURCES += \
         core.cpp \
+        dashboardmetricsmodel.cpp \
         main.cpp \
         sessionlistmodel.cpp \
         sessionmanager.cpp
@@ -60,6 +61,7 @@ DEPENDPATH += $$PWD/../DeviceBuilder/src
 
 HEADERS += \
     core.h \
+    dashboardmetricsmodel.h \
     session.h \
     sessionlistmodel.h \
     sessionmanager.h \

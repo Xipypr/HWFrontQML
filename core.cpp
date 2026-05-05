@@ -42,7 +42,7 @@ void Core::onStatusChanged(HWConnector::ConnectionStatus status)
     setState(convertConnectorEnum(status));
 }
 
-QObject *Core::device() const
+DesktopDevice *Core::device() const
 {
     return m_device;
 }

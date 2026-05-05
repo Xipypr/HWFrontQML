@@ -5,8 +5,7 @@ import QtQuick.Layouts 1.3
 Dialog {
     id: root
 
-    property var widgetsModel: null
-    signal applyLayout(var widgets)
+    required property var widgetsModel
 
     parent: Overlay.overlay
     x: (parent.width - width) / 2
@@ -17,70 +16,8 @@ Dialog {
     padding: 20
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-    readonly property var widgetTemplates: [
-        { label: "CPU", key: "cpu", title: "CPU", variant: "segments" },
-        { label: "RAM", key: "ram", title: "RAM", variant: "ring" },
-        { label: "GPU", key: "gpu", title: "GPU", variant: "linear" },
-        { label: "HDD (180°)", key: "hdd", title: "HDD", variant: "arc180" },
-        { label: "Новый виджет", key: "custom", title: "Новый виджет", variant: "segments" }
-    ]
 
     property int selectedTemplateIndex: 0
-    property int tempWidgetId: -1
-
-    ListModel {
-        id: editableModel
-    }
-
-    function syncFromSource() {
-        tempWidgetId = -1
-        editableModel.clear()
-        if (!root.widgetsModel)
-            return
-
-        for (let i = 0; i < root.widgetsModel.count; ++i) {
-            const item = root.widgetsModel.get(i)
-            editableModel.append({
-                uid: item.uid,
-                key: item.key,
-                title: item.title,
-                value: item.value,
-                variant: item.variant
-            })
-        }
-    }
-
-    function exportWidgets() {
-        const widgets = []
-        for (let i = 0; i < editableModel.count; ++i) {
-            widgets.push(editableModel.get(i))
-        }
-        return widgets
-    }
-
-    function nextCustomWidgetTitle() {
-        let maxNumber = 0
-        for (let i = 0; i < editableModel.count; ++i) {
-            const item = editableModel.get(i)
-            if (item.key !== "custom")
-                continue
-
-            const match = /^Новый виджет\s+(\d+)$/.exec(item.title)
-            if (match && match.length > 1) {
-                const number = parseInt(match[1], 10)
-                if (!isNaN(number))
-                    maxNumber = Math.max(maxNumber, number)
-            }
-        }
-        return "Новый виджет " + (maxNumber + 1)
-    }
-
-    function nextTempWidgetUid() {
-        tempWidgetId -= 1
-        return tempWidgetId
-    }
-
-    onOpened: syncFromSource()
 
     contentItem: ColumnLayout {
         spacing: 12
@@ -100,7 +37,7 @@ Dialog {
             Layout.preferredHeight: 260
             clip: true
             spacing: 8
-            model: editableModel
+            model: root.widgetsModel
 
             delegate: Rectangle {
                 width: widgetsList.width
@@ -117,7 +54,7 @@ Dialog {
 
                     Label {
                         Layout.fillWidth: true
-                        text: title
+                        text: model.title
                         color: "#E2E8F0"
                         elide: Text.ElideRight
                     }
@@ -125,18 +62,18 @@ Dialog {
                     ToolButton {
                         text: "↑"
                         enabled: index > 0
-                        onClicked: editableModel.move(index, index - 1, 1)
+                        onClicked: root.widgetsModel.moveWidget(index, index - 1)
                     }
 
                     ToolButton {
                         text: "↓"
-                        enabled: index < editableModel.count - 1
-                        onClicked: editableModel.move(index, index + 1, 1)
+                        enabled: root.widgetsModel && index < widgetsList.count - 1
+                        onClicked: root.widgetsModel.moveWidget(index, index + 1)
                     }
 
                     ToolButton {
                         text: "✕"
-                        onClicked: editableModel.remove(index, 1)
+                        onClicked: root.widgetsModel.removeWidget(model.widgetId)
                     }
                 }
             }
@@ -149,7 +86,7 @@ Dialog {
             ComboBox {
                 id: addWidgetCombo
                 Layout.fillWidth: true
-                model: root.widgetTemplates
+                model: root.widgetsModel.widgetTypeOptions()
                 textRole: "label"
                 onCurrentIndexChanged: root.selectedTemplateIndex = currentIndex
             }
@@ -157,17 +94,8 @@ Dialog {
             Button {
                 text: "Добавить"
                 onClicked: {
-                    const item = root.widgetTemplates[root.selectedTemplateIndex];
-                    let title = item.title
-                    if (item.key === "custom")
-                        title = root.nextCustomWidgetTitle()
-                    editableModel.append({
-                        uid: root.nextTempWidgetUid(),
-                        key: item.key,
-                        title: title,
-                        value: 0,
-                        variant: item.variant
-                    })
+                    const item = addWidgetCombo.model[root.selectedTemplateIndex]
+                    root.widgetsModel.addWidgetByType(item.key)
                 }
             }
         }
@@ -179,16 +107,8 @@ Dialog {
             Item { Layout.fillWidth: true }
 
             Button {
-                text: "Отмена"
+                text: "Закрыть"
                 onClicked: root.close()
-            }
-
-            Button {
-                text: "Принять"
-                onClicked: {
-                    root.applyLayout(root.exportWidgets())
-                    root.close()
-                }
             }
         }
     }
