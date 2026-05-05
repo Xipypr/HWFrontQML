@@ -12,7 +12,6 @@ class Device;
 class DashboardMetricsModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(QObject *sessionManager READ sessionManager WRITE setSessionManager NOTIFY sessionManagerChanged)
     Q_PROPERTY(QString sessionId READ sessionId WRITE setSessionId NOTIFY sessionIdChanged)
 
 public:
@@ -36,9 +35,6 @@ public:
 
     explicit DashboardMetricsModel(QObject *parent = nullptr);
 
-    QObject *sessionManager() const;
-    void setSessionManager(QObject *sessionManager);
-
     QString sessionId() const;
     void setSessionId(const QString &sessionId);
 
@@ -60,7 +56,6 @@ public:
                                   bool available = true);
 
 signals:
-    void sessionManagerChanged();
     void sessionIdChanged();
 
 private slots:
@@ -88,7 +83,7 @@ private:
     void applyDeviceSnapshot(const QList<Device *> &devices);
 
     QVector<WidgetItem> m_items;
-    QObject *m_sessionManager = nullptr;
+    SessionManager *m_sessionManager = nullptr;
     QString m_sessionId;
 };
 

@@ -20,7 +20,6 @@ Page {
 
     DashboardMetricsModel {
         id: widgetModel
-        sessionManager: sessionManager
         sessionId: root.sessionId
     }
 

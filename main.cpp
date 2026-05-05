@@ -3,6 +3,7 @@
 #include <QQmlContext>
 
 #include <QObject>
+#include <QVariant>
 
 //#include <hwconnector.h>
 //#include <devicebuilder.h>
@@ -23,6 +24,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     SessionManager sessionManager;
+    app.setProperty("sessionManagerPtr", QVariant::fromValue(static_cast<QObject *>(&sessionManager)));
     Device device;
     DesktopDevice desktopDevice;
     Ram ram;

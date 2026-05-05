@@ -4,39 +4,18 @@
 
 #include "dashboardmetricsmodel.h"
 
+#include <QCoreApplication>
 #include <QMetaEnum>
 
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
     : QAbstractListModel(parent)
 {
-}
-
-QObject *DashboardMetricsModel::sessionManager() const
-{
-    return m_sessionManager;
-}
-
-void DashboardMetricsModel::setSessionManager(QObject *sessionManager)
-{
-    if (m_sessionManager == sessionManager)
-        return;
+    QObject *managerObject = qApp ? qApp->property("sessionManagerPtr").value<QObject *>() : nullptr;
+    m_sessionManager = qobject_cast<SessionManager *>(managerObject);
 
     if (m_sessionManager) {
-        disconnect(m_sessionManager, nullptr, this, nullptr);
-    }
-
-    m_sessionManager = sessionManager;
-
-    SessionManager *manager = qobject_cast<SessionManager *>(m_sessionManager);
-    if (manager) {
-        connect(manager, &SessionManager::deviceReady,
+        connect(m_sessionManager, &SessionManager::deviceReady,
                 this, &DashboardMetricsModel::onDeviceReady);
-    }
-
-    emit sessionManagerChanged();
-
-    if (!m_sessionId.isEmpty()) {
-        onDeviceReady(m_sessionId, nullptr);
     }
 }
 
@@ -225,11 +204,10 @@ void DashboardMetricsModel::onDeviceReady(const QString &sessionId, DesktopDevic
 
     DesktopDevice *resolvedDevice = deviceRef;
     if (!resolvedDevice) {
-        SessionManager *manager = qobject_cast<SessionManager *>(m_sessionManager);
-        if (!manager)
+        if (!m_sessionManager)
             return;
 
-        Core *core = qobject_cast<Core *>(manager->coreForSession(m_sessionId));
+        Core *core = qobject_cast<Core *>(m_sessionManager->coreForSession(m_sessionId));
         if (!core)
             return;
 
