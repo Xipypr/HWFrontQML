@@ -71,7 +71,13 @@ QString SessionManager::createSession(const QString &target)
     });
 
     connect(core, &QObject::destroyed, this, [this, sessionId = session.sessionId]() {
-        if (m_sessions.remove(sessionId) > 0) {
+        auto it = m_sessions.find(sessionId);
+        if (it != m_sessions.end()) {
+            if (it->dashboardModel) {
+                it->dashboardModel->deleteLater();
+                it->dashboardModel = nullptr;
+            }
+            m_sessions.erase(it);
             m_sessionsModel.removeSession(sessionId);
             emit sessionRemoved(sessionId);
             emit sessionIdsChanged();
@@ -82,6 +88,8 @@ QString SessionManager::createSession(const QString &target)
     SessionEntry entry;
     entry.session = session;
     entry.core = core;
+    entry.dashboardModel = new DashboardMetricsModel(this);
+    entry.dashboardModel->setSessionId(session.sessionId);
     m_sessions.insert(session.sessionId, entry);
     m_sessionsModel.upsertSession(session);
 
@@ -98,6 +106,9 @@ void SessionManager::removeSession(const QString &sessionId)
     }
 
     const SessionEntry entry = m_sessions.take(sessionId);
+    if (entry.dashboardModel) {
+        entry.dashboardModel->deleteLater();
+    }
     if (!entry.core) {
         return;
     }
@@ -145,6 +156,15 @@ QString SessionManager::deviceAlias(const QString &sessionId) const
     }
 
     return m_sessionsModel.deviceAliasForSession(sessionId);
+}
+
+
+QObject *SessionManager::dashboardModelForSession(const QString &sessionId) const
+{
+    if (sessionId.isEmpty())
+        return nullptr;
+
+    return m_sessions.value(sessionId, SessionEntry{}).dashboardModel;
 }
 
 QAbstractListModel *SessionManager::sessionsModel()

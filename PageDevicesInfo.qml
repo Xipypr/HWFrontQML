@@ -18,13 +18,10 @@ Page {
 
     signal homeRequested()
 
-    DashboardMetricsModel {
-        id: widgetModel
-        sessionId: root.sessionId
-    }
+    property var widgetModel: sessionManager.dashboardModelForSession(root.sessionId)
 
     function resetDefaultWidgets() {
-        if (widgetModel.rowCount() > 0)
+        if (!widgetModel || widgetModel.rowCount() > 0)
             return
 
         widgetModel.addWidgetByType(DashboardMetricsModel.Cpu)
@@ -114,7 +111,7 @@ Page {
             rowSpacing: 12
 
             Repeater {
-                model: widgetModel
+                model: widgetModel ? widgetModel : []
 
                 delegate: MetricCard {
                     Layout.fillWidth: true
@@ -125,7 +122,7 @@ Page {
                     value: model.value
                     variant: model.variant
                     onVariantSelected: function(mode) {
-                        widgetModel.setVariant(model.widgetId, mode)
+                        if (widgetModel) widgetModel.setVariant(model.widgetId, mode)
                     }
                 }
             }
