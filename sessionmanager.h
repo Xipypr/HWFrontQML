@@ -31,7 +31,7 @@ public:
     Q_INVOKABLE QStringList connectedSessionIds() const;
     Q_INVOKABLE void setDeviceAlias(const QString &sessionId, const QString &alias);
     Q_INVOKABLE QString deviceAlias(const QString &sessionId) const;
-    Q_INVOKABLE QObject *dashboardModelForSession(const QString &sessionId) const;
+    Q_INVOKABLE DashboardMetricsModel *dashboardModelForSession(const QString &sessionId) const;
     QAbstractListModel *sessionsModel();
     Q_INVOKABLE int indexOfConnectedSession(const QString &sessionId) const;
     QAbstractItemModel *connectedSessionsModel();

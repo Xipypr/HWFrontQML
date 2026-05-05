@@ -21,7 +21,7 @@ Page {
     property var widgetModel: sessionManager.dashboardModelForSession(root.sessionId)
 
     function resetDefaultWidgets() {
-        if (!widgetModel || widgetModel.rowCount() > 0)
+        if (widgetModel.rowCount() > 0)
             return
 
         widgetModel.addWidgetByType(DashboardMetricsModel.Cpu)
@@ -111,7 +111,7 @@ Page {
             rowSpacing: 12
 
             Repeater {
-                model: widgetModel ? widgetModel : []
+                model: widgetModel
 
                 delegate: MetricCard {
                     Layout.fillWidth: true
@@ -122,7 +122,7 @@ Page {
                     value: model.value
                     variant: model.variant
                     onVariantSelected: function(mode) {
-                        if (widgetModel) widgetModel.setVariant(model.widgetId, mode)
+                        widgetModel.setVariant(model.widgetId, mode)
                     }
                 }
             }

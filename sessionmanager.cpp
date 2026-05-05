@@ -159,7 +159,7 @@ QString SessionManager::deviceAlias(const QString &sessionId) const
 }
 
 
-QObject *SessionManager::dashboardModelForSession(const QString &sessionId) const
+DashboardMetricsModel *SessionManager::dashboardModelForSession(const QString &sessionId) const
 {
     if (sessionId.isEmpty())
         return nullptr;
