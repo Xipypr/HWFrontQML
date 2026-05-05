@@ -90,7 +90,9 @@ QString SessionManager::createSession(const QString &target)
     entry.core = core;
     entry.dashboardModel = new DashboardMetricsModel(this);
     entry.dashboardModel->setSessionId(session.sessionId);
-    entry.dashboardModel->setCore(core);
+    connect(core, &Core::deviceReady, entry.dashboardModel, [model = entry.dashboardModel](QObject *deviceRef) {
+        model->onDeviceSnapshotReady(qobject_cast<DesktopDevice *>(deviceRef));
+    });
     m_sessions.insert(session.sessionId, entry);
     m_sessionsModel.upsertSession(session);
 

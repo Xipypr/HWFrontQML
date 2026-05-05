@@ -1,6 +1,4 @@
 #include "devicebuilder.h"
-#include "core.h"
-
 #include "dashboardmetricsmodel.h"
 
 #include <QMetaEnum>
@@ -25,25 +23,6 @@ void DashboardMetricsModel::setSessionId(const QString &sessionId)
 
 }
 
-
-void DashboardMetricsModel::setCore(Core *core)
-{
-    if (m_core == core)
-        return;
-
-    if (m_core) {
-        disconnect(m_core, nullptr, this, nullptr);
-    }
-
-    m_core = core;
-    if (m_core) {
-        connect(m_core, &Core::deviceReady, this, &DashboardMetricsModel::onCoreDeviceReady);
-
-        QObject *existingDevice = m_core->device();
-        if (existingDevice)
-            onCoreDeviceReady(existingDevice);
-    }
-}
 
 int DashboardMetricsModel::rowCount(const QModelIndex &parent) const
 {
@@ -207,16 +186,12 @@ bool DashboardMetricsModel::updateWidget(const QString &widgetId,
 }
 
 
-void DashboardMetricsModel::onCoreDeviceReady(QObject *deviceRef)
+void DashboardMetricsModel::onDeviceSnapshotReady(DesktopDevice *deviceRef)
 {
     if (!deviceRef)
         return;
 
-    DesktopDevice *desktopDevice = qobject_cast<DesktopDevice *>(deviceRef);
-    if (!desktopDevice)
-        return;
-
-    applyDeviceSnapshot(desktopDevice->devicesList());
+    applyDeviceSnapshot(deviceRef->devicesList());
 }
 
 void DashboardMetricsModel::applyDeviceSnapshot(const QList<Device *> &devices)

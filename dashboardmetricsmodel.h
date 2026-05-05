@@ -5,7 +5,6 @@
 #include <QVector>
 #include <QVariantList>
 
-class Core;
 class DesktopDevice;
 class Device;
 
@@ -37,7 +36,6 @@ public:
 
     QString sessionId() const;
     void setSessionId(const QString &sessionId);
-    void setCore(Core *core);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -59,8 +57,8 @@ public:
 signals:
     void sessionIdChanged();
 
-private slots:
-    void onCoreDeviceReady(QObject *deviceRef);
+public slots:
+    void onDeviceSnapshotReady(DesktopDevice *deviceRef);
 
 private:
     struct WidgetItem {
@@ -84,7 +82,6 @@ private:
     void applyDeviceSnapshot(const QList<Device *> &devices);
 
     QVector<WidgetItem> m_items;
-    Core *m_core = nullptr;
     QString m_sessionId;
 };
 
