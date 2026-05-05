@@ -6,9 +6,6 @@
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
     : QAbstractListModel(parent)
 {
-    addWidgetByType(Cpu);
-    addWidgetByType(Ram);
-    addWidgetByType(Gpu);
 }
 
 int DashboardMetricsModel::rowCount(const QModelIndex &parent) const
@@ -212,33 +209,41 @@ void DashboardMetricsModel::applyDeviceSnapshot(const QList<Device *> &devices)
         const bool isHdd = (typeKey == "HARD_DISK" || className.contains("disk") || className.contains("hdd") || type == 5);
 
         if (isCpu) {
+            addWidgetByType(Cpu);
             setWidgetValue("cpu", loading, true);
             hasCpu = true;
             continue;
         }
 
         if (isRam) {
+            addWidgetByType(Ram);
             setWidgetValue("ram", loading, true);
             hasRam = true;
             continue;
         }
 
         if (isGpu) {
+            addWidgetByType(Gpu);
             setWidgetValue("gpu", loading, true);
             hasGpu = true;
             continue;
         }
 
         if (isHdd) {
+            addWidgetByType(Hdd);
             setWidgetValue("hdd", loading, true);
             hasHdd = true;
         }
     }
 
-    setWidgetValue("cpu", 0, hasCpu);
-    setWidgetValue("ram", 0, hasRam);
-    setWidgetValue("gpu", 0, hasGpu);
-    setWidgetValue("hdd", 0, hasHdd);
+    if (!hasCpu)
+        removeWidget("cpu");
+    if (!hasRam)
+        removeWidget("ram");
+    if (!hasGpu)
+        removeWidget("gpu");
+    if (!hasHdd)
+        removeWidget("hdd");
 }
 
 int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
