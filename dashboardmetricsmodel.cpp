@@ -6,6 +6,9 @@
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
     : QAbstractListModel(parent)
 {
+    addWidgetByType(Cpu);
+    addWidgetByType(Ram);
+    addWidgetByType(Gpu);
 }
 
 int DashboardMetricsModel::rowCount(const QModelIndex &parent) const

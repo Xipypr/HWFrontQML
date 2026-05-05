@@ -20,17 +20,6 @@ Page {
 
     property var widgetModel: sessionManager.dashboardModelForSession(root.sessionId)
 
-    function resetDefaultWidgets() {
-        if (widgetModel.rowCount() > 0)
-            return
-
-        widgetModel.addWidgetByType(DashboardMetricsModel.Cpu)
-        widgetModel.addWidgetByType(DashboardMetricsModel.Ram)
-        widgetModel.addWidgetByType(DashboardMetricsModel.Gpu)
-
-    }
-
-
     function openDeviceSettingsDialog() {
         if (!deviceSettingsDialogLoader.active)
             deviceSettingsDialogLoader.active = true
@@ -42,8 +31,6 @@ Page {
 
         deviceSettingsDialogLoader.pendingOpen = true
     }
-
-    Component.onCompleted: resetDefaultWidgets()
 
     header: DeviceStatusHeader {
         width: root.width
