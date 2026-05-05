@@ -72,7 +72,7 @@ private:
 
     int findWidgetIndex(const QString &widgetId) const;
     WidgetDescriptor descriptorForType(WidgetType type) const;
-    void setWidgetValue(const QString &widgetId, int value, bool available);
+    void setWidgetValue(const QString &widgetId, int value, bool available, const QString &title = QString());
     void applyDeviceSnapshot(const QList<Device *> &devices);
 
     QVector<WidgetItem> m_items;

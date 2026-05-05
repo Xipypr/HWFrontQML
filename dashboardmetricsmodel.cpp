@@ -191,6 +191,7 @@ void DashboardMetricsModel::applyDeviceSnapshot(const QList<Device *> &devices)
 
         const int type = deviceObject->property("type").toInt();
         const int loading = deviceObject->property("loading").toInt();
+        const QString deviceName = deviceObject->property("name").toString();
         const QString className = QString::fromLatin1(deviceObject->metaObject()->className()).toLower();
 
         QString typeKey;
@@ -210,28 +211,28 @@ void DashboardMetricsModel::applyDeviceSnapshot(const QList<Device *> &devices)
 
         if (isCpu) {
             addWidgetByType(Cpu);
-            setWidgetValue("cpu", loading, true);
+            setWidgetValue("cpu", loading, true, deviceName);
             hasCpu = true;
             continue;
         }
 
         if (isRam) {
             addWidgetByType(Ram);
-            setWidgetValue("ram", loading, true);
+            setWidgetValue("ram", loading, true, deviceName);
             hasRam = true;
             continue;
         }
 
         if (isGpu) {
             addWidgetByType(Gpu);
-            setWidgetValue("gpu", loading, true);
+            setWidgetValue("gpu", loading, true, deviceName);
             hasGpu = true;
             continue;
         }
 
         if (isHdd) {
             addWidgetByType(Hdd);
-            setWidgetValue("hdd", loading, true);
+            setWidgetValue("hdd", loading, true, deviceName);
             hasHdd = true;
         }
     }
@@ -272,19 +273,33 @@ DashboardMetricsModel::WidgetDescriptor DashboardMetricsModel::descriptorForType
     }
 }
 
-void DashboardMetricsModel::setWidgetValue(const QString &widgetId, int value, bool available)
+void DashboardMetricsModel::setWidgetValue(const QString &widgetId, int value, bool available, const QString &title)
 {
     const int index = findWidgetIndex(widgetId);
     if (index < 0)
         return;
 
     WidgetItem &item = m_items[index];
-    if (item.value == value && item.available == available)
+    QVector<int> changedRoles;
+
+    if (item.value != value) {
+        item.value = value;
+        changedRoles.push_back(ValueRole);
+    }
+
+    if (item.available != available) {
+        item.available = available;
+        changedRoles.push_back(AvailableRole);
+    }
+
+    if (!title.isEmpty() && item.title != title) {
+        item.title = title;
+        changedRoles.push_back(TitleRole);
+    }
+
+    if (changedRoles.isEmpty())
         return;
 
-    item.value = value;
-    item.available = available;
-
     const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, { ValueRole, AvailableRole });
+    emit dataChanged(modelIndex, modelIndex, changedRoles);
 }
