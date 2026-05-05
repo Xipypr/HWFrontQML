@@ -11,7 +11,6 @@ class Device;
 class DashboardMetricsModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(QString sessionId READ sessionId WRITE setSessionId NOTIFY sessionIdChanged)
 
 public:
     enum Roles {
@@ -34,8 +33,6 @@ public:
 
     explicit DashboardMetricsModel(QObject *parent = nullptr);
 
-    QString sessionId() const;
-    void setSessionId(const QString &sessionId);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
@@ -53,9 +50,6 @@ public:
     Q_INVOKABLE bool updateWidget(const QString &widgetId,
                                   int value,
                                   bool available = true);
-
-signals:
-    void sessionIdChanged();
 
 public slots:
     void onDeviceSnapshotReady(DesktopDevice *deviceRef);
@@ -82,7 +76,6 @@ private:
     void applyDeviceSnapshot(const QList<Device *> &devices);
 
     QVector<WidgetItem> m_items;
-    QString m_sessionId;
 };
 
 #endif // DASHBOARDMETRICSMODEL_H

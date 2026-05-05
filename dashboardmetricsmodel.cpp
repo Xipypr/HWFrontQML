@@ -8,22 +8,6 @@ DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
 {
 }
 
-QString DashboardMetricsModel::sessionId() const
-{
-    return m_sessionId;
-}
-
-void DashboardMetricsModel::setSessionId(const QString &sessionId)
-{
-    if (m_sessionId == sessionId)
-        return;
-
-    m_sessionId = sessionId;
-    emit sessionIdChanged();
-
-}
-
-
 int DashboardMetricsModel::rowCount(const QModelIndex &parent) const
 {
     if (parent.isValid())
