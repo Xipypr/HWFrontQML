@@ -58,7 +58,7 @@ QString SessionManager::createSession(const QString &target)
         emit sessionStateChanged(sessionId, state);
     });
 
-    connect(core, &Core::deviceReady, this, [this, sessionId = session.sessionId](QObject *deviceRef) {
+    connect(core, &Core::deviceReady, this, [this, sessionId = session.sessionId](DesktopDevice *deviceRef) {
         SessionEntry *entry = findSessionEntry(sessionId);
         if (!entry) {
             return;
@@ -67,7 +67,7 @@ QString SessionManager::createSession(const QString &target)
         entry->session.displayName = deviceRef ? deviceRef->property("name").toString() : entry->session.displayName;
         m_sessionsModel.upsertSession(entry->session);
         emit connectedSessionIdsChanged();
-        emit deviceReady(sessionId, qobject_cast<DesktopDevice *>(deviceRef));
+        emit deviceReady(sessionId, deviceRef);
     });
 
     connect(core, &QObject::destroyed, this, [this, sessionId = session.sessionId]() {
@@ -90,9 +90,7 @@ QString SessionManager::createSession(const QString &target)
     entry.core = core;
     entry.dashboardModel = new DashboardMetricsModel(this);
     entry.dashboardModel->setSessionId(session.sessionId);
-    connect(core, &Core::deviceReady, entry.dashboardModel, [model = entry.dashboardModel](QObject *deviceRef) {
-        model->onDeviceSnapshotReady(qobject_cast<DesktopDevice *>(deviceRef));
-    });
+    connect(core, &Core::deviceReady, entry.dashboardModel, &DashboardMetricsModel::onDeviceSnapshotReady);
     m_sessions.insert(session.sessionId, entry);
     m_sessionsModel.upsertSession(session);
 

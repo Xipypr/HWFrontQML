@@ -15,7 +15,7 @@ public:
     explicit Core(QObject *parent = nullptr);
     ~Core();
 
-    Q_INVOKABLE QObject *device() const;
+    Q_INVOKABLE DesktopDevice *device() const;
 
 public slots:
     void onStartConnection(const QString &target);
@@ -25,7 +25,7 @@ public slots:
 
 signals:
     void sessionStateChanged(SessionState state);
-    void deviceReady(QObject *deviceRef);
+    void deviceReady(DesktopDevice *deviceRef);
 
     void testSignal();
 
