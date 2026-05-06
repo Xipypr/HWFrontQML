@@ -11,6 +11,7 @@ SOURCES += \
         core.cpp \
         dashboardmetricsmodel.cpp \
         main.cpp \
+        metricsservice.cpp \
         sessionlistmodel.cpp \
         sessionmanager.cpp
 
@@ -62,6 +63,7 @@ DEPENDPATH += $$PWD/../DeviceBuilder/src
 HEADERS += \
     core.h \
     dashboardmetricsmodel.h \
+    metricsservice.h \
     session.h \
     sessionlistmodel.h \
     sessionmanager.h \

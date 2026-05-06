@@ -1,15 +1,12 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
-import DeviceData 1.0
 import SessionState 1.0
 import DashboardModels 1.0
 
 Page {
     id: root
 
-    property var objectsArray: []
-    property var desktop_device: ({})
     property string sessionId: ""
     property string destop_name: ""
     property string deviceAlias: ""

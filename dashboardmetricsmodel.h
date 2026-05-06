@@ -5,8 +5,6 @@
 #include <QVector>
 #include <QVariantList>
 
-class DesktopDevice;
-class Device;
 
 class DashboardMetricsModel : public QAbstractListModel
 {
@@ -52,7 +50,10 @@ public:
                                   bool available = true);
 
 public slots:
-    void onDeviceSnapshotReady(DesktopDevice *deviceRef);
+    void onAvailableMetricsChanged(const QVariantList &metrics);
+    void onMetricUpdated(const QString &deviceId,
+                         const QString &metricId,
+                         const QVariant &value);
 
 private:
     struct WidgetItem {
@@ -73,7 +74,7 @@ private:
     int findWidgetIndex(const QString &widgetId) const;
     WidgetDescriptor descriptorForType(WidgetType type) const;
     void setWidgetValue(const QString &widgetId, int value, bool available, const QString &title = QString());
-    void applyDeviceSnapshot(const QList<Device *> &devices);
+    void syncWidgetsWithMetrics(const QVariantList &metrics);
 
     QVector<WidgetItem> m_items;
 };

@@ -77,6 +77,10 @@ QString SessionManager::createSession(const QString &target)
                 it->dashboardModel->deleteLater();
                 it->dashboardModel = nullptr;
             }
+            if (it->metricsService) {
+                it->metricsService->deleteLater();
+                it->metricsService = nullptr;
+            }
             m_sessions.erase(it);
             m_sessionsModel.removeSession(sessionId);
             emit sessionRemoved(sessionId);
@@ -89,7 +93,10 @@ QString SessionManager::createSession(const QString &target)
     entry.session = session;
     entry.core = core;
     entry.dashboardModel = new DashboardMetricsModel(this);
-    connect(core, &Core::deviceReady, entry.dashboardModel, &DashboardMetricsModel::onDeviceSnapshotReady);
+    entry.metricsService = new MetricsService(this);
+    connect(core, &Core::deviceReady, entry.metricsService, &MetricsService::processDeviceSnapshot);
+    connect(entry.metricsService, &MetricsService::availableMetricsChanged, entry.dashboardModel, &DashboardMetricsModel::onAvailableMetricsChanged);
+    connect(entry.metricsService, &MetricsService::metricUpdated, entry.dashboardModel, &DashboardMetricsModel::onMetricUpdated);
     m_sessions.insert(session.sessionId, entry);
     m_sessionsModel.upsertSession(session);
 
@@ -108,6 +115,9 @@ void SessionManager::removeSession(const QString &sessionId)
     const SessionEntry entry = m_sessions.take(sessionId);
     if (entry.dashboardModel) {
         entry.dashboardModel->deleteLater();
+    }
+    if (entry.metricsService) {
+        entry.metricsService->deleteLater();
     }
     if (!entry.core) {
         return;

@@ -1,7 +1,6 @@
-#include "devicebuilder.h"
 #include "dashboardmetricsmodel.h"
 
-#include <QMetaEnum>
+#include <QSet>
 
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
     : QAbstractListModel(parent)
@@ -170,81 +169,54 @@ bool DashboardMetricsModel::updateWidget(const QString &widgetId,
 }
 
 
-void DashboardMetricsModel::onDeviceSnapshotReady(DesktopDevice *deviceRef)
+void DashboardMetricsModel::onAvailableMetricsChanged(const QVariantList &metrics)
 {
-    if (!deviceRef)
-        return;
-
-    applyDeviceSnapshot(deviceRef->devicesList());
+    syncWidgetsWithMetrics(metrics);
 }
 
-void DashboardMetricsModel::applyDeviceSnapshot(const QList<Device *> &devices)
+void DashboardMetricsModel::onMetricUpdated(const QString &deviceId,
+                                            const QString &metricId,
+                                            const QVariant &value)
 {
-    bool hasCpu = false;
-    bool hasRam = false;
-    bool hasGpu = false;
-    bool hasHdd = false;
+    if (metricId != QStringLiteral("loading"))
+        return;
 
-    for (Device *deviceObject : devices) {
-        if (!deviceObject)
+    setWidgetValue(deviceId, value.toInt(), true);
+}
+
+void DashboardMetricsModel::syncWidgetsWithMetrics(const QVariantList &metrics)
+{
+    QSet<QString> availableDeviceIds;
+
+    for (const QVariant &metric : metrics) {
+        const QVariantMap descriptor = metric.toMap();
+        const QString deviceId = descriptor.value(QStringLiteral("deviceId")).toString();
+        const QString metricId = descriptor.value(QStringLiteral("metricId")).toString();
+        const QString displayName = descriptor.value(QStringLiteral("displayName")).toString();
+        if (deviceId.isEmpty() || metricId != QStringLiteral("loading"))
             continue;
 
-        const int type = deviceObject->property("type").toInt();
-        const int loading = deviceObject->property("loading").toInt();
-        const QString deviceName = deviceObject->property("name").toString();
-        const QString className = QString::fromLatin1(deviceObject->metaObject()->className()).toLower();
+        availableDeviceIds.insert(deviceId);
 
-        QString typeKey;
-        const QMetaObject *mo = deviceObject->metaObject();
-        const int enumIndex = mo->indexOfEnumerator("Type");
-        if (enumIndex >= 0) {
-            const QMetaEnum typeEnum = mo->enumerator(enumIndex);
-            const char *key = typeEnum.valueToKey(type);
-            if (key)
-                typeKey = QString::fromLatin1(key).toUpper();
-        }
-
-        const bool isCpu = (typeKey == "PROCESSOR" || className.contains("processor") || className.contains("cpu") || type == 2);
-        const bool isRam = (typeKey == "MEMORY" || className.contains("memory") || className.contains("ram") || type == 3);
-        const bool isGpu = (typeKey == "VIDEO_CARD" || className.contains("video") || className.contains("gpu") || type == 4);
-        const bool isHdd = (typeKey == "HARD_DISK" || className.contains("disk") || className.contains("hdd") || type == 5);
-
-        if (isCpu) {
+        if (deviceId == QStringLiteral("cpu"))
             addWidgetByType(Cpu);
-            setWidgetValue("cpu", loading, true, deviceName);
-            hasCpu = true;
-            continue;
-        }
-
-        if (isRam) {
+        else if (deviceId == QStringLiteral("ram"))
             addWidgetByType(Ram);
-            setWidgetValue("ram", loading, true, deviceName);
-            hasRam = true;
-            continue;
-        }
-
-        if (isGpu) {
+        else if (deviceId == QStringLiteral("gpu"))
             addWidgetByType(Gpu);
-            setWidgetValue("gpu", loading, true, deviceName);
-            hasGpu = true;
-            continue;
-        }
-
-        if (isHdd) {
+        else if (deviceId == QStringLiteral("hdd"))
             addWidgetByType(Hdd);
-            setWidgetValue("hdd", loading, true, deviceName);
-            hasHdd = true;
-        }
+        else
+            addWidget(deviceId, QStringLiteral("segments"));
+
+        setWidgetValue(deviceId, 0, true, displayName);
     }
 
-    if (!hasCpu)
-        removeWidget("cpu");
-    if (!hasRam)
-        removeWidget("ram");
-    if (!hasGpu)
-        removeWidget("gpu");
-    if (!hasHdd)
-        removeWidget("hdd");
+    for (int i = m_items.size() - 1; i >= 0; --i) {
+        const QString deviceId = m_items.at(i).widgetId;
+        if (!availableDeviceIds.contains(deviceId))
+            removeWidget(deviceId);
+    }
 }
 
 int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
