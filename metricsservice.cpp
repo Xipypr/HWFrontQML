@@ -31,16 +31,6 @@ const QList<MetricDefinition> &metricDefinitions()
     return definitions;
 }
 
-QString metricDisplaySuffix(const QString &metricId)
-{
-    for (const MetricDefinition &definition : metricDefinitions()) {
-        if (metricId == QString::fromLatin1(definition.metricId))
-            return QString::fromLatin1(definition.displaySuffix);
-    }
-
-    return metricId;
-}
-
 QString metricUnit(const QString &metricId)
 {
     for (const MetricDefinition &definition : metricDefinitions()) {
@@ -106,7 +96,7 @@ void MetricsService::discoverMetrics(DesktopDevice *desktopDevice)
             discoveredMetrics.push_back({
                 deviceId,
                 metricId,
-                metricDisplayName(deviceObject, deviceId, metricId),
+                metricDisplayName(deviceObject, deviceId),
                 metricUnit(metricId)
             });
         }
@@ -160,16 +150,11 @@ QString MetricsService::metricDeviceId(Device *deviceObject)
 }
 
 
-QString MetricsService::metricDisplayName(Device *deviceObject,
-                                          const QString &deviceId,
-                                          const QString &metricId)
+QString MetricsService::metricDisplayName(Device *deviceObject, const QString &deviceId)
 {
     const QString fallbackName = deviceId.toUpper();
     const QString deviceName = deviceObject ? deviceObject->property("name").toString() : QString();
-    const QString baseName = deviceName.isEmpty() ? fallbackName : deviceName;
-    const QString suffix = metricDisplaySuffix(metricId);
-
-    return suffix.isEmpty() ? baseName : QStringLiteral("%1 %2").arg(baseName, suffix);
+    return deviceName.isEmpty() ? fallbackName : deviceName;
 }
 
 bool MetricsService::hasMetric(Device *deviceObject, const QString &metricId)

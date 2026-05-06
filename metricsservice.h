@@ -47,9 +47,7 @@ private:
     void refreshMetricValues(DesktopDevice *desktopDevice);
 
     static QString metricDeviceId(Device *deviceObject);
-    static QString metricDisplayName(Device *deviceObject,
-                                     const QString &deviceId,
-                                     const QString &metricId);
+    static QString metricDisplayName(Device *deviceObject, const QString &deviceId);
     static bool hasMetric(Device *deviceObject, const QString &metricId);
     static QVariantMap descriptorToVariantMap(const MetricDescriptor &descriptor);
     QVariant metricValue(Device *deviceObject, const QString &metricId) const;
