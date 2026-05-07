@@ -175,10 +175,10 @@ void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescript
 }
 
 void DashboardMetricsModel::onMetricUpdated(const QString &deviceId,
-                                            const QString &metricId,
+                                            Metrics::MetricId metricId,
                                             const QVariant &value)
 {
-    if (metricId != QStringLiteral("loading"))
+    if (metricId != Metrics::MetricId::Loading)
         return;
 
     setWidgetValue(deviceId, value.toInt(), true);
@@ -189,7 +189,7 @@ void DashboardMetricsModel::syncWidgetsWithMetrics(const QList<MetricDescriptor>
     QSet<QString> availableDeviceIds;
 
     for (const MetricDescriptor &descriptor : metrics) {
-        if (descriptor.deviceId.isEmpty() || descriptor.metricId != QStringLiteral("loading"))
+        if (descriptor.deviceId.isEmpty() || descriptor.metricId != Metrics::MetricId::Loading)
             continue;
 
         availableDeviceIds.insert(descriptor.deviceId);

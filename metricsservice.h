@@ -24,7 +24,7 @@ public slots:
 signals:
     void availableMetricsChanged(const QList<MetricDescriptor> &metrics);
     void metricUpdated(const QString &deviceId,
-                       const QString &metricId,
+                       Metrics::MetricId metricId,
                        const QVariant &value);
 
 private:
@@ -33,8 +33,8 @@ private:
 
     static QString metricDeviceId(Device *deviceObject);
     static QString metricDisplayName(Device *deviceObject, const QString &deviceId);
-    static bool hasMetric(Device *deviceObject, const QString &metricId);
-    QVariant metricValue(Device *deviceObject, const QString &metricId) const;
+    static bool hasMetric(Device *deviceObject, Metrics::MetricId metricId);
+    QVariant metricValue(Device *deviceObject, Metrics::MetricId metricId) const;
 
     bool m_metricsDiscovered = false;
     QList<MetricDescriptor> m_availableMetrics;

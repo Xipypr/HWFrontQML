@@ -54,7 +54,7 @@ public:
 public slots:
     void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
     void onMetricUpdated(const QString &deviceId,
-                         const QString &metricId,
+                         Metrics::MetricId metricId,
                          const QVariant &value);
 
 private:
