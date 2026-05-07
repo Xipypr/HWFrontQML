@@ -6,9 +6,6 @@
 #include <QHash>
 
 namespace {
-constexpr const char *LoadingPropertyName = "loading";
-constexpr const char *TemperaturePropertyName = "temperature";
-constexpr const char *FrequencyPropertyName = "frequency";
 constexpr const char *MetricUnitPercent = "%";
 constexpr const char *MetricUnitCelsius = "°C";
 constexpr const char *MetricUnitMegahertz = "MHz";
@@ -16,7 +13,6 @@ constexpr const char *MetricUnitMegahertz = "MHz";
 struct MetricDefinition
 {
     Metrics::MetricId metricId;
-    const char *propertyName;
     const char *displaySuffix;
     const char *unit;
 };
@@ -24,9 +20,9 @@ struct MetricDefinition
 const QList<MetricDefinition> &metricDefinitions()
 {
     static const QList<MetricDefinition> definitions = {
-        { Metrics::MetricId::Loading, LoadingPropertyName, "Loading", MetricUnitPercent },
-        { Metrics::MetricId::Temperature, TemperaturePropertyName, "Temperature", MetricUnitCelsius },
-        { Metrics::MetricId::Frequency, FrequencyPropertyName, "Frequency", MetricUnitMegahertz }
+        { Metrics::MetricId::Loading, "Loading", MetricUnitPercent },
+        { Metrics::MetricId::Temperature, "Temperature", MetricUnitCelsius },
+        { Metrics::MetricId::Frequency, "Frequency", MetricUnitMegahertz }
     };
 
     return definitions;
@@ -40,12 +36,6 @@ const MetricDefinition *metricDefinition(Metrics::MetricId metricId)
     }
 
     return nullptr;
-}
-
-QString metricPropertyName(Metrics::MetricId metricId)
-{
-    const MetricDefinition *definition = metricDefinition(metricId);
-    return definition ? QString::fromLatin1(definition->propertyName) : QString();
 }
 
 QString metricUnit(Metrics::MetricId metricId)
@@ -166,8 +156,9 @@ bool MetricsService::hasMetric(Device *deviceObject, Metrics::MetricId metricId)
     if (!deviceObject)
         return false;
 
-    const QString propertyName = metricPropertyName(metricId);
-    return !propertyName.isEmpty() && deviceObject->property(propertyName.toLatin1().constData()).isValid();
+    const QString metricName = Metrics::metricIdToString(metricId);
+    return metricId != Metrics::MetricId::Unknown
+           && deviceObject->property(metricName.toLatin1().constData()).isValid();
 }
 
 QVariant MetricsService::metricValue(Device *deviceObject, Metrics::MetricId metricId) const
@@ -175,9 +166,9 @@ QVariant MetricsService::metricValue(Device *deviceObject, Metrics::MetricId met
     if (!deviceObject)
         return {};
 
-    const QString propertyName = metricPropertyName(metricId);
-    if (propertyName.isEmpty())
+    if (metricId == Metrics::MetricId::Unknown)
         return {};
 
-    return deviceObject->property(propertyName.toLatin1().constData());
+    const QString metricName = Metrics::metricIdToString(metricId);
+    return deviceObject->property(metricName.toLatin1().constData());
 }

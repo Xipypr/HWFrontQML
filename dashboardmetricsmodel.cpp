@@ -189,7 +189,7 @@ void DashboardMetricsModel::syncWidgetsWithMetrics(const QList<MetricDescriptor>
     QSet<QString> availableDeviceIds;
 
     for (const MetricDescriptor &descriptor : metrics) {
-        if (descriptor.deviceId.isEmpty() || descriptor.metricId != Metrics::MetricId::Loading)
+        if (availableDeviceIds.contains(descriptor.deviceId))
             continue;
 
         availableDeviceIds.insert(descriptor.deviceId);

@@ -35,11 +35,12 @@ inline QString metricIdToString(MetricId metricId)
 
 inline MetricId metricIdFromString(const QString &metricId)
 {
-    if (metricId == QStringLiteral("loading"))
+    const QString normalizedMetricId = metricId.toLower();
+    if (normalizedMetricId == QStringLiteral("loading"))
         return MetricId::Loading;
-    if (metricId == QStringLiteral("temperature"))
+    if (normalizedMetricId == QStringLiteral("temperature"))
         return MetricId::Temperature;
-    if (metricId == QStringLiteral("frequency"))
+    if (normalizedMetricId == QStringLiteral("frequency"))
         return MetricId::Frequency;
 
     return MetricId::Unknown;
