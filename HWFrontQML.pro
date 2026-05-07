@@ -63,6 +63,7 @@ DEPENDPATH += $$PWD/../DeviceBuilder/src
 HEADERS += \
     core.h \
     dashboardmetricsmodel.h \
+    metricdescriptor.h \
     metricsservice.h \
     session.h \
     sessionlistmodel.h \

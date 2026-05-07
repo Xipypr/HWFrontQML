@@ -1,6 +1,8 @@
 #ifndef DASHBOARDMETRICSMODEL_H
 #define DASHBOARDMETRICSMODEL_H
 
+#include "metricdescriptor.h"
+
 #include <QAbstractListModel>
 #include <QVector>
 #include <QVariantList>
@@ -50,7 +52,7 @@ public:
                                   bool available = true);
 
 public slots:
-    void onAvailableMetricsChanged(const QVariantList &metrics);
+    void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
     void onMetricUpdated(const QString &deviceId,
                          const QString &metricId,
                          const QVariant &value);
@@ -74,7 +76,7 @@ private:
     int findWidgetIndex(const QString &widgetId) const;
     WidgetDescriptor descriptorForType(WidgetType type) const;
     void setWidgetValue(const QString &widgetId, int value, bool available, const QString &title = QString());
-    void syncWidgetsWithMetrics(const QVariantList &metrics);
+    void syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics);
 
     QVector<WidgetItem> m_items;
 };

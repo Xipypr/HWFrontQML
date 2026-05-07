@@ -50,15 +50,6 @@ MetricsService::MetricsService(QObject *parent)
     qRegisterMetaType<QList<MetricDescriptor>>("QList<MetricDescriptor>");
 }
 
-QVariantList MetricsService::availableMetrics() const
-{
-    QVariantList result;
-    for (const MetricDescriptor &descriptor : m_availableMetrics)
-        result.push_back(descriptorToVariantMap(descriptor));
-
-    return result;
-}
-
 QList<MetricDescriptor> MetricsService::metricDescriptors() const
 {
     return m_availableMetrics;
@@ -104,7 +95,7 @@ void MetricsService::discoverMetrics(DesktopDevice *desktopDevice)
 
     m_availableMetrics = discoveredMetrics;
     m_metricsDiscovered = true;
-    emit availableMetricsChanged(availableMetrics());
+    emit availableMetricsChanged(m_availableMetrics);
 }
 
 void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
@@ -163,16 +154,6 @@ bool MetricsService::hasMetric(Device *deviceObject, const QString &metricId)
         return false;
 
     return deviceObject->property(metricId.toLatin1().constData()).isValid();
-}
-
-QVariantMap MetricsService::descriptorToVariantMap(const MetricDescriptor &descriptor)
-{
-    return {
-        { QStringLiteral("deviceId"), descriptor.deviceId },
-        { QStringLiteral("metricId"), descriptor.metricId },
-        { QStringLiteral("displayName"), descriptor.displayName },
-        { QStringLiteral("unit"), descriptor.unit }
-    };
 }
 
 QVariant MetricsService::metricValue(Device *deviceObject, const QString &metricId) const

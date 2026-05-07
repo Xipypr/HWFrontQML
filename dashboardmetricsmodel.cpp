@@ -169,7 +169,7 @@ bool DashboardMetricsModel::updateWidget(const QString &widgetId,
 }
 
 
-void DashboardMetricsModel::onAvailableMetricsChanged(const QVariantList &metrics)
+void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics)
 {
     syncWidgetsWithMetrics(metrics);
 }
@@ -184,32 +184,28 @@ void DashboardMetricsModel::onMetricUpdated(const QString &deviceId,
     setWidgetValue(deviceId, value.toInt(), true);
 }
 
-void DashboardMetricsModel::syncWidgetsWithMetrics(const QVariantList &metrics)
+void DashboardMetricsModel::syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics)
 {
     QSet<QString> availableDeviceIds;
 
-    for (const QVariant &metric : metrics) {
-        const QVariantMap descriptor = metric.toMap();
-        const QString deviceId = descriptor.value(QStringLiteral("deviceId")).toString();
-        const QString metricId = descriptor.value(QStringLiteral("metricId")).toString();
-        const QString displayName = descriptor.value(QStringLiteral("displayName")).toString();
-        if (deviceId.isEmpty() || metricId != QStringLiteral("loading"))
+    for (const MetricDescriptor &descriptor : metrics) {
+        if (descriptor.deviceId.isEmpty() || descriptor.metricId != QStringLiteral("loading"))
             continue;
 
-        availableDeviceIds.insert(deviceId);
+        availableDeviceIds.insert(descriptor.deviceId);
 
-        if (deviceId == QStringLiteral("cpu"))
+        if (descriptor.deviceId == QStringLiteral("cpu"))
             addWidgetByType(Cpu);
-        else if (deviceId == QStringLiteral("ram"))
+        else if (descriptor.deviceId == QStringLiteral("ram"))
             addWidgetByType(Ram);
-        else if (deviceId == QStringLiteral("gpu"))
+        else if (descriptor.deviceId == QStringLiteral("gpu"))
             addWidgetByType(Gpu);
-        else if (deviceId == QStringLiteral("hdd"))
+        else if (descriptor.deviceId == QStringLiteral("hdd"))
             addWidgetByType(Hdd);
         else
-            addWidget(deviceId, QStringLiteral("segments"));
+            addWidget(descriptor.deviceId, QStringLiteral("segments"));
 
-        setWidgetValue(deviceId, 0, true, displayName);
+        setWidgetValue(descriptor.deviceId, 0, true, descriptor.displayName);
     }
 
     for (int i = m_items.size() - 1; i >= 0; --i) {
