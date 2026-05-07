@@ -178,8 +178,7 @@ void DashboardMetricsModel::onMetricUpdated(const QString &deviceId,
                                             Metrics::MetricId metricId,
                                             const QVariant &value)
 {
-    if (metricId != Metrics::MetricId::Loading)
-        return;
+    Q_UNUSED(metricId)
 
     setWidgetValue(deviceId, value.toInt(), true);
 }

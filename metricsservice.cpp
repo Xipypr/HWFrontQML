@@ -13,16 +13,15 @@ constexpr const char *MetricUnitMegahertz = "MHz";
 struct MetricDefinition
 {
     Metrics::MetricId metricId;
-    const char *displaySuffix;
     const char *unit;
 };
 
 const QList<MetricDefinition> &metricDefinitions()
 {
     static const QList<MetricDefinition> definitions = {
-        { Metrics::MetricId::Loading, "Loading", MetricUnitPercent },
-        { Metrics::MetricId::Temperature, "Temperature", MetricUnitCelsius },
-        { Metrics::MetricId::Frequency, "Frequency", MetricUnitMegahertz }
+        { Metrics::MetricId::Loading, MetricUnitPercent },
+        { Metrics::MetricId::Temperature, MetricUnitCelsius },
+        { Metrics::MetricId::Frequency, MetricUnitMegahertz }
     };
 
     return definitions;
