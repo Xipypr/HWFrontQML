@@ -1,12 +1,12 @@
 #ifndef DASHBOARDMETRICSMODEL_H
 #define DASHBOARDMETRICSMODEL_H
 
+#include "metricdescriptor.h"
+
 #include <QAbstractListModel>
 #include <QVector>
 #include <QVariantList>
 
-class DesktopDevice;
-class Device;
 
 class DashboardMetricsModel : public QAbstractListModel
 {
@@ -52,7 +52,10 @@ public:
                                   bool available = true);
 
 public slots:
-    void onDeviceSnapshotReady(DesktopDevice *deviceRef);
+    void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
+    void onMetricUpdated(const QString &deviceId,
+                         Metrics::MetricId metricId,
+                         const QVariant &value);
 
 private:
     struct WidgetItem {
@@ -73,7 +76,7 @@ private:
     int findWidgetIndex(const QString &widgetId) const;
     WidgetDescriptor descriptorForType(WidgetType type) const;
     void setWidgetValue(const QString &widgetId, int value, bool available, const QString &title = QString());
-    void applyDeviceSnapshot(const QList<Device *> &devices);
+    void syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics);
 
     QVector<WidgetItem> m_items;
 };

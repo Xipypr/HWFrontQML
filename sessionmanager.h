@@ -5,6 +5,7 @@
 #include "session.h"
 #include "sessionlistmodel.h"
 #include "dashboardmetricsmodel.h"
+#include "metricsservice.h"
 
 #include <QMap>
 #include <QObject>
@@ -52,6 +53,7 @@ private:
         Session session;
         Core *core = nullptr;
         DashboardMetricsModel *dashboardModel = nullptr;
+        MetricsService *metricsService = nullptr;
     };
 
     SessionEntry *findSessionEntry(const QString &sessionId);
