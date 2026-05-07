@@ -1,6 +1,4 @@
 #include "metricsservice.h"
-
-#include "devicebuilder.h"
 #include "storages/desktopdevice.h"
 
 #include <QHash>
@@ -78,14 +76,15 @@ void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
 {
     QHash<QString, Device *> devicesById;
 
-    const QList<Device *> devices = desktopDevice->devicesList();
-    for (Device *deviceObject : devices) {
+    for (Device *deviceObject : desktopDevice->devicesList())
+    {
         const QString deviceId = metricDeviceId(deviceObject);
         if (!deviceId.isEmpty() && !devicesById.contains(deviceId))
             devicesById.insert(deviceId, deviceObject);
     }
 
-    for (const MetricDescriptor &descriptor : m_availableMetrics) {
+    for (const MetricDescriptor &descriptor : m_availableMetrics)
+    {
         Device *deviceObject = devicesById.value(descriptor.deviceId, nullptr);
         if (!deviceObject)
             continue;
@@ -119,9 +118,8 @@ QString MetricsService::metricDeviceId(Device *deviceObject)
 
 QString MetricsService::metricDisplayName(Device *deviceObject, const QString &deviceId)
 {
-    const QString fallbackName = deviceId.toUpper();
-    const QString deviceName = deviceObject ? deviceObject->property("name").toString() : QString();
-    return deviceName.isEmpty() ? fallbackName : deviceName;
+    const QString deviceName = deviceObject->name();
+    return deviceName.isEmpty() ? deviceId.toUpper() : deviceName;
 }
 
 bool MetricsService::hasMetric(Device *deviceObject, Metrics::MetricId metricId)
