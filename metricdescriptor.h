@@ -45,6 +45,22 @@ inline MetricId metricIdFromString(const QString &metricId)
 
     return MetricId::Unknown;
 }
+
+inline QString metricUnit(MetricId metricId)
+{
+    switch (metricId) {
+    case MetricId::Loading:
+        return QStringLiteral("%");
+    case MetricId::Temperature:
+        return QStringLiteral("°C");
+    case MetricId::Frequency:
+        return QStringLiteral("MHz");
+    case MetricId::Unknown:
+        return {};
+    }
+
+    return {};
+}
 }
 
 struct MetricDescriptor

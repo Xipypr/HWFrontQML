@@ -6,41 +6,15 @@
 #include <QHash>
 
 namespace {
-constexpr const char *MetricUnitPercent = "%";
-constexpr const char *MetricUnitCelsius = "°C";
-constexpr const char *MetricUnitMegahertz = "MHz";
-
-struct MetricDefinition
+const QList<Metrics::MetricId> &metricDefinitions()
 {
-    Metrics::MetricId metricId;
-    const char *unit;
-};
-
-const QList<MetricDefinition> &metricDefinitions()
-{
-    static const QList<MetricDefinition> definitions = {
-        { Metrics::MetricId::Loading, MetricUnitPercent },
-        { Metrics::MetricId::Temperature, MetricUnitCelsius },
-        { Metrics::MetricId::Frequency, MetricUnitMegahertz }
+    static const QList<Metrics::MetricId> definitions = {
+        Metrics::MetricId::Loading,
+        Metrics::MetricId::Temperature,
+        Metrics::MetricId::Frequency
     };
 
     return definitions;
-}
-
-const MetricDefinition *metricDefinition(Metrics::MetricId metricId)
-{
-    for (const MetricDefinition &definition : metricDefinitions()) {
-        if (definition.metricId == metricId)
-            return &definition;
-    }
-
-    return nullptr;
-}
-
-QString metricUnit(Metrics::MetricId metricId)
-{
-    const MetricDefinition *definition = metricDefinition(metricId);
-    return definition ? QString::fromUtf8(definition->unit) : QString();
 }
 }
 
@@ -82,15 +56,15 @@ void MetricsService::discoverMetrics(DesktopDevice *desktopDevice)
         if (deviceId.isEmpty())
             continue;
 
-        for (const MetricDefinition &definition : metricDefinitions()) {
-            if (!hasMetric(deviceObject, definition.metricId))
+        for (Metrics::MetricId metricId : metricDefinitions()) {
+            if (!hasMetric(deviceObject, metricId))
                 continue;
 
             discoveredMetrics.push_back({
                 deviceId,
-                definition.metricId,
+                metricId,
                 metricDisplayName(deviceObject, deviceId),
-                metricUnit(definition.metricId)
+                Metrics::metricUnit(metricId)
             });
         }
     }
