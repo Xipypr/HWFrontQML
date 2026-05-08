@@ -104,6 +104,7 @@ Page {
                     Layout.minimumHeight: 150
                     title: model.title
                     value: model.value
+                    unit: model.unit
                     variant: model.variant
                     onVariantSelected: function(mode) {
                         widgetModel.setVariant(model.widgetId, mode)

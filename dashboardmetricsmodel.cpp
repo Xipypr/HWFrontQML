@@ -33,6 +33,12 @@ QVariant DashboardMetricsModel::data(const QModelIndex &index, int role) const
         return item.variant;
     case AvailableRole:
         return item.available;
+    case DeviceIdRole:
+        return item.deviceId;
+    case MetricIdRole:
+        return Metrics::metricIdToString(item.metricId);
+    case UnitRole:
+        return item.unit;
     default:
         return {};
     }
@@ -45,7 +51,10 @@ QHash<int, QByteArray> DashboardMetricsModel::roleNames() const
         { TitleRole, "title" },
         { ValueRole, "value" },
         { VariantRole, "variant" },
-        { AvailableRole, "available" }
+        { AvailableRole, "available" },
+        { DeviceIdRole, "deviceId" },
+        { MetricIdRole, "metricId" },
+        { UnitRole, "unit" }
     };
 }
 
@@ -60,20 +69,35 @@ QVariantMap DashboardMetricsModel::get(int row) const
         { "title", item.title },
         { "value", item.value },
         { "variant", item.variant },
-        { "available", item.available }
+        { "available", item.available },
+        { "deviceId", item.deviceId },
+        { "metricId", Metrics::metricIdToString(item.metricId) },
+        { "unit", item.unit }
     };
 }
 
-bool DashboardMetricsModel::addWidget(const QString &widgetId,
+bool DashboardMetricsModel::addWidget(const QString &deviceId,
+                                      Metrics::MetricId metricId,
                                       const QString &variant,
-                                      bool available)
+                                      bool available,
+                                      const QString &title,
+                                      const QString &unit)
 {
-    if (widgetId.isEmpty() || findWidgetIndex(widgetId) >= 0)
+    if (deviceId.isEmpty() || metricId == Metrics::MetricId::Unknown || widgetIndexForMetric(deviceId, metricId) >= 0)
         return false;
 
     const int insertRow = m_items.size();
     beginInsertRows(QModelIndex(), insertRow, insertRow);
-    m_items.push_back({ widgetId, "unknown", 0, variant, available });
+    m_items.push_back({
+        makeWidgetId(deviceId, metricId),
+        title.isEmpty() ? deviceId.toUpper() : title,
+        0,
+        variant,
+        available,
+        deviceId,
+        metricId,
+        unit.isEmpty() ? Metrics::metricUnit(metricId) : unit
+    });
     endInsertRows();
     return true;
 }
@@ -84,14 +108,12 @@ bool DashboardMetricsModel::addWidgetByType(DashboardMetricsModel::WidgetType ty
     if (descriptor.type == Unknown)
         return false;
 
-    if (findWidgetIndex(descriptor.widgetId) >= 0)
-        return false;
-
-    const int insertRow = m_items.size();
-    beginInsertRows(QModelIndex(), insertRow, insertRow);
-    m_items.push_back({ descriptor.widgetId, descriptor.title, 0, descriptor.variant, true });
-    endInsertRows();
-    return true;
+    return addWidget(descriptor.deviceId,
+                     Metrics::MetricId::Loading,
+                     descriptor.variant,
+                     false,
+                     descriptor.title + QStringLiteral(" Loading"),
+                     Metrics::metricUnit(Metrics::MetricId::Loading));
 }
 
 QVariantList DashboardMetricsModel::widgetTypeOptions() const
@@ -111,7 +133,7 @@ QVariantList DashboardMetricsModel::widgetTypeOptions() const
 
 bool DashboardMetricsModel::removeWidget(const QString &widgetId)
 {
-    const int index = findWidgetIndex(widgetId);
+    const int index = widgetIndexById(widgetId);
     if (index < 0)
         return false;
 
@@ -137,7 +159,7 @@ bool DashboardMetricsModel::moveWidget(int from, int to)
 
 bool DashboardMetricsModel::setVariant(const QString &widgetId, const QString &variant)
 {
-    const int index = findWidgetIndex(widgetId);
+    const int index = widgetIndexById(widgetId);
     if (index < 0)
         return false;
 
@@ -151,20 +173,16 @@ bool DashboardMetricsModel::setVariant(const QString &widgetId, const QString &v
     return true;
 }
 
-bool DashboardMetricsModel::updateWidget(const QString &widgetId,
+bool DashboardMetricsModel::updateWidget(const QString &deviceId,
+                                         Metrics::MetricId metricId,
                                          int value,
                                          bool available)
 {
-    const int index = findWidgetIndex(widgetId);
+    const int index = widgetIndexForMetric(deviceId, metricId);
     if (index < 0)
         return false;
 
-    WidgetItem &item = m_items[index];
-    item.value = value;
-    item.available = available;
-
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, { ValueRole, AvailableRole });
+    setWidgetValue(deviceId, metricId, value, available);
     return true;
 }
 
@@ -178,46 +196,83 @@ void DashboardMetricsModel::onMetricUpdated(const QString &deviceId,
                                             Metrics::MetricId metricId,
                                             const QVariant &value)
 {
-    Q_UNUSED(metricId)
+    const bool available = value.isValid() && !value.isNull() && value.canConvert(QVariant::Int);
+    if (!available) {
+        setWidgetAvailability(deviceId, metricId, false);
+        return;
+    }
 
-    setWidgetValue(deviceId, value.toInt(), true);
+    setWidgetValue(deviceId, metricId, value.toInt(), true);
 }
 
 void DashboardMetricsModel::syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics)
 {
-    QSet<QString> availableDeviceIds;
+    QSet<QString> availableMetricKeys;
 
     for (const MetricDescriptor &descriptor : metrics) {
-        if (availableDeviceIds.contains(descriptor.deviceId))
+        if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)
             continue;
 
-        availableDeviceIds.insert(descriptor.deviceId);
+        availableMetricKeys.insert(makeWidgetId(descriptor.deviceId, descriptor.metricId));
 
-        if (descriptor.deviceId == QStringLiteral("cpu"))
-            addWidgetByType(Cpu);
-        else if (descriptor.deviceId == QStringLiteral("ram"))
-            addWidgetByType(Ram);
-        else if (descriptor.deviceId == QStringLiteral("gpu"))
-            addWidgetByType(Gpu);
-        else if (descriptor.deviceId == QStringLiteral("hdd"))
-            addWidgetByType(Hdd);
-        else
-            addWidget(descriptor.deviceId, QStringLiteral("segments"));
+        const WidgetDescriptor widgetDescriptor = descriptorForDevice(descriptor.deviceId, descriptor.displayName);
+        const QString variant = widgetDescriptor.variant.isEmpty() ? QStringLiteral("segments") : widgetDescriptor.variant;
+        const QString title = metricTitle(descriptor);
 
-        setWidgetValue(descriptor.deviceId, 0, true, descriptor.displayName);
+        if (widgetIndexForMetric(descriptor.deviceId, descriptor.metricId) < 0) {
+            addWidget(descriptor.deviceId,
+                      descriptor.metricId,
+                      variant,
+                      true,
+                      title,
+                      descriptor.unit);
+        } else {
+            setWidgetValue(descriptor.deviceId, descriptor.metricId, 0, true, title, descriptor.unit);
+        }
     }
 
-    for (int i = m_items.size() - 1; i >= 0; --i) {
-        const QString deviceId = m_items.at(i).widgetId;
-        if (!availableDeviceIds.contains(deviceId))
-            removeWidget(deviceId);
+    for (int i = 0; i < m_items.size(); ++i) {
+        const WidgetItem &item = m_items.at(i);
+        if (!availableMetricKeys.contains(makeWidgetId(item.deviceId, item.metricId)))
+            setWidgetAvailability(item.deviceId, item.metricId, false);
     }
 }
 
-int DashboardMetricsModel::findWidgetIndex(const QString &widgetId) const
+QString DashboardMetricsModel::makeWidgetId(const QString &deviceId, Metrics::MetricId metricId)
+{
+    return deviceId + QStringLiteral(":") + Metrics::metricIdToString(metricId);
+}
+
+QString DashboardMetricsModel::metricTitle(const MetricDescriptor &descriptor)
+{
+    const QString metricName = Metrics::metricIdToString(descriptor.metricId);
+    const QString displayName = descriptor.displayName.isEmpty() ? descriptor.deviceId.toUpper() : descriptor.displayName;
+
+    if (metricName == QStringLiteral("loading"))
+        return displayName + QStringLiteral(" Load");
+    if (metricName == QStringLiteral("temperature"))
+        return displayName + QStringLiteral(" Temp");
+    if (metricName == QStringLiteral("frequency"))
+        return displayName + QStringLiteral(" Freq");
+
+    return displayName;
+}
+
+int DashboardMetricsModel::widgetIndexById(const QString &widgetId) const
 {
     for (int i = 0; i < m_items.size(); ++i) {
         if (m_items.at(i).widgetId == widgetId)
+            return i;
+    }
+
+    return -1;
+}
+
+int DashboardMetricsModel::widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const
+{
+    for (int i = 0; i < m_items.size(); ++i) {
+        const WidgetItem &item = m_items.at(i);
+        if (item.deviceId == deviceId && item.metricId == metricId)
             return i;
     }
 
@@ -240,9 +295,30 @@ DashboardMetricsModel::WidgetDescriptor DashboardMetricsModel::descriptorForType
     }
 }
 
-void DashboardMetricsModel::setWidgetValue(const QString &widgetId, int value, bool available, const QString &title)
+DashboardMetricsModel::WidgetDescriptor DashboardMetricsModel::descriptorForDevice(const QString &deviceId, const QString &displayName) const
 {
-    const int index = findWidgetIndex(widgetId);
+    const QString title = displayName.isEmpty() ? deviceId.toUpper() : displayName;
+
+    if (deviceId == QStringLiteral("cpu"))
+        return { Cpu, deviceId, title, "segments" };
+    if (deviceId == QStringLiteral("ram"))
+        return { Ram, deviceId, title, "segments" };
+    if (deviceId == QStringLiteral("gpu"))
+        return { Gpu, deviceId, title, "segments" };
+    if (deviceId == QStringLiteral("hdd"))
+        return { Hdd, deviceId, title, "segments" };
+
+    return { Unknown, deviceId, title, "segments" };
+}
+
+void DashboardMetricsModel::setWidgetValue(const QString &deviceId,
+                                           Metrics::MetricId metricId,
+                                           int value,
+                                           bool available,
+                                           const QString &title,
+                                           const QString &unit)
+{
+    const int index = widgetIndexForMetric(deviceId, metricId);
     if (index < 0)
         return;
 
@@ -264,9 +340,29 @@ void DashboardMetricsModel::setWidgetValue(const QString &widgetId, int value, b
         changedRoles.push_back(TitleRole);
     }
 
+    if (!unit.isEmpty() && item.unit != unit) {
+        item.unit = unit;
+        changedRoles.push_back(UnitRole);
+    }
+
     if (changedRoles.isEmpty())
         return;
 
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, changedRoles);
+}
+
+void DashboardMetricsModel::setWidgetAvailability(const QString &deviceId, Metrics::MetricId metricId, bool available)
+{
+    const int index = widgetIndexForMetric(deviceId, metricId);
+    if (index < 0)
+        return;
+
+    WidgetItem &item = m_items[index];
+    if (item.available == available)
+        return;
+
+    item.available = available;
+    const QModelIndex modelIndex = this->index(index);
+    emit dataChanged(modelIndex, modelIndex, { AvailableRole });
 }

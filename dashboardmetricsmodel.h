@@ -18,7 +18,10 @@ public:
         TitleRole,
         ValueRole,
         VariantRole,
-        AvailableRole
+        AvailableRole,
+        DeviceIdRole,
+        MetricIdRole,
+        UnitRole
     };
     Q_ENUM(Roles)
 
@@ -39,15 +42,19 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE QVariantMap get(int row) const;
-    Q_INVOKABLE bool addWidget(const QString &widgetId,
+    Q_INVOKABLE bool addWidget(const QString &deviceId,
+                               Metrics::MetricId metricId,
                                const QString &variant,
-                               bool available = true);
+                               bool available = true,
+                               const QString &title = QString(),
+                               const QString &unit = QString());
     Q_INVOKABLE bool addWidgetByType(WidgetType type);
     Q_INVOKABLE QVariantList widgetTypeOptions() const;
     Q_INVOKABLE bool removeWidget(const QString &widgetId);
     Q_INVOKABLE bool moveWidget(int from, int to);
     Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);
-    Q_INVOKABLE bool updateWidget(const QString &widgetId,
+    Q_INVOKABLE bool updateWidget(const QString &deviceId,
+                                  Metrics::MetricId metricId,
                                   int value,
                                   bool available = true);
 
@@ -64,18 +71,31 @@ private:
         int value = 0;
         QString variant;
         bool available = true;
+        QString deviceId;
+        Metrics::MetricId metricId = Metrics::MetricId::Unknown;
+        QString unit;
     };
 
     struct WidgetDescriptor {
         WidgetType type = Unknown;
-        QString widgetId;
+        QString deviceId;
         QString title;
         QString variant;
     };
 
-    int findWidgetIndex(const QString &widgetId) const;
+    static QString makeWidgetId(const QString &deviceId, Metrics::MetricId metricId);
+    static QString metricTitle(const MetricDescriptor &descriptor);
+    int widgetIndexById(const QString &widgetId) const;
+    int widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const;
     WidgetDescriptor descriptorForType(WidgetType type) const;
-    void setWidgetValue(const QString &widgetId, int value, bool available, const QString &title = QString());
+    WidgetDescriptor descriptorForDevice(const QString &deviceId, const QString &displayName = QString()) const;
+    void setWidgetValue(const QString &deviceId,
+                        Metrics::MetricId metricId,
+                        int value,
+                        bool available,
+                        const QString &title = QString(),
+                        const QString &unit = QString());
+    void setWidgetAvailability(const QString &deviceId, Metrics::MetricId metricId, bool available);
     void syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics);
 
     QVector<WidgetItem> m_items;
