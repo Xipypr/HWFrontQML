@@ -4,8 +4,28 @@
 #include "metricdescriptor.h"
 
 #include <QAbstractListModel>
+#include <QHash>
 #include <QVector>
 #include <QVariantList>
+
+
+struct DashboardMetricWidgetKey
+{
+    QString title;
+    Metrics::MetricId metricId = Metrics::MetricId::Unknown;
+
+    bool operator==(const DashboardMetricWidgetKey &other) const
+    {
+        return title == other.title && metricId == other.metricId;
+    }
+
+    bool isValid() const
+    {
+        return !title.isEmpty() && metricId != Metrics::MetricId::Unknown;
+    }
+};
+
+uint qHash(const DashboardMetricWidgetKey &key, uint seed = 0);
 
 
 class DashboardMetricsModel : public QAbstractListModel
@@ -79,9 +99,13 @@ private:
         QString variant;
     };
 
-    static QString makeWidgetId(const QString &title, Metrics::MetricId metricId);
+    static DashboardMetricWidgetKey makeWidgetKey(const QString &title, Metrics::MetricId metricId);
+    static QString makeWidgetId(const DashboardMetricWidgetKey &key);
     int widgetIndexById(const QString &widgetId) const;
     int widgetIndexForMetric(const QString &title, Metrics::MetricId metricId) const;
+    bool insertWidget(const WidgetItem &item);
+    bool removeWidgetAt(int index);
+    void rebuildWidgetIndexes();
     WidgetDescriptor descriptorForType(WidgetType type) const;
     void setWidgetValue(const QString &title,
                         Metrics::MetricId metricId,
@@ -92,6 +116,8 @@ private:
     void syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics);
 
     QVector<WidgetItem> m_items;
+    QHash<DashboardMetricWidgetKey, int> m_widgetIndexByKey;
+    QHash<QString, DashboardMetricWidgetKey> m_widgetKeysById;
 };
 
 #endif // DASHBOARDMETRICSMODEL_H

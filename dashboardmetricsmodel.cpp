@@ -2,6 +2,13 @@
 
 #include <QSet>
 
+uint qHash(const DashboardMetricWidgetKey &key, uint seed)
+{
+    const uint titleHash = ::qHash(key.title, seed);
+    const uint metricHash = static_cast<uint>(key.metricId);
+    return titleHash ^ (metricHash + 0x9e3779b9U + (titleHash << 6) + (titleHash >> 2));
+}
+
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
     : QAbstractListModel(parent)
 {
@@ -78,22 +85,19 @@ bool DashboardMetricsModel::addWidget(const QString &title,
                                       bool available,
                                       const QString &unit)
 {
-    if (title.isEmpty() || metricId == Metrics::MetricId::Unknown || widgetIndexForMetric(title, metricId) >= 0)
+    const DashboardMetricWidgetKey key = makeWidgetKey(title, metricId);
+    if (!key.isValid())
         return false;
 
-    const int insertRow = m_items.size();
-    beginInsertRows(QModelIndex(), insertRow, insertRow);
-    m_items.push_back({
-        makeWidgetId(title, metricId),
-        title,
+    return insertWidget({
+        makeWidgetId(key),
+        key.title,
         0,
         variant,
         available,
-        metricId,
-        unit.isEmpty() ? Metrics::metricUnit(metricId) : unit
+        key.metricId,
+        unit.isEmpty() ? Metrics::metricUnit(key.metricId) : unit
     });
-    endInsertRows();
-    return true;
 }
 
 bool DashboardMetricsModel::addWidgetByType(DashboardMetricsModel::WidgetType type)
@@ -130,10 +134,7 @@ bool DashboardMetricsModel::removeWidget(const QString &widgetId)
     if (index < 0)
         return false;
 
-    beginRemoveRows(QModelIndex(), index, index);
-    m_items.removeAt(index);
-    endRemoveRows();
-    return true;
+    return removeWidgetAt(index);
 }
 
 bool DashboardMetricsModel::moveWidget(int from, int to)
@@ -146,6 +147,7 @@ bool DashboardMetricsModel::moveWidget(int from, int to)
         return false;
 
     m_items.move(from, to);
+    rebuildWidgetIndexes();
     endMoveRows();
     return true;
 }
@@ -200,13 +202,13 @@ void DashboardMetricsModel::onMetricUpdated(const QString &title,
 
 void DashboardMetricsModel::syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics)
 {
-    QSet<QString> availableMetricKeys;
+    QSet<DashboardMetricWidgetKey> availableMetricKeys;
 
     for (const MetricDescriptor &descriptor : metrics) {
         if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)
             continue;
 
-        availableMetricKeys.insert(makeWidgetId(descriptor.displayName, descriptor.metricId));
+        availableMetricKeys.insert(makeWidgetKey(descriptor.displayName, descriptor.metricId));
 
         if (widgetIndexForMetric(descriptor.displayName, descriptor.metricId) < 0) {
             addWidget(descriptor.displayName,
@@ -221,35 +223,79 @@ void DashboardMetricsModel::syncWidgetsWithMetrics(const QList<MetricDescriptor>
 
     for (int i = 0; i < m_items.size(); ++i) {
         const WidgetItem &item = m_items.at(i);
-        if (!availableMetricKeys.contains(item.widgetId))
+        if (!availableMetricKeys.contains(makeWidgetKey(item.title, item.metricId)))
             setWidgetAvailability(item.title, item.metricId, false);
     }
 }
 
-QString DashboardMetricsModel::makeWidgetId(const QString &title, Metrics::MetricId metricId)
+DashboardMetricWidgetKey DashboardMetricsModel::makeWidgetKey(const QString &title, Metrics::MetricId metricId)
 {
-    return title + QStringLiteral(":") + Metrics::metricIdToString(metricId);
+    return { title, metricId };
+}
+
+QString DashboardMetricsModel::makeWidgetId(const DashboardMetricWidgetKey &key)
+{
+    return key.title + QStringLiteral(":") + Metrics::metricIdToString(key.metricId);
 }
 
 int DashboardMetricsModel::widgetIndexById(const QString &widgetId) const
 {
-    for (int i = 0; i < m_items.size(); ++i) {
-        if (m_items.at(i).widgetId == widgetId)
-            return i;
-    }
+    const auto keyIt = m_widgetKeysById.constFind(widgetId);
+    if (keyIt == m_widgetKeysById.constEnd())
+        return -1;
 
-    return -1;
+    const auto indexIt = m_widgetIndexByKey.constFind(keyIt.value());
+    return indexIt == m_widgetIndexByKey.constEnd() ? -1 : indexIt.value();
 }
 
 int DashboardMetricsModel::widgetIndexForMetric(const QString &title, Metrics::MetricId metricId) const
 {
+    const DashboardMetricWidgetKey key = makeWidgetKey(title, metricId);
+    const auto indexIt = m_widgetIndexByKey.constFind(key);
+    return indexIt == m_widgetIndexByKey.constEnd() ? -1 : indexIt.value();
+}
+
+bool DashboardMetricsModel::insertWidget(const WidgetItem &item)
+{
+    const DashboardMetricWidgetKey key = makeWidgetKey(item.title, item.metricId);
+    if (!key.isValid() || m_widgetIndexByKey.contains(key))
+        return false;
+
+    const int insertRow = m_items.size();
+    beginInsertRows(QModelIndex(), insertRow, insertRow);
+    m_items.push_back(item);
+    m_widgetIndexByKey.insert(key, insertRow);
+    m_widgetKeysById.insert(item.widgetId, key);
+    endInsertRows();
+    return true;
+}
+
+bool DashboardMetricsModel::removeWidgetAt(int index)
+{
+    if (index < 0 || index >= m_items.size())
+        return false;
+
+    beginRemoveRows(QModelIndex(), index, index);
+    m_items.removeAt(index);
+    rebuildWidgetIndexes();
+    endRemoveRows();
+    return true;
+}
+
+void DashboardMetricsModel::rebuildWidgetIndexes()
+{
+    m_widgetIndexByKey.clear();
+    m_widgetKeysById.clear();
+
     for (int i = 0; i < m_items.size(); ++i) {
         const WidgetItem &item = m_items.at(i);
-        if (item.title == title && item.metricId == metricId)
-            return i;
-    }
+        const DashboardMetricWidgetKey key = makeWidgetKey(item.title, item.metricId);
+        if (!key.isValid())
+            continue;
 
-    return -1;
+        m_widgetIndexByKey.insert(key, i);
+        m_widgetKeysById.insert(item.widgetId, key);
+    }
 }
 
 DashboardMetricsModel::WidgetDescriptor DashboardMetricsModel::descriptorForType(DashboardMetricsModel::WidgetType type) const
