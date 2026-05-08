@@ -74,7 +74,7 @@ public:
                                   int value);
 
 public slots:
-    void onMetricDescriptorsChanged(const QList<MetricDescriptor> &metrics);
+    void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
     void onMetricUpdated(const QString &title,
                          Metrics::MetricId metricId,
                          const QVariant &value);
@@ -111,7 +111,6 @@ private:
 
     QVector<WidgetItem> m_items;
     QHash<DashboardMetricWidgetKey, int> m_widgetIndexByKey;
-    QHash<QString, DashboardMetricWidgetKey> m_widgetKeysById;
 };
 
 #endif // DASHBOARDMETRICSMODEL_H

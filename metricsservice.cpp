@@ -27,7 +27,7 @@ MetricsService::MetricsService(QObject *parent)
 
 QList<MetricDescriptor> MetricsService::metricDescriptors() const
 {
-    return m_metricDescriptors;
+    return m_availableMetrics;
 }
 
 void MetricsService::processDeviceSnapshot(DesktopDevice *desktopDevice)
@@ -67,9 +67,9 @@ void MetricsService::discoverMetrics(DesktopDevice *desktopDevice)
         }
     }
 
-    m_metricDescriptors = discoveredMetrics;
+    m_availableMetrics = discoveredMetrics;
     m_metricsDiscovered = true;
-    emit metricDescriptorsChanged(m_metricDescriptors);
+    emit availableMetricsChanged(m_availableMetrics);
 }
 
 void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
@@ -83,7 +83,7 @@ void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
             devicesById.insert(deviceId, deviceObject);
     }
 
-    for (const MetricDescriptor &descriptor : m_metricDescriptors)
+    for (const MetricDescriptor &descriptor : m_availableMetrics)
     {
         Device *deviceObject = devicesById.value(descriptor.deviceId, nullptr);
         if (!deviceObject)

@@ -174,7 +174,7 @@ bool DashboardMetricsModel::updateWidget(const QString &title,
 }
 
 
-void DashboardMetricsModel::onMetricDescriptorsChanged(const QList<MetricDescriptor> &metrics)
+void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics)
 {
     syncWidgetsWithMetrics(metrics);
 }
@@ -228,12 +228,12 @@ QString DashboardMetricsModel::makeWidgetId(const DashboardMetricWidgetKey &key)
 
 int DashboardMetricsModel::widgetIndexById(const QString &widgetId) const
 {
-    const auto keyIt = m_widgetKeysById.constFind(widgetId);
-    if (keyIt == m_widgetKeysById.constEnd())
-        return -1;
+    for (int i = 0; i < m_items.size(); ++i) {
+        if (m_items.at(i).widgetId == widgetId)
+            return i;
+    }
 
-    const auto indexIt = m_widgetIndexByKey.constFind(keyIt.value());
-    return indexIt == m_widgetIndexByKey.constEnd() ? -1 : indexIt.value();
+    return -1;
 }
 
 int DashboardMetricsModel::widgetIndexForMetric(const QString &title, Metrics::MetricId metricId) const
@@ -253,7 +253,6 @@ bool DashboardMetricsModel::insertWidget(const WidgetItem &item)
     beginInsertRows(QModelIndex(), insertRow, insertRow);
     m_items.push_back(item);
     m_widgetIndexByKey.insert(key, insertRow);
-    m_widgetKeysById.insert(item.widgetId, key);
     endInsertRows();
     return true;
 }
@@ -273,8 +272,6 @@ bool DashboardMetricsModel::removeWidgetAt(int index)
 void DashboardMetricsModel::rebuildWidgetIndexes()
 {
     m_widgetIndexByKey.clear();
-    m_widgetKeysById.clear();
-
     for (int i = 0; i < m_items.size(); ++i) {
         const WidgetItem &item = m_items.at(i);
         const DashboardMetricWidgetKey key = makeWidgetKey(item.title, item.metricId);
@@ -282,7 +279,6 @@ void DashboardMetricsModel::rebuildWidgetIndexes()
             continue;
 
         m_widgetIndexByKey.insert(key, i);
-        m_widgetKeysById.insert(item.widgetId, key);
     }
 }
 
