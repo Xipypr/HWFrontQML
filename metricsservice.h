@@ -23,7 +23,7 @@ public slots:
 
 signals:
     void availableMetricsChanged(const QList<MetricDescriptor> &metrics);
-    void metricUpdated(const QString &title,
+    void metricUpdated(const QString &deviceId,
                        Metrics::MetricId metricId,
                        const QVariant &value);
 

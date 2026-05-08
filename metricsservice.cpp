@@ -89,7 +89,7 @@ void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
         if (!deviceObject)
             continue;
 
-        emit metricUpdated(descriptor.displayName,
+        emit metricUpdated(descriptor.deviceId,
                            descriptor.metricId,
                            metricValue(deviceObject, descriptor.metricId));
     }

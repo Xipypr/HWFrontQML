@@ -10,14 +10,54 @@ Dialog {
     parent: Overlay.overlay
     x: (parent.width - width) / 2
     y: (parent.height - height) / 2
-    width: Math.min(parent.width - 32, 440)
+    width: Math.min(parent.width - 32, 520)
     modal: true
     focus: true
     padding: 20
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
+    property int metricsRevision: widgetsModel ? widgetsModel.availableMetricsRevision : 0
+    property var deviceOptions: []
+    property var metricOptions: []
+    property string addError: ""
 
-    property int selectedTemplateIndex: 0
+    function selectedDeviceId() {
+        if (deviceCombo.currentIndex < 0 || deviceCombo.currentIndex >= deviceOptions.length)
+            return ""
+
+        return deviceOptions[deviceCombo.currentIndex].deviceId || ""
+    }
+
+    function selectedMetricId() {
+        if (metricCombo.currentIndex < 0 || metricCombo.currentIndex >= metricOptions.length)
+            return ""
+
+        return metricOptions[metricCombo.currentIndex].metricId || ""
+    }
+
+    function refreshDevices() {
+        deviceOptions = widgetsModel ? widgetsModel.availableDevices() : []
+        if (deviceOptions.length === 0)
+            deviceCombo.currentIndex = -1
+        else if (deviceCombo.currentIndex < 0 || deviceCombo.currentIndex >= deviceOptions.length)
+            deviceCombo.currentIndex = 0
+        refreshMetrics()
+    }
+
+    function refreshMetrics() {
+        metricOptions = widgetsModel ? widgetsModel.availableMetricsForDevice(selectedDeviceId()) : []
+        if (metricOptions.length === 0)
+            metricCombo.currentIndex = -1
+        else if (metricCombo.currentIndex < 0 || metricCombo.currentIndex >= metricOptions.length)
+            metricCombo.currentIndex = 0
+    }
+
+    onOpened: {
+        addError = ""
+        refreshDevices()
+    }
+
+    onMetricsRevisionChanged: refreshDevices()
 
     contentItem: ColumnLayout {
         spacing: 12
@@ -41,7 +81,7 @@ Dialog {
 
             delegate: Rectangle {
                 width: widgetsList.width
-                height: 48
+                height: 56
                 radius: 8
                 color: "#1E293B"
                 border.width: 1
@@ -52,11 +92,24 @@ Dialog {
                     anchors.margins: 8
                     spacing: 8
 
-                    Label {
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        text: model.title
-                        color: "#E2E8F0"
-                        elide: Text.ElideRight
+                        spacing: 2
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: model.title
+                            color: "#E2E8F0"
+                            elide: Text.ElideRight
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: model.metricId + (model.unit ? " · " + model.unit : "")
+                            color: "#94A3B8"
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                        }
                     }
 
                     ToolButton {
@@ -79,30 +132,74 @@ Dialog {
             }
         }
 
-        RowLayout {
+        ColumnLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: 6
 
-            ComboBox {
-                id: addWidgetCombo
-                Layout.fillWidth: true
-                model: root.widgetsModel.widgetTypeOptions()
-                textRole: "label"
-                onCurrentIndexChanged: root.selectedTemplateIndex = currentIndex
+            Label {
+                text: "Устройство"
+                color: "#CBD5E1"
+                font.pixelSize: 12
             }
 
-            Button {
-                text: "Добавить"
-                onClicked: {
-                    const item = addWidgetCombo.model[root.selectedTemplateIndex]
-                    root.widgetsModel.addWidgetByType(item.key)
+            ComboBox {
+                id: deviceCombo
+                Layout.fillWidth: true
+                model: root.deviceOptions
+                textRole: "label"
+                enabled: root.deviceOptions.length > 0
+                onCurrentIndexChanged: {
+                    root.addError = ""
+                    root.refreshMetrics()
                 }
+            }
+
+            Label {
+                text: "Метрика"
+                color: "#CBD5E1"
+                font.pixelSize: 12
+            }
+
+            ComboBox {
+                id: metricCombo
+                Layout.fillWidth: true
+                model: root.metricOptions
+                textRole: "label"
+                enabled: root.metricOptions.length > 0
+                onCurrentIndexChanged: root.addError = ""
+            }
+
+            Label {
+                Layout.fillWidth: true
+                visible: root.addError.length > 0
+                text: root.addError
+                color: "#F87171"
+                wrapMode: Text.WordWrap
+                font.pixelSize: 12
             }
         }
 
         RowLayout {
             Layout.fillWidth: true
             spacing: 8
+
+            Button {
+                text: "Добавить"
+                enabled: root.deviceOptions.length > 0 && root.metricOptions.length > 0
+                onClicked: {
+                    const deviceId = root.selectedDeviceId()
+                    const metricId = root.selectedMetricId()
+                    if (!deviceId || !metricId) {
+                        root.addError = "Выберите устройство и метрику."
+                        return
+                    }
+
+                    if (!root.widgetsModel.addWidgetForMetric(deviceId, metricId, "segments"))
+                        root.addError = "Не удалось добавить виджет: метрика уже добавлена или недоступна."
+                    else
+                        root.addError = ""
+                }
+            }
 
             Item { Layout.fillWidth: true }
 
