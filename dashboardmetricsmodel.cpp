@@ -117,14 +117,12 @@ QVariantList DashboardMetricsModel::availableMetricsForDevice(const QString &dev
     return metrics;
 }
 
-bool DashboardMetricsModel::addWidget(const QString &deviceId,
+bool DashboardMetricsModel::addWidget(const QString &title,
                                       Metrics::MetricId metricId,
-                                      const QString &title,
                                       const QString &unit,
                                       const QString &variant)
 {
-    const QString widgetTitle = title.isEmpty() ? deviceId : title;
-    const DashboardMetricWidgetKey key = makeWidgetKey(widgetTitle, metricId);
+    const DashboardMetricWidgetKey key = makeWidgetKey(title, metricId);
     if (!key.isValid())
         return false;
 
@@ -135,7 +133,6 @@ bool DashboardMetricsModel::addWidget(const QString &deviceId,
 
     return insertWidget({
         makeWidgetId(key),
-        deviceId,
         key.title,
         initialValue,
         variant.isEmpty() ? QStringLiteral("segments") : variant,
@@ -156,9 +153,8 @@ bool DashboardMetricsModel::addWidgetForMetric(const QString &deviceId,
     if (!descriptor)
         return false;
 
-    return addWidget(descriptor->deviceId,
+    return addWidget(descriptor->displayName,
                      descriptor->metricId,
-                     descriptor->displayName,
                      descriptor->unit,
                      variant);
 }
@@ -356,9 +352,8 @@ void DashboardMetricsModel::syncInitialWidgetsWithMetrics()
         if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)
             continue;
 
-        addWidget(descriptor.deviceId,
+        addWidget(descriptor.displayName,
                   descriptor.metricId,
-                  descriptor.displayName,
                   descriptor.unit,
                   QStringLiteral("segments"));
     }

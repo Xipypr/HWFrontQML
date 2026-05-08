@@ -49,9 +49,8 @@ public:
     Q_INVOKABLE QVariantMap get(int row) const;
     Q_INVOKABLE QVariantList availableDevices() const;
     Q_INVOKABLE QVariantList availableMetricsForDevice(const QString &deviceId) const;
-    Q_INVOKABLE bool addWidget(const QString &deviceId,
+    Q_INVOKABLE bool addWidget(const QString &title,
                                Metrics::MetricId metricId,
-                               const QString &title,
                                const QString &unit,
                                const QString &variant);
     Q_INVOKABLE bool addWidgetForMetric(const QString &deviceId,
@@ -73,7 +72,6 @@ public slots:
 private:
     struct WidgetItem {
         QString widgetId;
-        QString deviceId;
         QString title;
         int value = 0;
         QString variant;
