@@ -36,7 +36,7 @@ Dialog {
 
     function refreshDevices() {
         const currentDeviceId = selectedDeviceId()
-        deviceOptions = widgetsModel ? widgetsModel.availableDevices() : []
+        deviceOptions = widgetsModel.availableDevices()
         deviceCombo.currentIndex = -1
 
         for (let i = 0; i < deviceOptions.length; ++i) {
@@ -54,7 +54,7 @@ Dialog {
 
     function refreshMetrics() {
         const currentMetricId = selectedMetricId()
-        metricOptions = widgetsModel ? widgetsModel.availableMetricsForDevice(selectedDeviceId()) : []
+        metricOptions = widgetsModel.availableMetricsForDevice(selectedDeviceId())
         metricCombo.currentIndex = -1
 
         for (let i = 0; i < metricOptions.length; ++i) {
@@ -179,11 +179,6 @@ Dialog {
                 onClicked: {
                     const deviceId = root.selectedDeviceId()
                     const metricId = root.selectedMetricId()
-                    if (!deviceId || !metricId) {
-                        root.addError = "Выберите устройство и метрику."
-                        return
-                    }
-
                     if (!root.widgetsModel.addWidgetForMetric(deviceId, metricId, "segments"))
                         root.addError = "Метрика уже добавлена или недоступна."
                     else
