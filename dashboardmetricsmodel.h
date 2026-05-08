@@ -97,7 +97,6 @@ private:
     QVector<WidgetItem> m_items;
     QList<MetricDescriptor> m_availableMetrics;
     QHash<DashboardMetricWidgetKey, int> m_widgetIndexByKey;
-    QHash<DashboardMetricWidgetKey, QVariant> m_latestMetricValues;
     bool m_hasSeededInitialWidgets = false;
 };
 

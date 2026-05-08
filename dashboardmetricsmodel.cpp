@@ -126,15 +126,10 @@ bool DashboardMetricsModel::addWidget(const QString &title,
     if (!key.isValid())
         return false;
 
-    int initialValue = 0;
-    const QVariant cachedValue = m_latestMetricValues.value(key);
-    if (cachedValue.isValid() && !cachedValue.isNull() && cachedValue.canConvert(QVariant::Int))
-        initialValue = cachedValue.toInt();
-
     return insertWidget({
         makeWidgetId(key),
         key.title,
-        initialValue,
+        0,
         variant.isEmpty() ? QStringLiteral("segments") : variant,
         key.metricId,
         unit.isEmpty() ? Metrics::metricUnit(key.metricId) : unit
@@ -242,8 +237,6 @@ void DashboardMetricsModel::onMetricUpdated(const QString &title,
         return;
     }
 
-    const DashboardMetricWidgetKey key = makeWidgetKey(title, metricId);
-    m_latestMetricValues.insert(key, value);
     setWidgetValue(title, metricId, value.toInt());
 }
 
