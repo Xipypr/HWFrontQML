@@ -62,11 +62,6 @@ QHash<int, QByteArray> DashboardMetricsModel::roleNames() const
     };
 }
 
-int DashboardMetricsModel::availableMetricsRevision() const
-{
-    return m_availableMetricsRevision;
-}
-
 QVariantMap DashboardMetricsModel::get(int row) const
 {
     if (row < 0 || row >= m_items.size())
@@ -228,9 +223,6 @@ void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescript
 {
     m_availableMetrics = metrics;
     syncInitialWidgetsWithMetrics();
-
-    ++m_availableMetricsRevision;
-    emit availableMetricsChanged();
 
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
         if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)

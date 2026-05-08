@@ -16,7 +16,6 @@ Dialog {
     padding: 20
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-    property int metricsRevision: widgetsModel ? widgetsModel.availableMetricsRevision : 0
     property var deviceOptions: []
     property var metricOptions: []
     property string addError: ""
@@ -73,8 +72,6 @@ Dialog {
         addError = ""
         refreshDevices()
     }
-
-    onMetricsRevisionChanged: refreshDevices()
 
     contentItem: ColumnLayout {
         spacing: 12

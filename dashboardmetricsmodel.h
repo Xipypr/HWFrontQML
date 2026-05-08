@@ -29,8 +29,6 @@ uint qHash(const DashboardMetricWidgetKey &key, uint seed = 0);
 class DashboardMetricsModel : public QAbstractListModel
 {
     Q_OBJECT
-    Q_PROPERTY(int availableMetricsRevision READ availableMetricsRevision NOTIFY availableMetricsChanged)
-
 public:
     enum Roles {
         WidgetIdRole = Qt::UserRole + 1,
@@ -49,8 +47,6 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
-    int availableMetricsRevision() const;
-
     Q_INVOKABLE QVariantMap get(int row) const;
     Q_INVOKABLE QVariantList availableDevices() const;
     Q_INVOKABLE QVariantList availableMetricsForDevice(const QString &deviceId) const;
@@ -68,9 +64,6 @@ public:
     Q_INVOKABLE bool updateWidget(const QString &title,
                                   Metrics::MetricId metricId,
                                   int value);
-
-signals:
-    void availableMetricsChanged();
 
 public slots:
     void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
@@ -109,7 +102,6 @@ private:
     QHash<DashboardMetricWidgetKey, int> m_widgetIndexByKey;
     QHash<DashboardMetricWidgetKey, QVariant> m_latestMetricValues;
     bool m_hasSeededInitialWidgets = false;
-    int m_availableMetricsRevision = 0;
 };
 
 #endif // DASHBOARDMETRICSMODEL_H
