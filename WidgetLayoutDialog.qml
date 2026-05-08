@@ -9,7 +9,7 @@ Dialog {
 
     parent: Overlay.overlay
     x: (parent.width - width) / 2
-    y: Math.max(12, (parent.height - height) / 2)
+    y: (parent.height - height) / 2
     width: Math.min(parent.width - 32, 440)
     modal: true
     focus: true
@@ -88,7 +88,7 @@ Dialog {
         ListView {
             id: widgetsList
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(220, Math.max(104, count * 60))
+            Layout.preferredHeight: 260
             clip: true
             spacing: 8
             model: root.widgetsModel
