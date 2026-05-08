@@ -8,7 +8,6 @@
 #include <QVector>
 #include <QVariantList>
 
-
 struct DashboardMetricWidgetKey
 {
     QString title;
@@ -27,11 +26,9 @@ struct DashboardMetricWidgetKey
 
 uint qHash(const DashboardMetricWidgetKey &key, uint seed = 0);
 
-
 class DashboardMetricsModel : public QAbstractListModel
 {
     Q_OBJECT
-
 public:
     enum Roles {
         WidgetIdRole = Qt::UserRole + 1,
@@ -43,29 +40,22 @@ public:
     };
     Q_ENUM(Roles)
 
-    enum WidgetType {
-        Cpu = 0,
-        Ram,
-        Gpu,
-        Hdd,
-        Unknown
-    };
-    Q_ENUM(WidgetType)
-
     explicit DashboardMetricsModel(QObject *parent = nullptr);
-
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE QVariantMap get(int row) const;
+    Q_INVOKABLE QVariantList availableDevices() const;
+    Q_INVOKABLE QVariantList availableMetricsForDevice(const QString &deviceId) const;
     Q_INVOKABLE bool addWidget(const QString &title,
                                Metrics::MetricId metricId,
-                               const QString &variant,
-                               const QString &unit = QString());
-    Q_INVOKABLE bool addWidgetByType(WidgetType type);
-    Q_INVOKABLE QVariantList widgetTypeOptions() const;
+                               const QString &unit,
+                               const QString &variant);
+    Q_INVOKABLE bool addWidgetForMetric(const QString &deviceId,
+                                         const QString &metricId,
+                                         const QString &variant = QStringLiteral("segments"));
     Q_INVOKABLE bool removeWidget(const QString &widgetId);
     Q_INVOKABLE bool moveWidget(int from, int to);
     Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);
@@ -89,12 +79,6 @@ private:
         QString unit;
     };
 
-    struct WidgetDescriptor {
-        WidgetType type = Unknown;
-        QString title;
-        QString variant;
-    };
-
     static DashboardMetricWidgetKey makeWidgetKey(const QString &title, Metrics::MetricId metricId);
     static QString makeWidgetId(const DashboardMetricWidgetKey &key);
     int widgetIndexById(const QString &widgetId) const;
@@ -102,15 +86,18 @@ private:
     bool insertWidget(const WidgetItem &item);
     bool removeWidgetAt(int index);
     void rebuildWidgetIndexes();
-    WidgetDescriptor descriptorForType(WidgetType type) const;
     void setWidgetValue(const QString &title,
                         Metrics::MetricId metricId,
                         int value,
                         const QString &unit = QString());
-    void syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics);
+    void syncInitialWidgetsWithMetrics();
+    const MetricDescriptor *descriptorForMetric(const QString &deviceId,
+                                                Metrics::MetricId metricId) const;
 
     QVector<WidgetItem> m_items;
+    QList<MetricDescriptor> m_availableMetrics;
     QHash<DashboardMetricWidgetKey, int> m_widgetIndexByKey;
+    bool m_hasSeededInitialWidgets = false;
 };
 
 #endif // DASHBOARDMETRICSMODEL_H
