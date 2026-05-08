@@ -32,8 +32,6 @@ QVariant DashboardMetricsModel::data(const QModelIndex &index, int role) const
     switch (role) {
     case WidgetIdRole:
         return item.widgetId;
-    case DeviceIdRole:
-        return item.deviceId;
     case TitleRole:
         return item.title;
     case ValueRole:
@@ -53,7 +51,6 @@ QHash<int, QByteArray> DashboardMetricsModel::roleNames() const
 {
     return {
         { WidgetIdRole, "widgetId" },
-        { DeviceIdRole, "deviceId" },
         { TitleRole, "title" },
         { ValueRole, "value" },
         { VariantRole, "variant" },
@@ -70,7 +67,6 @@ QVariantMap DashboardMetricsModel::get(int row) const
     const WidgetItem &item = m_items.at(row);
     return {
         { "widgetId", item.widgetId },
-        { "deviceId", item.deviceId },
         { "title", item.title },
         { "value", item.value },
         { "variant", item.variant },

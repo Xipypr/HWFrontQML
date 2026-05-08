@@ -32,7 +32,6 @@ class DashboardMetricsModel : public QAbstractListModel
 public:
     enum Roles {
         WidgetIdRole = Qt::UserRole + 1,
-        DeviceIdRole,
         TitleRole,
         ValueRole,
         VariantRole,
