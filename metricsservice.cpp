@@ -86,14 +86,12 @@ void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
     for (const MetricDescriptor &descriptor : m_availableMetrics)
     {
         Device *deviceObject = devicesById.value(descriptor.deviceId, nullptr);
-        QVariant value;
-
-        if (deviceObject && hasMetric(deviceObject, descriptor.metricId))
-            value = metricValue(deviceObject, descriptor.metricId);
+        if (!deviceObject)
+            continue;
 
         emit metricUpdated(descriptor.deviceId,
                            descriptor.metricId,
-                           value);
+                           metricValue(deviceObject, descriptor.metricId));
     }
 }
 

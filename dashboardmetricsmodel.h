@@ -19,7 +19,6 @@ public:
         ValueRole,
         VariantRole,
         AvailableRole,
-        DeviceIdRole,
         MetricIdRole,
         UnitRole
     };
@@ -69,14 +68,13 @@ private:
         int value = 0;
         QString variant;
         bool available = true;
-        QString deviceId;
         Metrics::MetricId metricId = Metrics::MetricId::Unknown;
         QString unit;
     };
 
     struct WidgetDescriptor {
         WidgetType type = Unknown;
-        QString deviceId;
+        QString widgetId;
         QString title;
         QString variant;
     };

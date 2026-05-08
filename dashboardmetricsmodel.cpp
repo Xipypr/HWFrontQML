@@ -26,15 +26,13 @@ QVariant DashboardMetricsModel::data(const QModelIndex &index, int role) const
     case WidgetIdRole:
         return item.widgetId;
     case TitleRole:
-        return item.deviceId;
+        return item.widgetId.section(QLatin1Char(':'), 0, 0);
     case ValueRole:
         return item.value;
     case VariantRole:
         return item.variant;
     case AvailableRole:
         return item.available;
-    case DeviceIdRole:
-        return item.deviceId;
     case MetricIdRole:
         return Metrics::metricIdToString(item.metricId);
     case UnitRole:
@@ -52,7 +50,6 @@ QHash<int, QByteArray> DashboardMetricsModel::roleNames() const
         { ValueRole, "value" },
         { VariantRole, "variant" },
         { AvailableRole, "available" },
-        { DeviceIdRole, "deviceId" },
         { MetricIdRole, "metricId" },
         { UnitRole, "unit" }
     };
@@ -66,11 +63,10 @@ QVariantMap DashboardMetricsModel::get(int row) const
     const WidgetItem &item = m_items.at(row);
     return {
         { "widgetId", item.widgetId },
-        { "title", item.deviceId },
+        { "title", item.widgetId.section(QLatin1Char(':'), 0, 0) },
         { "value", item.value },
         { "variant", item.variant },
         { "available", item.available },
-        { "deviceId", item.deviceId },
         { "metricId", Metrics::metricIdToString(item.metricId) },
         { "unit", item.unit }
     };
@@ -92,7 +88,6 @@ bool DashboardMetricsModel::addWidget(const QString &deviceId,
         0,
         variant,
         available,
-        deviceId,
         metricId,
         unit.isEmpty() ? Metrics::metricUnit(metricId) : unit
     });
@@ -106,7 +101,7 @@ bool DashboardMetricsModel::addWidgetByType(DashboardMetricsModel::WidgetType ty
     if (descriptor.type == Unknown)
         return false;
 
-    return addWidget(descriptor.deviceId,
+    return addWidget(descriptor.widgetId,
                      Metrics::MetricId::Loading,
                      descriptor.variant,
                      false,
@@ -225,8 +220,8 @@ void DashboardMetricsModel::syncWidgetsWithMetrics(const QList<MetricDescriptor>
 
     for (int i = 0; i < m_items.size(); ++i) {
         const WidgetItem &item = m_items.at(i);
-        if (!availableMetricKeys.contains(makeWidgetId(item.deviceId, item.metricId)))
-            setWidgetAvailability(item.deviceId, item.metricId, false);
+        if (!availableMetricKeys.contains(item.widgetId))
+            setWidgetAvailability(item.widgetId.section(QLatin1Char(':'), 0, 0), item.metricId, false);
     }
 }
 
@@ -249,7 +244,7 @@ int DashboardMetricsModel::widgetIndexForMetric(const QString &deviceId, Metrics
 {
     for (int i = 0; i < m_items.size(); ++i) {
         const WidgetItem &item = m_items.at(i);
-        if (item.deviceId == deviceId && item.metricId == metricId)
+        if (item.widgetId == makeWidgetId(deviceId, metricId) && item.metricId == metricId)
             return i;
     }
 
