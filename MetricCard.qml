@@ -7,7 +7,7 @@ Rectangle {
 
     property string title: "N/A"
     property int value: 0
-    property string unit: "%"
+    property string unit: ""
     // segments | ring | linear | arc180
     property string variant: "segments"
     signal variantSelected(string mode)

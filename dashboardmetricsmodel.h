@@ -46,7 +46,6 @@ public:
                                Metrics::MetricId metricId,
                                const QString &variant,
                                bool available = true,
-                               const QString &title = QString(),
                                const QString &unit = QString());
     Q_INVOKABLE bool addWidgetByType(WidgetType type);
     Q_INVOKABLE QVariantList widgetTypeOptions() const;
@@ -67,7 +66,6 @@ public slots:
 private:
     struct WidgetItem {
         QString widgetId;
-        QString title;
         int value = 0;
         QString variant;
         bool available = true;
@@ -84,16 +82,13 @@ private:
     };
 
     static QString makeWidgetId(const QString &deviceId, Metrics::MetricId metricId);
-    static QString metricTitle(const MetricDescriptor &descriptor);
     int widgetIndexById(const QString &widgetId) const;
     int widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const;
     WidgetDescriptor descriptorForType(WidgetType type) const;
-    WidgetDescriptor descriptorForDevice(const QString &deviceId, const QString &displayName = QString()) const;
     void setWidgetValue(const QString &deviceId,
                         Metrics::MetricId metricId,
                         int value,
                         bool available,
-                        const QString &title = QString(),
                         const QString &unit = QString());
     void setWidgetAvailability(const QString &deviceId, Metrics::MetricId metricId, bool available);
     void syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics);
