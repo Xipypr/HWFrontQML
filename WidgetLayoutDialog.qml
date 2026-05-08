@@ -88,14 +88,14 @@ Dialog {
         ListView {
             id: widgetsList
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(220, Math.max(96, count * 56))
+            Layout.preferredHeight: Math.min(220, Math.max(104, count * 60))
             clip: true
             spacing: 8
             model: root.widgetsModel
 
             delegate: Rectangle {
                 width: widgetsList.width
-                height: 48
+                height: 52
                 radius: 8
                 color: "#1E293B"
                 border.width: 1
