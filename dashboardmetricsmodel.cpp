@@ -248,18 +248,22 @@ void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescript
     }
 }
 
-void DashboardMetricsModel::onMetricUpdated(const QString &deviceId,
+void DashboardMetricsModel::onMetricUpdated(const QString &title,
                                             Metrics::MetricId metricId,
                                             const QVariant &value)
 {
-    if (deviceId.isEmpty() || metricId == Metrics::MetricId::Unknown
+    if (title.isEmpty() || metricId == Metrics::MetricId::Unknown
             || !value.isValid() || value.isNull() || !value.canConvert(QVariant::Int)) {
         return;
     }
 
-    const DashboardMetricWidgetKey key = makeWidgetKey(deviceId, metricId);
+    const MetricDescriptor *descriptor = descriptorForMetricTitle(title, metricId);
+    if (!descriptor)
+        return;
+
+    const DashboardMetricWidgetKey key = makeWidgetKey(descriptor->deviceId, metricId);
     m_latestMetricValues.insert(key, value);
-    setWidgetValue(deviceId, metricId, value.toInt());
+    setWidgetValue(descriptor->deviceId, metricId, value.toInt());
 }
 
 DashboardMetricWidgetKey DashboardMetricsModel::makeWidgetKey(const QString &deviceId, Metrics::MetricId metricId)
@@ -383,6 +387,17 @@ const MetricDescriptor *DashboardMetricsModel::descriptorForMetric(const QString
 {
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
         if (descriptor.deviceId == deviceId && descriptor.metricId == metricId)
+            return &descriptor;
+    }
+
+    return nullptr;
+}
+
+const MetricDescriptor *DashboardMetricsModel::descriptorForMetricTitle(const QString &title,
+                                                                        Metrics::MetricId metricId) const
+{
+    for (const MetricDescriptor &descriptor : m_availableMetrics) {
+        if (descriptor.displayName == title && descriptor.metricId == metricId)
             return &descriptor;
     }
 

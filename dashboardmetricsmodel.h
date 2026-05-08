@@ -74,7 +74,7 @@ signals:
 
 public slots:
     void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
-    void onMetricUpdated(const QString &deviceId,
+    void onMetricUpdated(const QString &title,
                          Metrics::MetricId metricId,
                          const QVariant &value);
 
@@ -103,6 +103,8 @@ private:
     void syncInitialWidgetsWithMetrics();
     const MetricDescriptor *descriptorForMetric(const QString &deviceId,
                                                 Metrics::MetricId metricId) const;
+    const MetricDescriptor *descriptorForMetricTitle(const QString &title,
+                                                     Metrics::MetricId metricId) const;
 
     QVector<WidgetItem> m_items;
     QList<MetricDescriptor> m_availableMetrics;
