@@ -9,8 +9,8 @@ Dialog {
 
     parent: Overlay.overlay
     x: (parent.width - width) / 2
-    y: (parent.height - height) / 2
-    width: Math.min(parent.width - 32, 520)
+    y: Math.max(12, (parent.height - height) / 2)
+    width: Math.min(parent.width - 32, 440)
     modal: true
     focus: true
     padding: 20
@@ -36,19 +36,36 @@ Dialog {
     }
 
     function refreshDevices() {
+        const currentDeviceId = selectedDeviceId()
         deviceOptions = widgetsModel ? widgetsModel.availableDevices() : []
-        if (deviceOptions.length === 0)
-            deviceCombo.currentIndex = -1
-        else if (deviceCombo.currentIndex < 0 || deviceCombo.currentIndex >= deviceOptions.length)
+        deviceCombo.currentIndex = -1
+
+        for (let i = 0; i < deviceOptions.length; ++i) {
+            if (deviceOptions[i].deviceId === currentDeviceId) {
+                deviceCombo.currentIndex = i
+                break
+            }
+        }
+
+        if (deviceCombo.currentIndex < 0 && deviceOptions.length > 0)
             deviceCombo.currentIndex = 0
+
         refreshMetrics()
     }
 
     function refreshMetrics() {
+        const currentMetricId = selectedMetricId()
         metricOptions = widgetsModel ? widgetsModel.availableMetricsForDevice(selectedDeviceId()) : []
-        if (metricOptions.length === 0)
-            metricCombo.currentIndex = -1
-        else if (metricCombo.currentIndex < 0 || metricCombo.currentIndex >= metricOptions.length)
+        metricCombo.currentIndex = -1
+
+        for (let i = 0; i < metricOptions.length; ++i) {
+            if (metricOptions[i].metricId === currentMetricId) {
+                metricCombo.currentIndex = i
+                break
+            }
+        }
+
+        if (metricCombo.currentIndex < 0 && metricOptions.length > 0)
             metricCombo.currentIndex = 0
     }
 
@@ -74,14 +91,14 @@ Dialog {
         ListView {
             id: widgetsList
             Layout.fillWidth: true
-            Layout.preferredHeight: 260
+            Layout.preferredHeight: Math.min(220, Math.max(96, count * 56))
             clip: true
             spacing: 8
             model: root.widgetsModel
 
             delegate: Rectangle {
                 width: widgetsList.width
-                height: 56
+                height: 48
                 radius: 8
                 color: "#1E293B"
                 border.width: 1
@@ -132,19 +149,14 @@ Dialog {
             }
         }
 
-        ColumnLayout {
+        RowLayout {
             Layout.fillWidth: true
-            spacing: 6
-
-            Label {
-                text: "Устройство"
-                color: "#CBD5E1"
-                font.pixelSize: 12
-            }
+            spacing: 8
 
             ComboBox {
                 id: deviceCombo
                 Layout.fillWidth: true
+                Layout.preferredWidth: 190
                 model: root.deviceOptions
                 textRole: "label"
                 enabled: root.deviceOptions.length > 0
@@ -154,34 +166,15 @@ Dialog {
                 }
             }
 
-            Label {
-                text: "Метрика"
-                color: "#CBD5E1"
-                font.pixelSize: 12
-            }
-
             ComboBox {
                 id: metricCombo
                 Layout.fillWidth: true
+                Layout.preferredWidth: 130
                 model: root.metricOptions
                 textRole: "label"
                 enabled: root.metricOptions.length > 0
                 onCurrentIndexChanged: root.addError = ""
             }
-
-            Label {
-                Layout.fillWidth: true
-                visible: root.addError.length > 0
-                text: root.addError
-                color: "#F87171"
-                wrapMode: Text.WordWrap
-                font.pixelSize: 12
-            }
-        }
-
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 8
 
             Button {
                 text: "Добавить"
@@ -195,11 +188,25 @@ Dialog {
                     }
 
                     if (!root.widgetsModel.addWidgetForMetric(deviceId, metricId, "segments"))
-                        root.addError = "Не удалось добавить виджет: метрика уже добавлена или недоступна."
+                        root.addError = "Метрика уже добавлена или недоступна."
                     else
                         root.addError = ""
                 }
             }
+        }
+
+        Label {
+            Layout.fillWidth: true
+            visible: root.addError.length > 0
+            text: root.addError
+            color: "#F87171"
+            wrapMode: Text.WordWrap
+            font.pixelSize: 12
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
 
             Item { Layout.fillWidth: true }
 

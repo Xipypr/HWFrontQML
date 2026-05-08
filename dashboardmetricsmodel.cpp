@@ -226,6 +226,8 @@ bool DashboardMetricsModel::updateWidget(const QString &deviceId,
 void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics)
 {
     m_availableMetrics = metrics;
+    syncInitialWidgetsWithMetrics();
+
     ++m_availableMetricsRevision;
     emit availableMetricsChanged();
 
@@ -353,6 +355,27 @@ void DashboardMetricsModel::setWidgetValue(const QString &deviceId,
 
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, changedRoles);
+}
+
+
+void DashboardMetricsModel::syncInitialWidgetsWithMetrics()
+{
+    if (m_hasSeededInitialWidgets)
+        return;
+
+    for (const MetricDescriptor &descriptor : m_availableMetrics) {
+        if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)
+            continue;
+
+        addWidget(descriptor.deviceId,
+                  descriptor.metricId,
+                  descriptor.displayName,
+                  descriptor.unit,
+                  QStringLiteral("segments"));
+    }
+
+    if (!m_items.isEmpty())
+        m_hasSeededInitialWidgets = true;
 }
 
 const MetricDescriptor *DashboardMetricsModel::descriptorForMetric(const QString &deviceId,

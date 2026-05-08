@@ -100,6 +100,7 @@ private:
                         Metrics::MetricId metricId,
                         int value,
                         const QString &unit = QString());
+    void syncInitialWidgetsWithMetrics();
     const MetricDescriptor *descriptorForMetric(const QString &deviceId,
                                                 Metrics::MetricId metricId) const;
 
@@ -107,6 +108,7 @@ private:
     QList<MetricDescriptor> m_availableMetrics;
     QHash<DashboardMetricWidgetKey, int> m_widgetIndexByKey;
     QHash<DashboardMetricWidgetKey, QVariant> m_latestMetricValues;
+    bool m_hasSeededInitialWidgets = false;
     int m_availableMetricsRevision = 0;
 };
 
