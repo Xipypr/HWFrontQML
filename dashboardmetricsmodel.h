@@ -38,7 +38,6 @@ public:
         TitleRole,
         ValueRole,
         VariantRole,
-        AvailableRole,
         MetricIdRole,
         UnitRole
     };
@@ -64,7 +63,6 @@ public:
     Q_INVOKABLE bool addWidget(const QString &title,
                                Metrics::MetricId metricId,
                                const QString &variant,
-                               bool available = true,
                                const QString &unit = QString());
     Q_INVOKABLE bool addWidgetByType(WidgetType type);
     Q_INVOKABLE QVariantList widgetTypeOptions() const;
@@ -73,11 +71,10 @@ public:
     Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);
     Q_INVOKABLE bool updateWidget(const QString &title,
                                   Metrics::MetricId metricId,
-                                  int value,
-                                  bool available = true);
+                                  int value);
 
 public slots:
-    void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
+    void onMetricDescriptorsChanged(const QList<MetricDescriptor> &metrics);
     void onMetricUpdated(const QString &title,
                          Metrics::MetricId metricId,
                          const QVariant &value);
@@ -88,7 +85,6 @@ private:
         QString title;
         int value = 0;
         QString variant;
-        bool available = true;
         Metrics::MetricId metricId = Metrics::MetricId::Unknown;
         QString unit;
     };
@@ -110,9 +106,7 @@ private:
     void setWidgetValue(const QString &title,
                         Metrics::MetricId metricId,
                         int value,
-                        bool available,
                         const QString &unit = QString());
-    void setWidgetAvailability(const QString &title, Metrics::MetricId metricId, bool available);
     void syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics);
 
     QVector<WidgetItem> m_items;

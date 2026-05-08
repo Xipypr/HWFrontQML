@@ -22,7 +22,7 @@ public slots:
     void processDeviceSnapshot(DesktopDevice *desktopDevice);
 
 signals:
-    void availableMetricsChanged(const QList<MetricDescriptor> &metrics);
+    void metricDescriptorsChanged(const QList<MetricDescriptor> &metrics);
     void metricUpdated(const QString &title,
                        Metrics::MetricId metricId,
                        const QVariant &value);
@@ -37,7 +37,7 @@ private:
     QVariant metricValue(Device *deviceObject, Metrics::MetricId metricId) const;
 
     bool m_metricsDiscovered = false;
-    QList<MetricDescriptor> m_availableMetrics;
+    QList<MetricDescriptor> m_metricDescriptors;
 };
 
 #endif // METRICSSERVICE_H

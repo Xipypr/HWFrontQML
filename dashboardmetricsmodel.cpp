@@ -38,8 +38,6 @@ QVariant DashboardMetricsModel::data(const QModelIndex &index, int role) const
         return item.value;
     case VariantRole:
         return item.variant;
-    case AvailableRole:
-        return item.available;
     case MetricIdRole:
         return Metrics::metricIdToString(item.metricId);
     case UnitRole:
@@ -56,7 +54,6 @@ QHash<int, QByteArray> DashboardMetricsModel::roleNames() const
         { TitleRole, "title" },
         { ValueRole, "value" },
         { VariantRole, "variant" },
-        { AvailableRole, "available" },
         { MetricIdRole, "metricId" },
         { UnitRole, "unit" }
     };
@@ -73,7 +70,6 @@ QVariantMap DashboardMetricsModel::get(int row) const
         { "title", item.title },
         { "value", item.value },
         { "variant", item.variant },
-        { "available", item.available },
         { "metricId", Metrics::metricIdToString(item.metricId) },
         { "unit", item.unit }
     };
@@ -82,7 +78,6 @@ QVariantMap DashboardMetricsModel::get(int row) const
 bool DashboardMetricsModel::addWidget(const QString &title,
                                       Metrics::MetricId metricId,
                                       const QString &variant,
-                                      bool available,
                                       const QString &unit)
 {
     const DashboardMetricWidgetKey key = makeWidgetKey(title, metricId);
@@ -94,7 +89,6 @@ bool DashboardMetricsModel::addWidget(const QString &title,
         key.title,
         0,
         variant,
-        available,
         key.metricId,
         unit.isEmpty() ? Metrics::metricUnit(key.metricId) : unit
     });
@@ -109,7 +103,6 @@ bool DashboardMetricsModel::addWidgetByType(DashboardMetricsModel::WidgetType ty
     return addWidget(descriptor.title,
                      Metrics::MetricId::Loading,
                      descriptor.variant,
-                     false,
                      Metrics::metricUnit(Metrics::MetricId::Loading));
 }
 
@@ -170,19 +163,18 @@ bool DashboardMetricsModel::setVariant(const QString &widgetId, const QString &v
 
 bool DashboardMetricsModel::updateWidget(const QString &title,
                                          Metrics::MetricId metricId,
-                                         int value,
-                                         bool available)
+                                         int value)
 {
     const int index = widgetIndexForMetric(title, metricId);
     if (index < 0)
         return false;
 
-    setWidgetValue(title, metricId, value, available);
+    setWidgetValue(title, metricId, value);
     return true;
 }
 
 
-void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics)
+void DashboardMetricsModel::onMetricDescriptorsChanged(const QList<MetricDescriptor> &metrics)
 {
     syncWidgetsWithMetrics(metrics);
 }
@@ -191,40 +183,36 @@ void DashboardMetricsModel::onMetricUpdated(const QString &title,
                                             Metrics::MetricId metricId,
                                             const QVariant &value)
 {
-    const bool available = value.isValid() && !value.isNull() && value.canConvert(QVariant::Int);
-    if (!available) {
-        setWidgetAvailability(title, metricId, false);
+    if (!value.isValid() || value.isNull() || !value.canConvert(QVariant::Int))
         return;
-    }
 
-    setWidgetValue(title, metricId, value.toInt(), true);
+    setWidgetValue(title, metricId, value.toInt());
 }
 
 void DashboardMetricsModel::syncWidgetsWithMetrics(const QList<MetricDescriptor> &metrics)
 {
-    QSet<DashboardMetricWidgetKey> availableMetricKeys;
+    QSet<DashboardMetricWidgetKey> metricKeys;
 
     for (const MetricDescriptor &descriptor : metrics) {
         if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)
             continue;
 
-        availableMetricKeys.insert(makeWidgetKey(descriptor.displayName, descriptor.metricId));
+        metricKeys.insert(makeWidgetKey(descriptor.displayName, descriptor.metricId));
 
         if (widgetIndexForMetric(descriptor.displayName, descriptor.metricId) < 0) {
             addWidget(descriptor.displayName,
                       descriptor.metricId,
                       QStringLiteral("segments"),
-                      true,
                       descriptor.unit);
         } else {
-            setWidgetValue(descriptor.displayName, descriptor.metricId, 0, true, descriptor.unit);
+            setWidgetValue(descriptor.displayName, descriptor.metricId, 0, descriptor.unit);
         }
     }
 
-    for (int i = 0; i < m_items.size(); ++i) {
+    for (int i = m_items.size() - 1; i >= 0; --i) {
         const WidgetItem &item = m_items.at(i);
-        if (!availableMetricKeys.contains(makeWidgetKey(item.title, item.metricId)))
-            setWidgetAvailability(item.title, item.metricId, false);
+        if (!metricKeys.contains(makeWidgetKey(item.title, item.metricId)))
+            removeWidgetAt(i);
     }
 }
 
@@ -317,7 +305,6 @@ DashboardMetricsModel::WidgetDescriptor DashboardMetricsModel::descriptorForType
 void DashboardMetricsModel::setWidgetValue(const QString &title,
                                            Metrics::MetricId metricId,
                                            int value,
-                                           bool available,
                                            const QString &unit)
 {
     const int index = widgetIndexForMetric(title, metricId);
@@ -332,10 +319,6 @@ void DashboardMetricsModel::setWidgetValue(const QString &title,
         changedRoles.push_back(ValueRole);
     }
 
-    if (item.available != available) {
-        item.available = available;
-        changedRoles.push_back(AvailableRole);
-    }
 
     if (!unit.isEmpty() && item.unit != unit) {
         item.unit = unit;
@@ -347,19 +330,4 @@ void DashboardMetricsModel::setWidgetValue(const QString &title,
 
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, changedRoles);
-}
-
-void DashboardMetricsModel::setWidgetAvailability(const QString &title, Metrics::MetricId metricId, bool available)
-{
-    const int index = widgetIndexForMetric(title, metricId);
-    if (index < 0)
-        return;
-
-    WidgetItem &item = m_items[index];
-    if (item.available == available)
-        return;
-
-    item.available = available;
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, { AvailableRole });
 }
