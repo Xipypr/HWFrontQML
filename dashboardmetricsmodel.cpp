@@ -4,9 +4,9 @@
 
 uint qHash(const DashboardMetricWidgetKey &key, uint seed)
 {
-    const uint deviceHash = ::qHash(key.deviceId, seed);
+    const uint titleHash = ::qHash(key.title, seed);
     const uint metricHash = static_cast<uint>(key.metricId);
-    return deviceHash ^ (metricHash + 0x9e3779b9U + (deviceHash << 6) + (deviceHash >> 2));
+    return titleHash ^ (metricHash + 0x9e3779b9U + (titleHash << 6) + (titleHash >> 2));
 }
 
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
@@ -132,7 +132,8 @@ bool DashboardMetricsModel::addWidget(const QString &deviceId,
                                       const QString &unit,
                                       const QString &variant)
 {
-    const DashboardMetricWidgetKey key = makeWidgetKey(deviceId, metricId);
+    const QString widgetTitle = title.isEmpty() ? deviceId : title;
+    const DashboardMetricWidgetKey key = makeWidgetKey(widgetTitle, metricId);
     if (!key.isValid())
         return false;
 
@@ -143,8 +144,8 @@ bool DashboardMetricsModel::addWidget(const QString &deviceId,
 
     return insertWidget({
         makeWidgetId(key),
-        key.deviceId,
-        title.isEmpty() ? key.deviceId : title,
+        deviceId,
+        key.title,
         initialValue,
         variant.isEmpty() ? QStringLiteral("segments") : variant,
         key.metricId,
@@ -211,15 +212,15 @@ bool DashboardMetricsModel::setVariant(const QString &widgetId, const QString &v
     return true;
 }
 
-bool DashboardMetricsModel::updateWidget(const QString &deviceId,
+bool DashboardMetricsModel::updateWidget(const QString &title,
                                          Metrics::MetricId metricId,
                                          int value)
 {
-    const int index = widgetIndexForMetric(deviceId, metricId);
+    const int index = widgetIndexForMetric(title, metricId);
     if (index < 0)
         return false;
 
-    setWidgetValue(deviceId, metricId, value);
+    setWidgetValue(title, metricId, value);
     return true;
 }
 
@@ -235,7 +236,7 @@ void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescript
         if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)
             continue;
 
-        const int widgetIndex = widgetIndexForMetric(descriptor.deviceId, descriptor.metricId);
+        const int widgetIndex = widgetIndexForMetric(descriptor.displayName, descriptor.metricId);
         if (widgetIndex < 0)
             continue;
 
@@ -257,23 +258,19 @@ void DashboardMetricsModel::onMetricUpdated(const QString &title,
         return;
     }
 
-    const MetricDescriptor *descriptor = descriptorForMetricTitle(title, metricId);
-    if (!descriptor)
-        return;
-
-    const DashboardMetricWidgetKey key = makeWidgetKey(descriptor->deviceId, metricId);
+    const DashboardMetricWidgetKey key = makeWidgetKey(title, metricId);
     m_latestMetricValues.insert(key, value);
-    setWidgetValue(descriptor->deviceId, metricId, value.toInt());
+    setWidgetValue(title, metricId, value.toInt());
 }
 
-DashboardMetricWidgetKey DashboardMetricsModel::makeWidgetKey(const QString &deviceId, Metrics::MetricId metricId)
+DashboardMetricWidgetKey DashboardMetricsModel::makeWidgetKey(const QString &title, Metrics::MetricId metricId)
 {
-    return { deviceId, metricId };
+    return { title, metricId };
 }
 
 QString DashboardMetricsModel::makeWidgetId(const DashboardMetricWidgetKey &key)
 {
-    return key.deviceId + QStringLiteral(":") + Metrics::metricIdToString(key.metricId);
+    return key.title + QStringLiteral(":") + Metrics::metricIdToString(key.metricId);
 }
 
 int DashboardMetricsModel::widgetIndexById(const QString &widgetId) const
@@ -286,16 +283,16 @@ int DashboardMetricsModel::widgetIndexById(const QString &widgetId) const
     return -1;
 }
 
-int DashboardMetricsModel::widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const
+int DashboardMetricsModel::widgetIndexForMetric(const QString &title, Metrics::MetricId metricId) const
 {
-    const DashboardMetricWidgetKey key = makeWidgetKey(deviceId, metricId);
+    const DashboardMetricWidgetKey key = makeWidgetKey(title, metricId);
     const auto indexIt = m_widgetIndexByKey.constFind(key);
     return indexIt == m_widgetIndexByKey.constEnd() ? -1 : indexIt.value();
 }
 
 bool DashboardMetricsModel::insertWidget(const WidgetItem &item)
 {
-    const DashboardMetricWidgetKey key = makeWidgetKey(item.deviceId, item.metricId);
+    const DashboardMetricWidgetKey key = makeWidgetKey(item.title, item.metricId);
     if (!key.isValid() || m_widgetIndexByKey.contains(key))
         return false;
 
@@ -324,7 +321,7 @@ void DashboardMetricsModel::rebuildWidgetIndexes()
     m_widgetIndexByKey.clear();
     for (int i = 0; i < m_items.size(); ++i) {
         const WidgetItem &item = m_items.at(i);
-        const DashboardMetricWidgetKey key = makeWidgetKey(item.deviceId, item.metricId);
+        const DashboardMetricWidgetKey key = makeWidgetKey(item.title, item.metricId);
         if (!key.isValid())
             continue;
 
@@ -332,12 +329,12 @@ void DashboardMetricsModel::rebuildWidgetIndexes()
     }
 }
 
-void DashboardMetricsModel::setWidgetValue(const QString &deviceId,
+void DashboardMetricsModel::setWidgetValue(const QString &title,
                                            Metrics::MetricId metricId,
                                            int value,
                                            const QString &unit)
 {
-    const int index = widgetIndexForMetric(deviceId, metricId);
+    const int index = widgetIndexForMetric(title, metricId);
     if (index < 0)
         return;
 
@@ -387,17 +384,6 @@ const MetricDescriptor *DashboardMetricsModel::descriptorForMetric(const QString
 {
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
         if (descriptor.deviceId == deviceId && descriptor.metricId == metricId)
-            return &descriptor;
-    }
-
-    return nullptr;
-}
-
-const MetricDescriptor *DashboardMetricsModel::descriptorForMetricTitle(const QString &title,
-                                                                        Metrics::MetricId metricId) const
-{
-    for (const MetricDescriptor &descriptor : m_availableMetrics) {
-        if (descriptor.displayName == title && descriptor.metricId == metricId)
             return &descriptor;
     }
 

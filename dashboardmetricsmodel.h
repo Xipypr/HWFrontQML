@@ -10,17 +10,17 @@
 
 struct DashboardMetricWidgetKey
 {
-    QString deviceId;
+    QString title;
     Metrics::MetricId metricId = Metrics::MetricId::Unknown;
 
     bool operator==(const DashboardMetricWidgetKey &other) const
     {
-        return deviceId == other.deviceId && metricId == other.metricId;
+        return title == other.title && metricId == other.metricId;
     }
 
     bool isValid() const
     {
-        return !deviceId.isEmpty() && metricId != Metrics::MetricId::Unknown;
+        return !title.isEmpty() && metricId != Metrics::MetricId::Unknown;
     }
 };
 
@@ -65,7 +65,7 @@ public:
     Q_INVOKABLE bool removeWidget(const QString &widgetId);
     Q_INVOKABLE bool moveWidget(int from, int to);
     Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);
-    Q_INVOKABLE bool updateWidget(const QString &deviceId,
+    Q_INVOKABLE bool updateWidget(const QString &title,
                                   Metrics::MetricId metricId,
                                   int value);
 
@@ -89,22 +89,20 @@ private:
         QString unit;
     };
 
-    static DashboardMetricWidgetKey makeWidgetKey(const QString &deviceId, Metrics::MetricId metricId);
+    static DashboardMetricWidgetKey makeWidgetKey(const QString &title, Metrics::MetricId metricId);
     static QString makeWidgetId(const DashboardMetricWidgetKey &key);
     int widgetIndexById(const QString &widgetId) const;
-    int widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const;
+    int widgetIndexForMetric(const QString &title, Metrics::MetricId metricId) const;
     bool insertWidget(const WidgetItem &item);
     bool removeWidgetAt(int index);
     void rebuildWidgetIndexes();
-    void setWidgetValue(const QString &deviceId,
+    void setWidgetValue(const QString &title,
                         Metrics::MetricId metricId,
                         int value,
                         const QString &unit = QString());
     void syncInitialWidgetsWithMetrics();
     const MetricDescriptor *descriptorForMetric(const QString &deviceId,
                                                 Metrics::MetricId metricId) const;
-    const MetricDescriptor *descriptorForMetricTitle(const QString &title,
-                                                     Metrics::MetricId metricId) const;
 
     QVector<WidgetItem> m_items;
     QList<MetricDescriptor> m_availableMetrics;
