@@ -233,6 +233,7 @@ bool DashboardMetricsModel::moveWidget(int from, int to)
     m_items.move(from, to);
     rebuildWidgetIndexes();
     endMoveRows();
+    emit widgetsStateChanged();
     return true;
 }
 
@@ -249,6 +250,7 @@ bool DashboardMetricsModel::setVariant(const QString &widgetId, const QString &v
     item.variant = variant;
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, { VariantRole });
+    emit widgetsStateChanged();
     return true;
 }
 
@@ -336,6 +338,7 @@ bool DashboardMetricsModel::insertWidget(const WidgetItem &item)
     m_items.push_back(item);
     m_widgetIndexByKey.insert(key, insertRow);
     endInsertRows();
+    emit widgetsStateChanged();
     return true;
 }
 
@@ -348,6 +351,7 @@ bool DashboardMetricsModel::removeWidgetAt(int index)
     m_items.removeAt(index);
     rebuildWidgetIndexes();
     endRemoveRows();
+    emit widgetsStateChanged();
     return true;
 }
 

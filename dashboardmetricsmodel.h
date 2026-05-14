@@ -66,6 +66,9 @@ public:
                                   Metrics::MetricId metricId,
                                   int value);
 
+signals:
+    void widgetsStateChanged();
+
 public slots:
     void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
     void onMetricUpdated(const QString &title,
