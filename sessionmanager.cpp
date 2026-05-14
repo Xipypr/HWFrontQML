@@ -317,6 +317,11 @@ SessionManager::SessionEntry SessionManager::createSessionEntry(const Session &s
         if (!entry) {
             return;
         }
+
+        if (entry->metricsService) {
+            entry->metricsService->processDeviceSnapshot(deviceRef);
+        }
+
         entry->session.hasDevice = true;
         entry->session.displayName = deviceRef ? deviceRef->property("name").toString() : entry->session.displayName;
         m_sessionsModel.upsertSession(entry->session);
@@ -355,7 +360,6 @@ SessionManager::SessionEntry SessionManager::createSessionEntry(const Session &s
             saveSessionsState();
         }
     });
-    connect(core, &Core::deviceReady, entry.metricsService, &MetricsService::processDeviceSnapshot);
     connect(entry.metricsService, &MetricsService::availableMetricsChanged, entry.dashboardModel, &DashboardMetricsModel::onAvailableMetricsChanged);
     connect(entry.metricsService, &MetricsService::metricUpdated, entry.dashboardModel, &DashboardMetricsModel::onMetricUpdated);
     return entry;
