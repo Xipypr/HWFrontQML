@@ -134,7 +134,7 @@ Dialog {
 
                     ToolButton {
                         text: "↓"
-                        enabled: root.widgetsModel && index < widgetsList.count - 1
+                        enabled: index < widgetsList.count - 1
                         onClicked: root.widgetsModel.moveWidget(index, index + 1)
                     }
 
