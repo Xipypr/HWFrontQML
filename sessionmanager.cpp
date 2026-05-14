@@ -220,6 +220,9 @@ void SessionManager::saveSessionsState()
         sessionObject[QStringLiteral("displayName")] = entry.session.displayName;
         sessionObject[QStringLiteral("hasDevice")] = entry.session.hasDevice;
         sessionObject[QStringLiteral("state")] = SessionStateNs::toString(entry.session.state);
+        if (entry.dashboardModel) {
+            sessionObject[QStringLiteral("widgets")] = entry.dashboardModel->toJson();
+        }
         sessionsArray.append(sessionObject);
     }
 
@@ -264,6 +267,10 @@ void SessionManager::restoreSessionsState()
         session.state = restoredSessionState(sessionStateFromString(sessionObject.value(QStringLiteral("state")).toString()));
 
         SessionEntry entry = createSessionEntry(session);
+        const QJsonValue widgetsValue = sessionObject.value(QStringLiteral("widgets"));
+        if (widgetsValue.isArray() && entry.dashboardModel) {
+            entry.dashboardModel->restoreFromJson(widgetsValue.toArray());
+        }
         m_sessions.insert(session.sessionId, entry);
         m_sessionsModel.upsertSession(session);
         restoredAnySession = true;
