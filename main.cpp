@@ -20,9 +20,13 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
 
+    QCoreApplication::setOrganizationName(QStringLiteral("HWFrontQML"));
+    QCoreApplication::setApplicationName(QStringLiteral("HWFrontQML"));
+
     QGuiApplication app(argc, argv);
 
     SessionManager sessionManager;
+    sessionManager.restoreSessionsState();
     Device device;
     DesktopDevice desktopDevice;
     Ram ram;

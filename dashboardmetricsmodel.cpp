@@ -1,5 +1,7 @@
 #include "dashboardmetricsmodel.h"
 
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QSet>
 
 uint qHash(const DashboardMetricWidgetKey &key, uint seed)
@@ -73,6 +75,62 @@ QVariantMap DashboardMetricsModel::get(int row) const
         { "metricId", Metrics::metricIdToString(item.metricId) },
         { "unit", item.unit }
     };
+}
+
+QJsonArray DashboardMetricsModel::toJson() const
+{
+    QJsonArray widgetsArray;
+
+    for (const WidgetItem &item : m_items) {
+        QJsonObject widgetObject;
+        widgetObject[QStringLiteral("title")] = item.title;
+        widgetObject[QStringLiteral("metricId")] = Metrics::metricIdToString(item.metricId);
+        widgetObject[QStringLiteral("unit")] = item.unit;
+        widgetObject[QStringLiteral("variant")] = item.variant;
+        widgetsArray.append(widgetObject);
+    }
+
+    return widgetsArray;
+}
+
+void DashboardMetricsModel::restoreFromJson(const QJsonArray &widgets)
+{
+    QVector<WidgetItem> restoredItems;
+    QHash<DashboardMetricWidgetKey, int> restoredIndexes;
+
+    for (const QJsonValue &value : widgets) {
+        if (!value.isObject())
+            continue;
+
+        const QJsonObject widgetObject = value.toObject();
+        const QString title = widgetObject.value(QStringLiteral("title")).toString().trimmed();
+        const Metrics::MetricId metricId = Metrics::metricIdFromString(widgetObject.value(QStringLiteral("metricId")).toString());
+        const DashboardMetricWidgetKey key = makeWidgetKey(title, metricId);
+
+        if (!key.isValid() || restoredIndexes.contains(key))
+            continue;
+
+        WidgetItem item;
+        item.widgetId = makeWidgetId(key);
+        item.title = key.title;
+        item.value = 0;
+        item.variant = widgetObject.value(QStringLiteral("variant")).toString(QStringLiteral("segments"));
+        if (item.variant.isEmpty())
+            item.variant = QStringLiteral("segments");
+        item.metricId = key.metricId;
+        item.unit = widgetObject.value(QStringLiteral("unit")).toString();
+        if (item.unit.isEmpty())
+            item.unit = Metrics::metricUnit(key.metricId);
+
+        restoredIndexes.insert(key, restoredItems.size());
+        restoredItems.push_back(item);
+    }
+
+    beginResetModel();
+    m_items = restoredItems;
+    m_widgetIndexByKey = restoredIndexes;
+    m_hasSeededInitialWidgets = true;
+    endResetModel();
 }
 
 QVariantList DashboardMetricsModel::availableDevices() const
@@ -175,6 +233,7 @@ bool DashboardMetricsModel::moveWidget(int from, int to)
     m_items.move(from, to);
     rebuildWidgetIndexes();
     endMoveRows();
+    emit widgetsStateChanged();
     return true;
 }
 
@@ -191,6 +250,7 @@ bool DashboardMetricsModel::setVariant(const QString &widgetId, const QString &v
     item.variant = variant;
     const QModelIndex modelIndex = this->index(index);
     emit dataChanged(modelIndex, modelIndex, { VariantRole });
+    emit widgetsStateChanged();
     return true;
 }
 
@@ -278,6 +338,7 @@ bool DashboardMetricsModel::insertWidget(const WidgetItem &item)
     m_items.push_back(item);
     m_widgetIndexByKey.insert(key, insertRow);
     endInsertRows();
+    emit widgetsStateChanged();
     return true;
 }
 
@@ -290,6 +351,7 @@ bool DashboardMetricsModel::removeWidgetAt(int index)
     m_items.removeAt(index);
     rebuildWidgetIndexes();
     endRemoveRows();
+    emit widgetsStateChanged();
     return true;
 }
 

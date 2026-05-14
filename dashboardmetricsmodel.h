@@ -5,6 +5,7 @@
 
 #include <QAbstractListModel>
 #include <QHash>
+#include <QJsonArray>
 #include <QVector>
 #include <QVariantList>
 
@@ -47,6 +48,8 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     Q_INVOKABLE QVariantMap get(int row) const;
+    QJsonArray toJson() const;
+    void restoreFromJson(const QJsonArray &widgets);
     Q_INVOKABLE QVariantList availableDevices() const;
     Q_INVOKABLE QVariantList availableMetricsForDevice(const QString &deviceId) const;
     Q_INVOKABLE bool addWidget(const QString &title,
@@ -62,6 +65,9 @@ public:
     Q_INVOKABLE bool updateWidget(const QString &title,
                                   Metrics::MetricId metricId,
                                   int value);
+
+signals:
+    void widgetsStateChanged();
 
 public slots:
     void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
