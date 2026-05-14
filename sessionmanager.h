@@ -31,6 +31,10 @@ public:
     Q_INVOKABLE QStringList sessionIds() const;
     Q_INVOKABLE QStringList connectedSessionIds() const;
     Q_INVOKABLE void setDeviceAlias(const QString &sessionId, const QString &alias);
+    Q_INVOKABLE void setSessionTarget(const QString &sessionId, const QString &target);
+    Q_INVOKABLE void saveSessionsState();
+    Q_INVOKABLE void restoreSessionsState();
+    Q_INVOKABLE void clearSavedSessionsState();
     Q_INVOKABLE QString deviceAlias(const QString &sessionId) const;
     Q_INVOKABLE DashboardMetricsModel *dashboardModelForSession(const QString &sessionId) const;
     QAbstractListModel *sessionsModel();
@@ -57,6 +61,8 @@ private:
     };
 
     SessionEntry *findSessionEntry(const QString &sessionId);
+    SessionEntry createSessionEntry(const Session &session);
+    bool hasSessionWithTarget(const QString &target) const;
 
     QMap<QString, SessionEntry> m_sessions;
     SessionListModel m_sessionsModel;

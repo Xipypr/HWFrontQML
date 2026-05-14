@@ -32,6 +32,9 @@ Page {
             width: listView.width
             height: implicitHeight
             sessionId: model.sessionId
+            target: model.target
+            connectedDeviceName: model.displayName
+            connectionInitialized: model.hasDevice ? 1 : 0
             deviceAlias: model.alias
             sessionState: model.state
             onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
@@ -42,7 +45,10 @@ Page {
         model: sessionManager.sessionsModel
     }
 
-    Component.onCompleted: addDevice()
+    Component.onCompleted: {
+        if (sessionManager.sessionsModel.rowCount() === 0)
+            addDevice()
+    }
 
     function addDevice()
     {

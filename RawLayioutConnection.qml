@@ -11,6 +11,7 @@ Item {
     property bool compactMode: width < 560
     property string connectedDeviceName: ""
     property string deviceAlias: ""
+    property string target: ""
 
     property bool awaitingDeviceCreation: false
     property string sessionId: ""
@@ -62,6 +63,7 @@ Item {
                 connected: root.connectionInitialized === 1
                 deviceName: root.deviceAlias.length > 0 ? root.deviceAlias : root.connectedDeviceName
                 sessionState: root.sessionState
+                inputText: root.target
                 onDeviceLabelClicked: {
                     if (root.hasValidSessionId(root.sessionId))
                         root.sessionSelected(root.sessionId)
@@ -92,6 +94,7 @@ Item {
                     if (!root.hasValidSessionId(root.sessionId)) {
                         root.sessionId = sessionManager.createSession(hostInfo.inputText)
                     }
+                    sessionManager.setSessionTarget(root.sessionId, hostInfo.inputText)
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
                     if (root.hasValidSessionId(root.sessionId)) {
