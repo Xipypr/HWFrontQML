@@ -4,7 +4,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QMetaEnum>
 #include <QSettings>
 #include <QSortFilterProxyModel>
 
@@ -24,30 +23,6 @@ protected:
 
 namespace {
 constexpr auto SavedSessionsKey = "sessions/state";
-
-SessionState sessionStateFromString(const QString &stateName)
-{
-    const QMetaEnum enumMeta = QMetaEnum::fromType<SessionState>();
-    bool ok = false;
-    const int value = enumMeta.keyToValue(stateName.toLatin1().constData(), &ok);
-    return ok ? static_cast<SessionState>(value) : SessionState::IDLE;
-}
-
-SessionState restoredSessionState(SessionState savedState)
-{
-    switch (savedState) {
-    case SessionState::CONNECTED:
-    case SessionState::CONNECTING:
-    case SessionState::RECONNECTING:
-        return SessionState::DISCONNECTED;
-    case SessionState::IDLE:
-    case SessionState::ERROR:
-    case SessionState::DISCONNECTED:
-        return savedState;
-    }
-
-    return SessionState::IDLE;
-}
 }
 
 SessionManager::SessionManager(QObject *parent)
@@ -219,7 +194,6 @@ void SessionManager::saveSessionsState()
         sessionObject[QStringLiteral("alias")] = entry.session.alias;
         sessionObject[QStringLiteral("displayName")] = entry.session.displayName;
         sessionObject[QStringLiteral("hasDevice")] = entry.session.hasDevice;
-        sessionObject[QStringLiteral("state")] = SessionStateNs::toString(entry.session.state);
         if (entry.dashboardModel) {
             sessionObject[QStringLiteral("widgets")] = entry.dashboardModel->toJson();
         }
@@ -264,7 +238,6 @@ void SessionManager::restoreSessionsState()
         session.alias = sessionObject.value(QStringLiteral("alias")).toString();
         session.displayName = sessionObject.value(QStringLiteral("displayName")).toString();
         session.hasDevice = sessionObject.value(QStringLiteral("hasDevice")).toBool(false);
-        session.state = restoredSessionState(sessionStateFromString(sessionObject.value(QStringLiteral("state")).toString()));
 
         SessionEntry entry = createSessionEntry(session);
         const QJsonValue widgetsValue = sessionObject.value(QStringLiteral("widgets"));
@@ -304,7 +277,6 @@ SessionManager::SessionEntry SessionManager::createSessionEntry(const Session &s
         entry->session.state = state;
         m_sessionsModel.setSessionState(sessionId, state);
         emit sessionStateChanged(sessionId, state);
-        saveSessionsState();
     });
 
     connect(core, &Core::deviceReady, this, [this, sessionId = session.sessionId](DesktopDevice *deviceRef) {
