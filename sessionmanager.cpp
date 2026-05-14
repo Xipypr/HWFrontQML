@@ -23,6 +23,8 @@ protected:
 
 namespace {
 constexpr auto SavedSessionsKey = "sessions/state";
+constexpr auto PersistSessionStateKey = "app/persistSessionState";
+constexpr bool DefaultPersistSessionState = true;
 }
 
 SessionManager::SessionManager(QObject *parent)
@@ -186,6 +188,10 @@ QAbstractItemModel *SessionManager::connectedSessionsModel()
 
 void SessionManager::saveSessionsState()
 {
+    if (!persistSessionState()) {
+        return;
+    }
+
     QJsonArray sessionsArray;
     for (const SessionEntry &entry : m_sessions) {
         QJsonObject sessionObject;
@@ -206,6 +212,10 @@ void SessionManager::saveSessionsState()
 
 void SessionManager::restoreSessionsState()
 {
+    if (!persistSessionState()) {
+        return;
+    }
+
     const QString savedState = QSettings().value(QString::fromLatin1(SavedSessionsKey)).toString();
     if (savedState.isEmpty()) {
         return;
@@ -263,6 +273,29 @@ void SessionManager::clearSavedSessionsState()
 {
     QSettings settings;
     settings.remove(QString::fromLatin1(SavedSessionsKey));
+}
+
+bool SessionManager::persistSessionState() const
+{
+    return QSettings().value(QString::fromLatin1(PersistSessionStateKey), DefaultPersistSessionState).toBool();
+}
+
+void SessionManager::setPersistSessionState(bool enabled)
+{
+    const bool wasEnabled = persistSessionState();
+
+    QSettings settings;
+    settings.setValue(QString::fromLatin1(PersistSessionStateKey), enabled);
+
+    if (!enabled) {
+        settings.remove(QString::fromLatin1(SavedSessionsKey));
+    } else if (!wasEnabled) {
+        saveSessionsState();
+    }
+
+    if (wasEnabled != enabled) {
+        emit persistSessionStateChanged();
+    }
 }
 
 SessionManager::SessionEntry SessionManager::createSessionEntry(const Session &session)

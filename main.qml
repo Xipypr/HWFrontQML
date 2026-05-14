@@ -20,6 +20,7 @@ ApplicationWindow {
 
         PageAuthForm {
             id: pageAuth
+            onSettingsRequested: settingsDialog.open()
             onSessionSelected: (sessionId) => swipeToSessionPage(sessionId)
         }
 
@@ -35,6 +36,11 @@ ApplicationWindow {
                 onHomeRequested: root.goToStartPage()
             }
         }
+    }
+
+    SettingsDialog {
+        id: settingsDialog
+        parent: Overlay.overlay
     }
 
     function swipeToSessionPage(sessionId) {

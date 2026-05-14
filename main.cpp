@@ -26,7 +26,9 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     SessionManager sessionManager;
-    sessionManager.restoreSessionsState();
+    if (sessionManager.persistSessionState()) {
+        sessionManager.restoreSessionsState();
+    }
     Device device;
     DesktopDevice desktopDevice;
     Ram ram;

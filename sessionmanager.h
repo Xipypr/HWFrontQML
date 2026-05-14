@@ -20,6 +20,7 @@ class SessionManager : public QObject
     Q_PROPERTY(QStringList connectedSessionIds READ connectedSessionIds NOTIFY connectedSessionIdsChanged)
     Q_PROPERTY(QAbstractListModel *sessionsModel READ sessionsModel NOTIFY sessionsModelChanged)
     Q_PROPERTY(QAbstractItemModel *connectedSessionsModel READ connectedSessionsModel NOTIFY connectedSessionsModelChanged)
+    Q_PROPERTY(bool persistSessionState READ persistSessionState WRITE setPersistSessionState NOTIFY persistSessionStateChanged)
 
 public:
     explicit SessionManager(QObject *parent = nullptr);
@@ -35,6 +36,8 @@ public:
     Q_INVOKABLE void saveSessionsState();
     Q_INVOKABLE void restoreSessionsState();
     Q_INVOKABLE void clearSavedSessionsState();
+    Q_INVOKABLE bool persistSessionState() const;
+    Q_INVOKABLE void setPersistSessionState(bool enabled);
     Q_INVOKABLE QString deviceAlias(const QString &sessionId) const;
     Q_INVOKABLE DashboardMetricsModel *dashboardModelForSession(const QString &sessionId) const;
     QAbstractListModel *sessionsModel();
@@ -51,6 +54,7 @@ signals:
     void sessionStateChanged(const QString &sessionId, SessionState state);
     void deviceReady(const QString &sessionId, DesktopDevice *deviceRef);
     void sessionAliasChanged(const QString &sessionId, const QString &alias);
+    void persistSessionStateChanged();
 
 private:
     struct SessionEntry {
