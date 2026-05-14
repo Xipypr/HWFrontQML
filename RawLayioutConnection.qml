@@ -94,6 +94,7 @@ Item {
                     if (!root.hasValidSessionId(root.sessionId)) {
                         root.sessionId = sessionManager.createSession(hostInfo.inputText)
                     }
+                    //TODO FIX Here, need to remove here calling to core
                     sessionManager.setSessionTarget(root.sessionId, hostInfo.inputText)
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
