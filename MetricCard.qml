@@ -7,6 +7,7 @@ Rectangle {
 
     property string title: "N/A"
     property int value: 0
+    property string unit: ""
     // segments | ring | linear | arc180
     property string variant: "segments"
     signal variantSelected(string mode)
@@ -110,7 +111,7 @@ Rectangle {
         }
 
         Text {
-            text: card.safeValue + "%"
+            text: card.safeValue + card.unit
             visible: card.variant !== "arc180" && card.variant !== "ring"
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
@@ -274,7 +275,7 @@ Rectangle {
 
             Text {
                 anchors.centerIn: parent
-                text: card.safeValue + "%"
+                text: card.safeValue + card.unit
                 color: "#F8FAFC"
                 font.pixelSize: 24
                 font.bold: true
@@ -347,7 +348,7 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.verticalCenterOffset: 28
-                text: card.safeValue + "%"
+                text: card.safeValue + card.unit
                 color: "#F8FAFC"
                 font.pixelSize: 24
                 font.bold: true

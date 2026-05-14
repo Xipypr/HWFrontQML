@@ -29,6 +29,7 @@ ApplicationWindow {
             delegate: PageDevicesInfo {
                 id: devicePage
                 sessionId: model.sessionId
+                destop_name: model.displayName
                 deviceAlias: model.alias
                 sessionState: model.state
                 onHomeRequested: root.goToStartPage()

@@ -4,10 +4,14 @@
 #include "core.h"
 #include "session.h"
 #include "sessionlistmodel.h"
+#include "dashboardmetricsmodel.h"
+#include "metricsservice.h"
 
 #include <QMap>
 #include <QObject>
 #include <QStringList>
+
+class DesktopDevice;
 
 class SessionManager : public QObject
 {
@@ -28,6 +32,7 @@ public:
     Q_INVOKABLE QStringList connectedSessionIds() const;
     Q_INVOKABLE void setDeviceAlias(const QString &sessionId, const QString &alias);
     Q_INVOKABLE QString deviceAlias(const QString &sessionId) const;
+    Q_INVOKABLE DashboardMetricsModel *dashboardModelForSession(const QString &sessionId) const;
     QAbstractListModel *sessionsModel();
     Q_INVOKABLE int indexOfConnectedSession(const QString &sessionId) const;
     QAbstractItemModel *connectedSessionsModel();
@@ -40,13 +45,15 @@ signals:
     void sessionCreated(const QString &sessionId);
     void sessionRemoved(const QString &sessionId);
     void sessionStateChanged(const QString &sessionId, SessionState state);
-    void deviceReady(const QString &sessionId, QObject *deviceRef);
+    void deviceReady(const QString &sessionId, DesktopDevice *deviceRef);
     void sessionAliasChanged(const QString &sessionId, const QString &alias);
 
 private:
     struct SessionEntry {
         Session session;
         Core *core = nullptr;
+        DashboardMetricsModel *dashboardModel = nullptr;
+        MetricsService *metricsService = nullptr;
     };
 
     SessionEntry *findSessionEntry(const QString &sessionId);

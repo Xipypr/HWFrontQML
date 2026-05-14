@@ -5,8 +5,7 @@ import QtQuick.Layouts 1.3
 Dialog {
     id: root
 
-    property var widgetsModel: null
-    signal applyLayout(var widgets)
+    required property var widgetsModel
 
     parent: Overlay.overlay
     x: (parent.width - width) / 2
@@ -17,70 +16,62 @@ Dialog {
     padding: 20
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-    readonly property var widgetTemplates: [
-        { label: "CPU", key: "cpu", title: "CPU", variant: "segments" },
-        { label: "RAM", key: "ram", title: "RAM", variant: "ring" },
-        { label: "GPU", key: "gpu", title: "GPU", variant: "linear" },
-        { label: "HDD (180°)", key: "hdd", title: "HDD", variant: "arc180" },
-        { label: "Новый виджет", key: "custom", title: "Новый виджет", variant: "segments" }
-    ]
+    property var deviceOptions: []
+    property var metricOptions: []
+    property string addError: ""
 
-    property int selectedTemplateIndex: 0
-    property int tempWidgetId: -1
+    function selectedDeviceId() {
+        if (deviceCombo.currentIndex < 0 || deviceCombo.currentIndex >= deviceOptions.length)
+            return ""
 
-    ListModel {
-        id: editableModel
+        return deviceOptions[deviceCombo.currentIndex].deviceId || ""
     }
 
-    function syncFromSource() {
-        tempWidgetId = -1
-        editableModel.clear()
-        if (!root.widgetsModel)
-            return
+    function selectedMetricId() {
+        if (metricCombo.currentIndex < 0 || metricCombo.currentIndex >= metricOptions.length)
+            return ""
 
-        for (let i = 0; i < root.widgetsModel.count; ++i) {
-            const item = root.widgetsModel.get(i)
-            editableModel.append({
-                uid: item.uid,
-                key: item.key,
-                title: item.title,
-                value: item.value,
-                variant: item.variant
-            })
-        }
+        return metricOptions[metricCombo.currentIndex].metricId || ""
     }
 
-    function exportWidgets() {
-        const widgets = []
-        for (let i = 0; i < editableModel.count; ++i) {
-            widgets.push(editableModel.get(i))
-        }
-        return widgets
-    }
+    function refreshDevices() {
+        const currentDeviceId = selectedDeviceId()
+        deviceOptions = widgetsModel.availableDevices()
+        deviceCombo.currentIndex = -1
 
-    function nextCustomWidgetTitle() {
-        let maxNumber = 0
-        for (let i = 0; i < editableModel.count; ++i) {
-            const item = editableModel.get(i)
-            if (item.key !== "custom")
-                continue
-
-            const match = /^Новый виджет\s+(\d+)$/.exec(item.title)
-            if (match && match.length > 1) {
-                const number = parseInt(match[1], 10)
-                if (!isNaN(number))
-                    maxNumber = Math.max(maxNumber, number)
+        for (let i = 0; i < deviceOptions.length; ++i) {
+            if (deviceOptions[i].deviceId === currentDeviceId) {
+                deviceCombo.currentIndex = i
+                break
             }
         }
-        return "Новый виджет " + (maxNumber + 1)
+
+        if (deviceCombo.currentIndex < 0 && deviceOptions.length > 0)
+            deviceCombo.currentIndex = 0
+
+        refreshMetrics()
     }
 
-    function nextTempWidgetUid() {
-        tempWidgetId -= 1
-        return tempWidgetId
+    function refreshMetrics() {
+        const currentMetricId = selectedMetricId()
+        metricOptions = widgetsModel.availableMetricsForDevice(selectedDeviceId())
+        metricCombo.currentIndex = -1
+
+        for (let i = 0; i < metricOptions.length; ++i) {
+            if (metricOptions[i].metricId === currentMetricId) {
+                metricCombo.currentIndex = i
+                break
+            }
+        }
+
+        if (metricCombo.currentIndex < 0 && metricOptions.length > 0)
+            metricCombo.currentIndex = 0
     }
 
-    onOpened: syncFromSource()
+    onOpened: {
+        addError = ""
+        refreshDevices()
+    }
 
     contentItem: ColumnLayout {
         spacing: 12
@@ -100,11 +91,11 @@ Dialog {
             Layout.preferredHeight: 260
             clip: true
             spacing: 8
-            model: editableModel
+            model: root.widgetsModel
 
             delegate: Rectangle {
                 width: widgetsList.width
-                height: 48
+                height: 52
                 radius: 8
                 color: "#1E293B"
                 border.width: 1
@@ -115,28 +106,41 @@ Dialog {
                     anchors.margins: 8
                     spacing: 8
 
-                    Label {
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        text: title
-                        color: "#E2E8F0"
-                        elide: Text.ElideRight
+                        spacing: 2
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: model.title
+                            color: "#E2E8F0"
+                            elide: Text.ElideRight
+                        }
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: model.metricId + (model.unit ? " · " + model.unit : "")
+                            color: "#94A3B8"
+                            font.pixelSize: 11
+                            elide: Text.ElideRight
+                        }
                     }
 
                     ToolButton {
                         text: "↑"
                         enabled: index > 0
-                        onClicked: editableModel.move(index, index - 1, 1)
+                        onClicked: root.widgetsModel.moveWidget(index, index - 1)
                     }
 
                     ToolButton {
                         text: "↓"
-                        enabled: index < editableModel.count - 1
-                        onClicked: editableModel.move(index, index + 1, 1)
+                        enabled: index < widgetsList.count - 1
+                        onClicked: root.widgetsModel.moveWidget(index, index + 1)
                     }
 
                     ToolButton {
                         text: "✕"
-                        onClicked: editableModel.remove(index, 1)
+                        onClicked: root.widgetsModel.removeWidget(model.widgetId)
                     }
                 }
             }
@@ -147,29 +151,49 @@ Dialog {
             spacing: 8
 
             ComboBox {
-                id: addWidgetCombo
+                id: deviceCombo
                 Layout.fillWidth: true
-                model: root.widgetTemplates
+                Layout.preferredWidth: 190
+                model: root.deviceOptions
                 textRole: "label"
-                onCurrentIndexChanged: root.selectedTemplateIndex = currentIndex
+                enabled: root.deviceOptions.length > 0
+                onCurrentIndexChanged: {
+                    root.addError = ""
+                    root.refreshMetrics()
+                }
+            }
+
+            ComboBox {
+                id: metricCombo
+                Layout.fillWidth: true
+                Layout.preferredWidth: 130
+                model: root.metricOptions
+                textRole: "label"
+                enabled: root.metricOptions.length > 0
+                onCurrentIndexChanged: root.addError = ""
             }
 
             Button {
                 text: "Добавить"
+                enabled: root.deviceOptions.length > 0 && root.metricOptions.length > 0
                 onClicked: {
-                    const item = root.widgetTemplates[root.selectedTemplateIndex];
-                    let title = item.title
-                    if (item.key === "custom")
-                        title = root.nextCustomWidgetTitle()
-                    editableModel.append({
-                        uid: root.nextTempWidgetUid(),
-                        key: item.key,
-                        title: title,
-                        value: 0,
-                        variant: item.variant
-                    })
+                    const deviceId = root.selectedDeviceId()
+                    const metricId = root.selectedMetricId()
+                    if (!root.widgetsModel.addWidgetForMetric(deviceId, metricId, "segments"))
+                        root.addError = "Метрика уже добавлена или недоступна."
+                    else
+                        root.addError = ""
                 }
             }
+        }
+
+        Label {
+            Layout.fillWidth: true
+            visible: root.addError.length > 0
+            text: root.addError
+            color: "#F87171"
+            wrapMode: Text.WordWrap
+            font.pixelSize: 12
         }
 
         RowLayout {
@@ -179,16 +203,8 @@ Dialog {
             Item { Layout.fillWidth: true }
 
             Button {
-                text: "Отмена"
+                text: "Закрыть"
                 onClicked: root.close()
-            }
-
-            Button {
-                text: "Принять"
-                onClicked: {
-                    root.applyLayout(root.exportWidgets())
-                    root.close()
-                }
             }
         }
     }
