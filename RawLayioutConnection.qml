@@ -6,7 +6,7 @@ import SessionState 1.0
 Item {
     id: root
 
-    property int connectionInitialized: 0
+    property bool connectionInitialized: false
     property int horizontalMargin: 10
     property bool compactMode: width < 560
     property string connectedDeviceName: ""
@@ -39,7 +39,7 @@ Item {
         spacing: 8
 
         Label {
-            visible: root.connectionInitialized !== 1
+            visible: !root.connectionInitialized
             text: "Введите IP-адрес"
             Layout.fillWidth: root.compactMode
             Layout.preferredWidth: controlsLayout.implicitWidth
@@ -60,7 +60,7 @@ Item {
                 Layout.fillWidth: root.compactMode
                 Layout.preferredWidth: 240
                 Layout.maximumWidth: root.compactMode ? Number.POSITIVE_INFINITY : 240
-                connected: root.connectionInitialized === 1
+                connected: root.connectionInitialized
                 deviceName: root.deviceAlias.length > 0 ? root.deviceAlias : root.connectedDeviceName
                 sessionState: root.sessionState
                 inputText: root.target
@@ -143,8 +143,8 @@ Item {
                 text: "Delete Device"
                 Layout.fillWidth: root.compactMode
                 onClicked: {
-                    const removeConnectedDevicePage = connectionInitialized === 1
-                    connectionInitialized = 0
+                    const removeConnectedDevicePage = connectionInitialized
+                    connectionInitialized = false
                     awaitingDeviceCreation = false
                     root.connectedDeviceName = ""
                     if (root.hasValidSessionId(root.sessionId))
@@ -179,7 +179,7 @@ Item {
                 awaitingDeviceCreation = false
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
-                connectionInitialized = 1
+                connectionInitialized = true
                 root.connectedDeviceName = deviceRef.name
                 if (sessionManager.sessionsModel.rowCount() === 1)
                     root.sessionSelected(sessionId)

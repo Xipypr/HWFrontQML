@@ -34,7 +34,7 @@ Page {
             sessionId: model.sessionId
             target: model.target
             connectedDeviceName: model.displayName
-            connectionInitialized: model.hasDevice ? 1 : 0
+            connectionInitialized: model.hasDevice
             deviceAlias: model.alias
             sessionState: model.state
             onRemoveThisObject: (removeConnectedDevicePage) => removeDevice(index, removeConnectedDevicePage)
