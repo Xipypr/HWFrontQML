@@ -99,6 +99,8 @@ Page {
             model: widgetModel
             cellWidth: width / columnCount
             cellHeight: 172
+            topMargin: 6
+            bottomMargin: 6
             boundsBehavior: Flickable.DragAndOvershootBounds
             ScrollBar.vertical: ScrollBar { }
 
