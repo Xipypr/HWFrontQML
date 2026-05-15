@@ -6,7 +6,7 @@
 namespace {
 const QList<Metrics::MetricId> &metricDefinitions(Device *deviceObject)
 {
-    static const QList<Metrics::MetricId> defaultDefinitions = {
+    static const QList<Metrics::MetricId> definitions = {
         Metrics::MetricId::Loading,
         Metrics::MetricId::Temperature,
         Metrics::MetricId::Frequency
@@ -19,7 +19,7 @@ const QList<Metrics::MetricId> &metricDefinitions(Device *deviceObject)
     if (deviceObject && deviceObject->type() == Device::HARD_DISK)
         return hardDiskDefinitions;
 
-    return defaultDefinitions;
+    return definitions;
 }
 
 QString metricPropertyName(Device *deviceObject, Metrics::MetricId metricId)
