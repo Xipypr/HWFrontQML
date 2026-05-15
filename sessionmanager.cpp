@@ -1,6 +1,8 @@
 #include "devicebuilder.h"
 #include "sessionmanager.h"
 
+#include "core.h"
+
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -97,11 +99,6 @@ void SessionManager::removeSession(const QString &sessionId)
     entry.core->deleteLater();
 }
 
-QObject *SessionManager::coreForSession(const QString &sessionId) const
-{
-    return m_sessions.value(sessionId, SessionEntry{}).core;
-}
-
 QStringList SessionManager::sessionIds() const
 {
     return m_sessions.keys();
@@ -129,16 +126,32 @@ void SessionManager::setDeviceAlias(const QString &sessionId, const QString &ali
 }
 
 
-void SessionManager::setSessionTarget(const QString &sessionId, const QString &target)
+bool SessionManager::startSessionConnection(const QString &sessionId, const QString &target)
 {
     SessionEntry *entry = findSessionEntry(sessionId);
-    if (!entry || entry->session.target == target) {
-        return;
+    if (!entry || !entry->core) {
+        return false;
     }
 
-    entry->session.target = target;
-    m_sessionsModel.upsertSession(entry->session);
-    saveSessionsState();
+    if (entry->session.target != target) {
+        entry->session.target = target;
+        m_sessionsModel.upsertSession(entry->session);
+        saveSessionsState();
+    }
+
+    entry->core->onStartConnection(target);
+    return true;
+}
+
+bool SessionManager::closeSessionConnection(const QString &sessionId)
+{
+    SessionEntry *entry = findSessionEntry(sessionId);
+    if (!entry || !entry->core) {
+        return false;
+    }
+
+    entry->core->onCloseConnection();
+    return true;
 }
 
 QString SessionManager::deviceAlias(const QString &sessionId) const

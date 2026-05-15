@@ -94,15 +94,12 @@ Item {
                     if (!root.hasValidSessionId(root.sessionId)) {
                         root.sessionId = sessionManager.createSession(hostInfo.inputText)
                     }
-                    //TODO FIX Here, need to remove here calling to core
-                    sessionManager.setSessionTarget(root.sessionId, hostInfo.inputText)
+
+                    if (!sessionManager.startSessionConnection(root.sessionId, hostInfo.inputText))
+                        return
+
                     awaitingDeviceCreation = true
                     root.connectionStateChanged(true)
-                    if (root.hasValidSessionId(root.sessionId)) {
-                        const sessionCore = sessionManager.coreForSession(root.sessionId)
-                        if (sessionCore)
-                            sessionCore.onStartConnection(hostInfo.inputText)
-                    }
                     connectButton.text = "Stop"
                     connectingIndicator.running = true
                 }
@@ -112,9 +109,7 @@ Item {
                     root.connectionStateChanged(false)
                     connectButton.text = "Connect Device"
                     connectingIndicator.running = false
-                    const sessionCore = sessionManager.coreForSession(root.sessionId)
-                    if (sessionCore)
-                        sessionCore.onCloseConnection()
+                    sessionManager.closeSessionConnection(root.sessionId)
                 }
 
             }

@@ -1,7 +1,6 @@
 #ifndef SESSIONMANAGER_H
 #define SESSIONMANAGER_H
 
-#include "core.h"
 #include "session.h"
 #include "sessionlistmodel.h"
 #include "dashboardmetricsmodel.h"
@@ -11,6 +10,7 @@
 #include <QObject>
 #include <QStringList>
 
+class Core;
 class DesktopDevice;
 
 class SessionManager : public QObject
@@ -28,11 +28,11 @@ public:
 
     Q_INVOKABLE QString createSession(const QString &target);
     Q_INVOKABLE void removeSession(const QString &sessionId);
-    Q_INVOKABLE QObject *coreForSession(const QString &sessionId) const;
     Q_INVOKABLE QStringList sessionIds() const;
     Q_INVOKABLE QStringList connectedSessionIds() const;
     Q_INVOKABLE void setDeviceAlias(const QString &sessionId, const QString &alias);
-    Q_INVOKABLE void setSessionTarget(const QString &sessionId, const QString &target);
+    Q_INVOKABLE bool startSessionConnection(const QString &sessionId, const QString &target);
+    Q_INVOKABLE bool closeSessionConnection(const QString &sessionId);
     Q_INVOKABLE void saveSessionsState();
     Q_INVOKABLE void restoreSessionsState();
     Q_INVOKABLE void clearSavedSessionsState();
