@@ -87,28 +87,30 @@ Page {
         anchors.margins: 16
         spacing: 12
 
-        GridLayout {
+        GridView {
+            id: gridView
+
             Layout.fillWidth: true
             Layout.fillHeight: true
-            columns: width > 900 ? 3 : width > 580 ? 2 : 1
-            columnSpacing: 12
-            rowSpacing: 12
 
-            Repeater {
-                model: widgetModel
+            readonly property int columnCount: width > 900 ? 3 : width > 580 ? 2 : 1
 
-                delegate: MetricCard {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: false
-                    Layout.preferredHeight: 160
-                    Layout.minimumHeight: 150
-                    title: model.title
-                    value: model.value
-                    unit: model.unit
-                    variant: model.variant
-                    onVariantSelected: function(mode) {
-                        widgetModel.setVariant(model.widgetId, mode)
-                    }
+            clip: true
+            model: widgetModel
+            cellWidth: width / columnCount
+            cellHeight: 172
+            boundsBehavior: Flickable.DragAndOvershootBounds
+            ScrollBar.vertical: ScrollBar { }
+
+            delegate: MetricCard {
+                width: gridView.cellWidth - 12
+                height: 160
+                title: model.title
+                value: model.value
+                unit: model.unit
+                variant: model.variant
+                onVariantSelected: function(mode) {
+                    widgetModel.setVariant(model.widgetId, mode)
                 }
             }
         }
