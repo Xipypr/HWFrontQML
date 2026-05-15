@@ -11,7 +11,6 @@ Page {
     property string destop_name: ""
     property string deviceAlias: ""
     property int sessionState: SessionState.IDLE
-    readonly property bool deviceAvailable: sessionState === SessionState.CONNECTED
 
     signal homeRequested()
 
@@ -89,7 +88,7 @@ Page {
 
         GridView {
             id: gridView
-            visible: root.deviceAvailable
+            visible: root.sessionState === SessionState.CONNECTED
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -120,7 +119,7 @@ Page {
         }
 
         Label {
-            visible: !root.deviceAvailable
+            visible: root.sessionState !== SessionState.CONNECTED
             Layout.fillWidth: true
             Layout.fillHeight: true
             text: qsTr("Устройство недоступно")
