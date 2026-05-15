@@ -201,7 +201,15 @@ void SessionManager::saveSessionsState()
         sessionObject[QStringLiteral("displayName")] = entry.session.displayName;
         sessionObject[QStringLiteral("hasDevice")] = entry.session.hasDevice;
         if (entry.dashboardModel) {
-            sessionObject[QStringLiteral("widgets")] = entry.dashboardModel->toJson();
+            const QJsonArray widgets = entry.dashboardModel->toJson();
+            // deviceReady can be emitted before MetricsService has seeded the default
+            // widgets. Do not overwrite the last valid persisted state with
+            // { hasDevice: true, widgets: [] } while the dashboard model is still
+            // waiting for its first metrics snapshot.
+            if (entry.session.hasDevice && widgets.isEmpty() && !entry.dashboardModel->hasSeededInitialWidgets()) {
+                return;
+            }
+            sessionObject[QStringLiteral("widgets")] = widgets;
         }
         sessionsArray.append(sessionObject);
     }
@@ -289,8 +297,6 @@ void SessionManager::setPersistSessionState(bool enabled)
 
     if (!enabled) {
         settings.remove(QString::fromLatin1(SavedSessionsKey));
-    } else if (!wasEnabled) {
-        saveSessionsState();
     }
 
     if (wasEnabled != enabled) {
