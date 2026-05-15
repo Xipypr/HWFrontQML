@@ -12,7 +12,6 @@ Page {
     property string deviceAlias: ""
     property int sessionState: SessionState.IDLE
 
-
     signal homeRequested()
 
     property var widgetModel: sessionManager.dashboardModelForSession(root.sessionId)
@@ -89,7 +88,7 @@ Page {
 
         GridView {
             id: gridView
-
+            visible: root.sessionState === SessionState.CONNECTED
             Layout.fillWidth: true
             Layout.fillHeight: true
 
@@ -117,6 +116,19 @@ Page {
                     widgetModel.setVariant(model.widgetId, mode)
                 }
             }
+        }
+
+        Label {
+            visible: root.sessionState !== SessionState.CONNECTED
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            text: qsTr("Устройство недоступно")
+            color: "#CBD5E1"
+            font.pixelSize: 18
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.WordWrap
         }
 
     }
