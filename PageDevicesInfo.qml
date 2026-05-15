@@ -94,13 +94,15 @@ Page {
             Layout.fillHeight: true
 
             readonly property int columnCount: width > 900 ? 3 : width > 580 ? 2 : 1
+            readonly property int rowCount: Math.ceil(count / columnCount)
+            readonly property int verticalMargin: Math.max(6, Math.floor((height - rowCount * cellHeight) / 2))
 
             clip: true
             model: widgetModel
             cellWidth: width / columnCount
             cellHeight: 172
-            topMargin: 6
-            bottomMargin: 6
+            topMargin: verticalMargin
+            bottomMargin: verticalMargin
             boundsBehavior: Flickable.DragAndOvershootBounds
             ScrollBar.vertical: ScrollBar { }
 
