@@ -4,15 +4,33 @@
 #include <QHash>
 
 namespace {
-const QList<Metrics::MetricId> &metricDefinitions()
+const QList<Metrics::MetricId> &metricDefinitions(Device *deviceObject)
 {
-    static const QList<Metrics::MetricId> definitions = {
+    static const QList<Metrics::MetricId> defaultDefinitions = {
         Metrics::MetricId::Loading,
         Metrics::MetricId::Temperature,
         Metrics::MetricId::Frequency
     };
 
-    return definitions;
+    static const QList<Metrics::MetricId> hardDiskDefinitions = {
+        Metrics::MetricId::Loading
+    };
+
+    if (deviceObject && deviceObject->type() == Device::HARD_DISK)
+        return hardDiskDefinitions;
+
+    return defaultDefinitions;
+}
+
+QString metricPropertyName(Device *deviceObject, Metrics::MetricId metricId)
+{
+    if (!deviceObject || metricId == Metrics::MetricId::Unknown)
+        return {};
+
+    if (deviceObject->type() == Device::HARD_DISK && metricId == Metrics::MetricId::Loading)
+        return QStringLiteral("load");
+
+    return Metrics::metricIdToString(metricId);
 }
 }
 
@@ -54,7 +72,7 @@ void MetricsService::discoverMetrics(DesktopDevice *desktopDevice)
         if (deviceId.isEmpty())
             continue;
 
-        for (Metrics::MetricId metricId : metricDefinitions()) {
+        for (Metrics::MetricId metricId : metricDefinitions(deviceObject)) {
             if (!hasMetric(deviceObject, metricId))
                 continue;
 
@@ -127,8 +145,8 @@ bool MetricsService::hasMetric(Device *deviceObject, Metrics::MetricId metricId)
     if (!deviceObject)
         return false;
 
-    const QString metricName = Metrics::metricIdToString(metricId);
-    return metricId != Metrics::MetricId::Unknown
+    const QString metricName = metricPropertyName(deviceObject, metricId);
+    return !metricName.isEmpty()
            && deviceObject->property(metricName.toLatin1().constData()).isValid();
 }
 
@@ -140,6 +158,9 @@ QVariant MetricsService::metricValue(Device *deviceObject, Metrics::MetricId met
     if (metricId == Metrics::MetricId::Unknown)
         return {};
 
-    const QString metricName = Metrics::metricIdToString(metricId);
+    const QString metricName = metricPropertyName(deviceObject, metricId);
+    if (metricName.isEmpty())
+        return {};
+
     return deviceObject->property(metricName.toLatin1().constData());
 }
