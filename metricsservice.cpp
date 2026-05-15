@@ -32,7 +32,7 @@ QString metricPropertyName(Device *deviceObject, Metrics::MetricId metricId)
 
     if ((deviceObject->type() == Device::PROCESSOR || deviceObject->type() == Device::VIDEO_CARD)
             && metricId == Metrics::MetricId::Temperature) {
-        return QStringLiteral("teperature");
+        return QStringLiteral("temperature");
     }
 
     return Metrics::metricIdToString(metricId);
