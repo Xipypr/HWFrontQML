@@ -93,6 +93,11 @@ QJsonArray DashboardMetricsModel::toJson() const
     return widgetsArray;
 }
 
+bool DashboardMetricsModel::hasSeededInitialWidgets() const
+{
+    return m_hasSeededInitialWidgets;
+}
+
 void DashboardMetricsModel::restoreFromJson(const QJsonArray &widgets)
 {
     QVector<WidgetItem> restoredItems;
@@ -129,7 +134,7 @@ void DashboardMetricsModel::restoreFromJson(const QJsonArray &widgets)
     beginResetModel();
     m_items = restoredItems;
     m_widgetIndexByKey = restoredIndexes;
-    m_hasSeededInitialWidgets = true;
+    m_hasSeededInitialWidgets = !m_items.isEmpty();
     endResetModel();
 }
 

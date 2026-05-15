@@ -23,6 +23,8 @@ protected:
 
 namespace {
 constexpr auto SavedSessionsKey = "sessions/state";
+constexpr auto PersistSessionStateKey = "app/persistSessionState";
+constexpr bool DefaultPersistSessionState = true;
 }
 
 SessionManager::SessionManager(QObject *parent)
@@ -186,6 +188,10 @@ QAbstractItemModel *SessionManager::connectedSessionsModel()
 
 void SessionManager::saveSessionsState()
 {
+    if (!persistSessionState()) {
+        return;
+    }
+
     QJsonArray sessionsArray;
     for (const SessionEntry &entry : m_sessions) {
         QJsonObject sessionObject;
@@ -195,7 +201,15 @@ void SessionManager::saveSessionsState()
         sessionObject[QStringLiteral("displayName")] = entry.session.displayName;
         sessionObject[QStringLiteral("hasDevice")] = entry.session.hasDevice;
         if (entry.dashboardModel) {
-            sessionObject[QStringLiteral("widgets")] = entry.dashboardModel->toJson();
+            const QJsonArray widgets = entry.dashboardModel->toJson();
+            // deviceReady can be emitted before MetricsService has seeded the default
+            // widgets. Do not overwrite the last valid persisted state with
+            // { hasDevice: true, widgets: [] } while the dashboard model is still
+            // waiting for its first metrics snapshot.
+            if (entry.session.hasDevice && widgets.isEmpty() && !entry.dashboardModel->hasSeededInitialWidgets()) {
+                return;
+            }
+            sessionObject[QStringLiteral("widgets")] = widgets;
         }
         sessionsArray.append(sessionObject);
     }
@@ -206,6 +220,10 @@ void SessionManager::saveSessionsState()
 
 void SessionManager::restoreSessionsState()
 {
+    if (!persistSessionState()) {
+        return;
+    }
+
     const QString savedState = QSettings().value(QString::fromLatin1(SavedSessionsKey)).toString();
     if (savedState.isEmpty()) {
         return;
@@ -265,6 +283,27 @@ void SessionManager::clearSavedSessionsState()
     settings.remove(QString::fromLatin1(SavedSessionsKey));
 }
 
+bool SessionManager::persistSessionState() const
+{
+    return QSettings().value(QString::fromLatin1(PersistSessionStateKey), DefaultPersistSessionState).toBool();
+}
+
+void SessionManager::setPersistSessionState(bool enabled)
+{
+    const bool wasEnabled = persistSessionState();
+
+    QSettings settings;
+    settings.setValue(QString::fromLatin1(PersistSessionStateKey), enabled);
+
+    if (!enabled) {
+        settings.remove(QString::fromLatin1(SavedSessionsKey));
+    }
+
+    if (wasEnabled != enabled) {
+        emit persistSessionStateChanged();
+    }
+}
+
 SessionManager::SessionEntry SessionManager::createSessionEntry(const Session &session)
 {
     Core *core = new Core(this);
@@ -284,6 +323,7 @@ SessionManager::SessionEntry SessionManager::createSessionEntry(const Session &s
         if (!entry) {
             return;
         }
+
         entry->session.hasDevice = true;
         entry->session.displayName = deviceRef ? deviceRef->property("name").toString() : entry->session.displayName;
         m_sessionsModel.upsertSession(entry->session);
