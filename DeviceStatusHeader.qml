@@ -32,7 +32,8 @@ ToolBar {
         ToolButton {
             visible: root.showHomeButton
             id: homeButton
-            text: "⌂"
+            // text: "⌂"
+            icon: "qrc:/icon-home.png"
             Layout.preferredWidth: root.height - root.verticalPadding
             Layout.preferredHeight: root.height - root.verticalPadding
             Layout.alignment: Qt.AlignVCenter

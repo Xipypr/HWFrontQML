@@ -16,5 +16,6 @@
         <file>AliasInputDialog.qml</file>
         <file>StatusIndicator.qml</file>
         <file>SettingsDialog.qml</file>
+        <file>icon-home.png</file>
     </qresource>
 </RCC>
