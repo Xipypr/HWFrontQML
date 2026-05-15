@@ -12,19 +12,6 @@ Page {
     property string deviceAlias: ""
     property int sessionState: SessionState.IDLE
     readonly property bool deviceAvailable: sessionState === SessionState.CONNECTED
-    readonly property string unavailableDescription: {
-        switch (sessionState) {
-        case SessionState.CONNECTING:
-        case SessionState.RECONNECTING:
-            return qsTr("Подключение ещё не установлено. Данные виджетов появятся, когда устройство снова станет доступно.")
-        case SessionState.ERROR:
-            return qsTr("Проверьте устройство и подключение, затем попробуйте подключиться снова.")
-        case SessionState.IDLE:
-        case SessionState.DISCONNECTED:
-        default:
-            return qsTr("Устройство отключено или ещё не подключено. Подключите устройство, чтобы увидеть виджеты.")
-        }
-    }
 
     signal homeRequested()
 
@@ -132,54 +119,17 @@ Page {
             }
         }
 
-        Item {
+        Label {
             visible: !root.deviceAvailable
             Layout.fillWidth: true
             Layout.fillHeight: true
-
-            Rectangle {
-                anchors.centerIn: parent
-                width: Math.min(parent.width, 420)
-                height: implicitHeight
-                implicitHeight: unavailableContent.implicitHeight + 48
-                radius: 16
-                color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
-                border.width: 1
-                border.color: Qt.rgba(100 / 255, 116 / 255, 139 / 255, 0.55)
-
-                ColumnLayout {
-                    id: unavailableContent
-                    anchors.fill: parent
-                    anchors.margins: 24
-                    spacing: 12
-
-                    StatusIndicator {
-                        Layout.alignment: Qt.AlignHCenter
-                        sessionState: root.sessionState
-                        width: 14
-                        height: 14
-                    }
-
-                    Label {
-                        Layout.fillWidth: true
-                        text: qsTr("Устройство недоступно")
-                        color: "#F8FAFC"
-                        font.pixelSize: 20
-                        font.bold: true
-                        horizontalAlignment: Text.AlignHCenter
-                        wrapMode: Text.WordWrap
-                    }
-
-                    Label {
-                        Layout.fillWidth: true
-                        text: root.unavailableDescription
-                        color: "#CBD5E1"
-                        font.pixelSize: 14
-                        horizontalAlignment: Text.AlignHCenter
-                        wrapMode: Text.WordWrap
-                    }
-                }
-            }
+            text: qsTr("Устройство недоступно")
+            color: "#CBD5E1"
+            font.pixelSize: 18
+            font.bold: true
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.WordWrap
         }
 
     }
