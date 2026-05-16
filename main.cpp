@@ -2,6 +2,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 
+#include <QIcon>
 #include <QObject>
 
 //#include <hwconnector.h>
@@ -24,6 +25,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName(QStringLiteral("HWFrontQML"));
 
     QGuiApplication app(argc, argv);
+    app.setWindowIcon(QIcon(":/icons/app/icon_512.png"));
 
     SessionManager sessionManager;
     if (sessionManager.persistSessionState()) {

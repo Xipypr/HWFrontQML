@@ -10,6 +10,7 @@ Page {
 
     header: DeviceStatusHeader {
         width: root.width
+        headerIconSource: "qrc:/icons/menu.png"
         headerText: qsTr("Settings")
         showIndicator: false
         horizontalPadding: 12

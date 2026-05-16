@@ -11,6 +11,7 @@ ToolBar {
     property color backgroundColor: "#17233A"
     property color pressedBackgroundColor: "#223150"
     property bool showHomeButton: false
+    property string headerIconSource: ""
     signal clicked()
     signal homeClicked()
 
@@ -32,10 +33,9 @@ ToolBar {
         ToolButton {
             visible: root.showHomeButton
             id: homeButton
-            // text: "⌂"
-            icon: "qrc:/icon-home.png"
-            Layout.preferredWidth: root.height - root.verticalPadding
-            Layout.preferredHeight: root.height - root.verticalPadding
+            icon.source: "qrc:/icons/home.png"
+            Layout.preferredWidth: root.height - root.verticalPadding * 2
+            Layout.preferredHeight: root.height - root.verticalPadding * 2
             Layout.alignment: Qt.AlignVCenter
             font.pixelSize: 24
             onClicked: root.homeClicked()
@@ -45,13 +45,22 @@ ToolBar {
                 border.color: "#3A4B6B"
                 border.width: 1
             }
-            contentItem: Label {
-                text: homeButton.text
-                color: "#E2E8F0"
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-                font: homeButton.font
-            }
+        }
+
+        ToolButton {
+            id: headerIcon
+            visible: !root.showHomeButton
+            padding: 0
+            focusPolicy: Qt.NoFocus
+            icon.source: root.headerIconSource
+            icon.width: 24
+            icon.height: 24
+            icon.color: "#E2E8F0"
+            Layout.preferredWidth: 24
+            Layout.preferredHeight: 24
+            Layout.alignment: Qt.AlignVCenter
+            onClicked: root.clicked()
+            background: Item {}
         }
 
         Label {

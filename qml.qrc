@@ -16,6 +16,11 @@
         <file>AliasInputDialog.qml</file>
         <file>StatusIndicator.qml</file>
         <file>SettingsDialog.qml</file>
-        <file>icon-home.png</file>
+        <file>icons/arrow_down.png</file>
+        <file>icons/arrow_up.png</file>
+        <file>icons/delete.png</file>
+        <file>icons/home.png</file>
+        <file>icons/menu.png</file>
+        <file>icons/app/icon_512.png</file>
     </qresource>
 </RCC>

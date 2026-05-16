@@ -127,19 +127,25 @@ Dialog {
                     }
 
                     ToolButton {
-                        text: "↑"
+                        icon.source: "qrc:/icons/arrow_up.png"
+                        icon.width: 16
+                        icon.height: 16
                         enabled: index > 0
                         onClicked: root.widgetsModel.moveWidget(index, index - 1)
                     }
 
                     ToolButton {
-                        text: "↓"
+                        icon.source: "qrc:/icons/arrow_down.png"
+                        icon.width: 16
+                        icon.height: 16
                         enabled: index < widgetsList.count - 1
                         onClicked: root.widgetsModel.moveWidget(index, index + 1)
                     }
 
                     ToolButton {
-                        text: "✕"
+                        icon.source: "qrc:/icons/delete.png"
+                        icon.width: 16
+                        icon.height: 16
                         onClicked: root.widgetsModel.removeWidget(model.widgetId)
                     }
                 }
