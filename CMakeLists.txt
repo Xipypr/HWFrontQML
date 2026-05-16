@@ -10,12 +10,10 @@ set(CMAKE_AUTOUIC ON)
 
 option(BUILD_SHARED_LIBS "Build HWFrontQML dependencies as shared libraries" OFF)
 
-set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT OFF)
-if(WIN32)
-    set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT ON)
-endif()
-option(HWFRONTQML_DEPLOY_AFTER_BUILD "Create a runnable deployment folder after building HWFrontQML" ${HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT})
+option(HWFRONTQML_DEPLOY_AFTER_BUILD "Create a runnable deployment folder after building HWFrontQML" ON)
 set(HWFRONTQML_DEPLOY_DIR "${CMAKE_BINARY_DIR}/HWFrontQML_deploy" CACHE PATH "Directory for the runnable HWFrontQML deployment")
+set(HWFRONTQML_WINDEPLOYQT_MODE "--release" CACHE STRING "windeployqt build mode flag: --release, --debug, or empty")
+set_property(CACHE HWFRONTQML_WINDEPLOYQT_MODE PROPERTY STRINGS "--release" "--debug" "")
 
 find_package(Git REQUIRED)
 
@@ -141,11 +139,7 @@ if(HWFRONTQML_DEPLOY_AFTER_BUILD)
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             "$<TARGET_FILE:HWFrontQML>"
             "${HWFRONTQML_DEPLOY_DIR}/$<TARGET_FILE_NAME:HWFrontQML>"
-        COMMAND "${WINDEPLOYQT_EXECUTABLE}"
-            --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/qml"
-            "$<IF:$<CONFIG:Debug>,--debug,--release>"
-            "${HWFRONTQML_DEPLOY_DIR}/$<TARGET_FILE_NAME:HWFrontQML>"
-        COMMENT "Deploying HWFrontQML runtime to ${HWFRONTQML_DEPLOY_DIR}"
+        COMMENT "Preparing HWFrontQML deployment folder at ${HWFRONTQML_DEPLOY_DIR}"
         VERBATIM
     )
 
@@ -159,6 +153,15 @@ if(HWFRONTQML_DEPLOY_AFTER_BUILD)
             VERBATIM
         )
     endforeach()
+
+    add_custom_command(TARGET HWFrontQML POST_BUILD
+        COMMAND "${WINDEPLOYQT_EXECUTABLE}"
+            --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+            ${HWFRONTQML_WINDEPLOYQT_MODE}
+            "${HWFRONTQML_DEPLOY_DIR}/$<TARGET_FILE_NAME:HWFrontQML>"
+        COMMENT "Deploying Qt runtime to ${HWFRONTQML_DEPLOY_DIR}"
+        VERBATIM
+    )
 endif()
 
 if(ANDROID)
