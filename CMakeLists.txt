@@ -10,10 +10,17 @@ set(CMAKE_AUTOUIC ON)
 
 option(BUILD_SHARED_LIBS "Build HWFrontQML dependencies as shared libraries" OFF)
 
-option(HWFRONTQML_DEPLOY_AFTER_BUILD "Create a runnable deployment folder after building HWFrontQML" ON)
+set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT OFF)
+if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT ON)
+endif()
+option(HWFRONTQML_DEPLOY_AFTER_BUILD "Create a runnable deployment folder after building HWFrontQML release builds" ${HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT})
 set(HWFRONTQML_DEPLOY_DIR "${CMAKE_BINARY_DIR}/HWFrontQML_deploy" CACHE PATH "Directory for the runnable HWFrontQML deployment")
-set(HWFRONTQML_WINDEPLOYQT_MODE "--release" CACHE STRING "windeployqt build mode flag: --release, --debug, or empty")
-set_property(CACHE HWFRONTQML_WINDEPLOYQT_MODE PROPERTY STRINGS "--release" "--debug" "")
+
+if(HWFRONTQML_DEPLOY_AFTER_BUILD AND NOT CMAKE_BUILD_TYPE STREQUAL "Release")
+    message(STATUS "Disabling HWFRONTQML_DEPLOY_AFTER_BUILD: deployment is available only for Release builds")
+    set(HWFRONTQML_DEPLOY_AFTER_BUILD OFF CACHE BOOL "Create a runnable deployment folder after building HWFrontQML release builds" FORCE)
+endif()
 
 find_package(Git REQUIRED)
 
@@ -132,6 +139,12 @@ target_link_libraries(HWFrontQML
         Qt6::Core
 )
 
+if(WIN32)
+    set_target_properties(HWFrontQML PROPERTIES
+        WIN32_EXECUTABLE "$<CONFIG:Release>"
+    )
+endif()
+
 if(HWFRONTQML_DEPLOY_AFTER_BUILD)
     add_custom_command(TARGET HWFrontQML POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E rm -rf "${HWFRONTQML_DEPLOY_DIR}"
@@ -157,7 +170,7 @@ if(HWFRONTQML_DEPLOY_AFTER_BUILD)
     add_custom_command(TARGET HWFrontQML POST_BUILD
         COMMAND "${WINDEPLOYQT_EXECUTABLE}"
             --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/qml"
-            ${HWFRONTQML_WINDEPLOYQT_MODE}
+            --release
             "${HWFRONTQML_DEPLOY_DIR}/$<TARGET_FILE_NAME:HWFrontQML>"
         COMMENT "Deploying Qt runtime to ${HWFRONTQML_DEPLOY_DIR}"
         VERBATIM
