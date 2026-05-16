@@ -15,7 +15,7 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT ON)
 endif()
 option(HWFRONTQML_DEPLOY_AFTER_BUILD "Create a runnable deployment folder after building HWFrontQML release builds" ${HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT})
-set(HWFRONTQML_DEPLOY_DIR "${CMAKE_BINARY_DIR}/HWFrontQML_deploy" CACHE PATH "Directory for the runnable HWFrontQML deployment")
+set(HWFRONTQML_DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deploy" CACHE PATH "Directory for the runnable HWFrontQML deployment")
 
 if(HWFRONTQML_DEPLOY_AFTER_BUILD AND NOT CMAKE_BUILD_TYPE STREQUAL "Release")
     message(STATUS "Disabling HWFRONTQML_DEPLOY_AFTER_BUILD: deployment is available only for Release builds")
@@ -141,7 +141,7 @@ target_link_libraries(HWFrontQML
 
 if(WIN32)
     set_target_properties(HWFrontQML PROPERTIES
-        WIN32_EXECUTABLE "$<CONFIG:Release>"
+        WIN32_EXECUTABLE TRUE
     )
 endif()
 

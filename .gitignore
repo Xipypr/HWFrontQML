@@ -18,6 +18,7 @@ android-*/
 *.ap_
 
 # Common generated artifacts
+deploy/
 *.o
 *.obj
 *.so
