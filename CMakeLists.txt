@@ -8,18 +8,43 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+find_package(Git REQUIRED)
+
+function(initialize_required_submodule submodule_dir)
+    set(submodule_path "${CMAKE_CURRENT_SOURCE_DIR}/${submodule_dir}")
+
+    if(NOT EXISTS "${submodule_path}/CMakeLists.txt")
+        message(STATUS "Initializing required submodule: ${submodule_dir}")
+        execute_process(
+            COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive -- ${submodule_dir}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            RESULT_VARIABLE submodule_update_result
+        )
+
+        if(NOT submodule_update_result EQUAL 0)
+            message(FATAL_ERROR "Failed to initialize required submodule '${submodule_dir}'")
+        endif()
+    endif()
+
+    if(NOT EXISTS "${submodule_path}/CMakeLists.txt")
+        message(FATAL_ERROR "Required submodule '${submodule_dir}' was not found or does not contain CMakeLists.txt")
+    endif()
+endfunction()
+
+initialize_required_submodule(HWConnector)
+initialize_required_submodule(DeviceBuilder)
+
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml)
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/HWConnector/CMakeLists.txt")
-    add_subdirectory(HWConnector)
-elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../HWConnector/CMakeLists.txt")
-    add_subdirectory(../HWConnector HWConnector-build)
+add_subdirectory(HWConnector)
+add_subdirectory(DeviceBuilder)
+
+if(NOT TARGET HWConnector)
+    message(FATAL_ERROR "Required target 'HWConnector' was not created by submodule 'HWConnector'")
 endif()
 
-if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/DeviceBuilder/CMakeLists.txt")
-    add_subdirectory(DeviceBuilder)
-elseif(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../DeviceBuilder/CMakeLists.txt")
-    add_subdirectory(../DeviceBuilder DeviceBuilder-build)
+if(NOT TARGET DeviceBuilder)
+    message(FATAL_ERROR "Required target 'DeviceBuilder' was not created by submodule 'DeviceBuilder'")
 endif()
 
 qt_add_executable(HWFrontQML
