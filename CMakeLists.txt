@@ -10,6 +10,13 @@ set(CMAKE_AUTOUIC ON)
 
 option(BUILD_SHARED_LIBS "Build HWFrontQML dependencies as shared libraries" OFF)
 
+set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT OFF)
+if(WIN32)
+    set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT ON)
+endif()
+option(HWFRONTQML_DEPLOY_AFTER_BUILD "Create a runnable deployment folder after building HWFrontQML" ${HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT})
+set(HWFRONTQML_DEPLOY_DIR "${CMAKE_BINARY_DIR}/HWFrontQML_deploy" CACHE PATH "Directory for the runnable HWFrontQML deployment")
+
 find_package(Git REQUIRED)
 
 function(initialize_required_submodule submodule_dir)
@@ -38,6 +45,20 @@ initialize_required_submodule(DeviceBuilder)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml)
 
+if(HWFRONTQML_DEPLOY_AFTER_BUILD)
+    if(NOT WIN32)
+        message(FATAL_ERROR "HWFRONTQML_DEPLOY_AFTER_BUILD currently supports Windows deployment via windeployqt only")
+    endif()
+
+    get_target_property(QT_QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
+    get_filename_component(QT_BIN_DIR "${QT_QMAKE_EXECUTABLE}" DIRECTORY)
+    find_program(WINDEPLOYQT_EXECUTABLE
+        NAMES windeployqt
+        HINTS "${QT_BIN_DIR}"
+        REQUIRED
+    )
+endif()
+
 add_subdirectory(HWConnector)
 add_subdirectory(DeviceBuilder)
 
@@ -59,6 +80,7 @@ function(configure_required_dependency_linkage target_name)
         )
         message(STATUS "Configured ${target_name} for static linkage")
     elseif(target_type STREQUAL "SHARED_LIBRARY" OR target_type STREQUAL "MODULE_LIBRARY")
+        set_property(GLOBAL APPEND PROPERTY HWFRONTQML_DEPLOY_RUNTIME_TARGETS ${target_name})
         message(STATUS "Configured ${target_name} for dynamic linkage")
     else()
         message(FATAL_ERROR "Target '${target_name}' has unsupported type '${target_type}'")
@@ -111,6 +133,33 @@ target_link_libraries(HWFrontQML
         Qt6::Gui
         Qt6::Core
 )
+
+if(HWFRONTQML_DEPLOY_AFTER_BUILD)
+    add_custom_command(TARGET HWFrontQML POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${HWFRONTQML_DEPLOY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${HWFRONTQML_DEPLOY_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "$<TARGET_FILE:HWFrontQML>"
+            "${HWFRONTQML_DEPLOY_DIR}/$<TARGET_FILE_NAME:HWFrontQML>"
+        COMMAND "${WINDEPLOYQT_EXECUTABLE}"
+            --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+            "$<IF:$<CONFIG:Debug>,--debug,--release>"
+            "${HWFRONTQML_DEPLOY_DIR}/$<TARGET_FILE_NAME:HWFrontQML>"
+        COMMENT "Deploying HWFrontQML runtime to ${HWFRONTQML_DEPLOY_DIR}"
+        VERBATIM
+    )
+
+    get_property(HWFRONTQML_DEPLOY_RUNTIME_TARGETS GLOBAL PROPERTY HWFRONTQML_DEPLOY_RUNTIME_TARGETS)
+    foreach(runtime_target IN LISTS HWFRONTQML_DEPLOY_RUNTIME_TARGETS)
+        add_custom_command(TARGET HWFrontQML POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "$<TARGET_FILE:${runtime_target}>"
+                "${HWFRONTQML_DEPLOY_DIR}/$<TARGET_FILE_NAME:${runtime_target}>"
+            COMMENT "Copying ${runtime_target} runtime to ${HWFRONTQML_DEPLOY_DIR}"
+            VERBATIM
+        )
+    endforeach()
+endif()
 
 if(ANDROID)
     set_property(TARGET HWFrontQML PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
