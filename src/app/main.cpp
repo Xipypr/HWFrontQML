@@ -11,9 +11,9 @@
 #include "hwconnector.h"
 #include "storages/ram.h"
 
-#include "sessionmanager.h"
-#include "sessionstate.h"
-#include "dashboardmetricsmodel.h"
+#include "../core/sessionmanager.h"
+#include "../core/sessionstate.h"
+#include "../models/dashboardmetricsmodel.h"
 
 int main(int argc, char *argv[])
 {
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     context->setContextProperty("device", &device);
     context->setContextProperty("desktopDevice", &desktopDevice);
 
-    const QUrl url(QStringLiteral("qrc:/main.qml"));
+    const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
                      &app, [url](QObject *obj, const QUrl &objUrl) {
         if (!obj && url == objUrl)

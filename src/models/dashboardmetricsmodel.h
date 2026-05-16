@@ -1,7 +1,7 @@
 #ifndef DASHBOARDMETRICSMODEL_H
 #define DASHBOARDMETRICSMODEL_H
 
-#include "metricdescriptor.h"
+#include "../core/metricdescriptor.h"
 
 #include <QAbstractListModel>
 #include <QHash>

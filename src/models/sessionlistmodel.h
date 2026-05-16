@@ -1,7 +1,7 @@
 #ifndef SESSIONLISTMODEL_H
 #define SESSIONLISTMODEL_H
 
-#include "session.h"
+#include "../core/session.h"
 
 #include <QAbstractListModel>
 #include <QHash>
