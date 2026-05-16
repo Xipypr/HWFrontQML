@@ -19,6 +19,7 @@ android-*/
 
 # Common generated artifacts
 deploy/
+deploy_android/
 *.o
 *.obj
 *.so
