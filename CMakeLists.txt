@@ -8,6 +8,8 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+option(BUILD_SHARED_LIBS "Build HWFrontQML dependencies as shared libraries" OFF)
+
 find_package(Git REQUIRED)
 
 function(initialize_required_submodule submodule_dir)
@@ -46,6 +48,31 @@ endif()
 if(NOT TARGET DeviceBuilder)
     message(FATAL_ERROR "Required target 'DeviceBuilder' was not created by submodule 'DeviceBuilder'")
 endif()
+
+function(configure_required_dependency_linkage target_name)
+    get_target_property(target_type ${target_name} TYPE)
+
+    if(target_type STREQUAL "STATIC_LIBRARY")
+        target_compile_definitions(${target_name}
+            PUBLIC
+                ${ARGN}
+        )
+        message(STATUS "Configured ${target_name} for static linkage")
+    elseif(target_type STREQUAL "SHARED_LIBRARY" OR target_type STREQUAL "MODULE_LIBRARY")
+        message(STATUS "Configured ${target_name} for dynamic linkage")
+    else()
+        message(FATAL_ERROR "Target '${target_name}' has unsupported type '${target_type}'")
+    endif()
+endfunction()
+
+configure_required_dependency_linkage(HWConnector
+    HWCONNECTOR_STATIC
+    HWCONNECTOR_LIBRARY
+)
+configure_required_dependency_linkage(DeviceBuilder
+    DEVICEBUILDER_STATIC
+    DEVICEBUILDER_LIBRARY
+)
 
 qt_add_executable(HWFrontQML
     src/app/main.cpp

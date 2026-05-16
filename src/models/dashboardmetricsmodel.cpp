@@ -298,7 +298,7 @@ void DashboardMetricsModel::onMetricUpdated(const QString &title,
                                             const QVariant &value)
 {
     if (title.isEmpty() || metricId == Metrics::MetricId::Unknown
-            || !value.isValid() || value.isNull() || !value.canConvert(QVariant::Int)) {
+            || !value.isValid() || value.isNull() || !value.canConvert<int>()) {
         return;
     }
 
