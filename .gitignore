@@ -40,3 +40,4 @@ compile_commands.json
 # macOS / Windows metadata
 .DS_Store
 Thumbs.db
+*.user

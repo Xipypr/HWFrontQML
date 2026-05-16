@@ -10,10 +10,8 @@ set(CMAKE_AUTOUIC ON)
 
 option(BUILD_SHARED_LIBS "Build HWFrontQML dependencies as shared libraries" OFF)
 
-set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT OFF)
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-    set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT ON)
-endif()
+set(HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT ON)
+
 option(HWFRONTQML_DEPLOY_AFTER_BUILD "Create a runnable deployment folder after building HWFrontQML release builds" ${HWFRONTQML_DEPLOY_AFTER_BUILD_DEFAULT})
 set(HWFRONTQML_DEPLOY_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deploy" CACHE PATH "Directory for the runnable HWFrontQML deployment")
 
