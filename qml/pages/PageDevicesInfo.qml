@@ -3,6 +3,8 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import SessionState 1.0
 import DashboardModels 1.0
+import "../components"
+import "../dialogs"
 
 Page {
     id: root

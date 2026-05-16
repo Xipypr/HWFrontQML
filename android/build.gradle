@@ -81,3 +81,37 @@ android {
         ndk.abiFilters = qtTargetAbiList.split(",")
     }
 }
+
+
+def findHwFrontQmlProjectRoot(File startDir) {
+    File currentDir = startDir
+    while (currentDir != null) {
+        if (new File(currentDir, 'CMakeLists.txt').exists()
+                && new File(currentDir, 'qml.qrc').exists()) {
+            return currentDir
+        }
+        currentDir = currentDir.parentFile
+    }
+
+    throw new GradleException('Unable to locate HWFrontQML project root for APK deployment')
+}
+
+def hwFrontQmlDeployAndroidDir = new File(findHwFrontQmlProjectRoot(projectDir), 'deploy_android')
+
+tasks.register('copyQtApkToDeployAndroid', Copy) {
+    from(fileTree("${buildDir}/outputs/apk") {
+        include '**/*.apk'
+    })
+    into hwFrontQmlDeployAndroidDir
+    eachFile { fileCopyDetails ->
+        fileCopyDetails.path = fileCopyDetails.name
+    }
+    includeEmptyDirs = false
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+afterEvaluate {
+    tasks.matching { task -> task.name.startsWith('assemble') }.configureEach { task ->
+        task.finalizedBy tasks.named('copyQtApkToDeployAndroid')
+    }
+}

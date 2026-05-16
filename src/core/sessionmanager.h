@@ -3,8 +3,8 @@
 
 #include "core.h"
 #include "session.h"
-#include "sessionlistmodel.h"
-#include "dashboardmetricsmodel.h"
+#include "../models/sessionlistmodel.h"
+#include "../models/dashboardmetricsmodel.h"
 #include "metricsservice.h"
 
 #include <QMap>

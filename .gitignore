@@ -18,6 +18,8 @@ android-*/
 *.ap_
 
 # Common generated artifacts
+deploy/
+deploy_android/
 *.o
 *.obj
 *.so
@@ -38,3 +40,4 @@ compile_commands.json
 # macOS / Windows metadata
 .DS_Store
 Thumbs.db
+*.user
