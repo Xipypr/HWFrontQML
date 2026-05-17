@@ -23,17 +23,34 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-        with:
-          token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
-          submodules: recursive
 
-      - name: Validate submodule checkout
+      - name: Checkout private submodules
         shell: pwsh
+        env:
+          SUBMODULES_TOKEN: ${{ secrets.SUBMODULES_TOKEN }}
         run: |
           $ErrorActionPreference = 'Stop'
+
+          if ([string]::IsNullOrWhiteSpace($env:SUBMODULES_TOKEN)) {
+            throw "Required repository secret SUBMODULES_TOKEN is not configured. Create a fine-grained PAT with Contents: Read access to Xipypr/HWConnector and Xipypr/DeviceBuilder, then add it as the SUBMODULES_TOKEN repository secret."
+          }
+
+          $authenticatedGitHubUrl = "https://x-access-token:$env:SUBMODULES_TOKEN@github.com/"
+          git config --global "url.$authenticatedGitHubUrl.insteadOf" "https://github.com/"
+
+          try {
+            git submodule sync --recursive
+            git submodule update --init --recursive
+          } finally {
+            git config --global --unset-all "url.$authenticatedGitHubUrl.insteadOf" 2>$null
+            if ($LASTEXITCODE -ne 0) {
+              $global:LASTEXITCODE = 0
+            }
+          }
+
           foreach ($submodule in @('HWConnector', 'DeviceBuilder')) {
             if (-not (Test-Path "$submodule/CMakeLists.txt" -PathType Leaf)) {
-              throw "Required submodule '$submodule' was not checked out. If it is private, create a fine-grained PAT with Contents: Read access to Xipypr/$submodule and add it as the SUBMODULES_TOKEN repository secret."
+              throw "Required submodule '$submodule' was not checked out. Verify that SUBMODULES_TOKEN has Contents: Read access to Xipypr/$submodule."
             }
           }
 
