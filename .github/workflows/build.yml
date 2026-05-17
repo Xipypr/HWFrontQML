@@ -70,7 +70,7 @@ jobs:
       - name: Build
         run: cmake --build build --config Release
 
-      - name: Package artifact
+      - name: Validate deploy directory
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
@@ -78,14 +78,19 @@ jobs:
             throw "Deploy directory was not created. Refusing to publish an incomplete artifact."
           }
 
-          Compress-Archive -Path deploy\* -DestinationPath $env:ARTIFACT_FILE -Force
-
       - name: Upload deploy artifact
         uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: deploy/**
           if-no-files-found: error
+
+      - name: Package release archive
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Compress-Archive -Path deploy\* -DestinationPath $env:ARTIFACT_FILE -Force
 
       - name: Publish GitHub Release asset
         if: startsWith(github.ref, 'refs/tags/v')
