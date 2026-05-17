@@ -12,7 +12,7 @@ permissions:
 jobs:
   windows:
     name: Windows Release
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     env:
       BUILD_TYPE: Release
@@ -22,9 +22,20 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
+          token: ${{ secrets.SUBMODULES_TOKEN || github.token }}
           submodules: recursive
+
+      - name: Validate submodule checkout
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          foreach ($submodule in @('HWConnector', 'DeviceBuilder')) {
+            if (-not (Test-Path "$submodule/CMakeLists.txt" -PathType Leaf)) {
+              throw "Required submodule '$submodule' was not checked out. If it is private, create a fine-grained PAT with Contents: Read access to Xipypr/$submodule and add it as the SUBMODULES_TOKEN repository secret."
+            }
+          }
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v4
@@ -53,7 +64,7 @@ jobs:
           Compress-Archive -Path deploy\* -DestinationPath $env:ARTIFACT_FILE -Force
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_NAME }}
           path: ${{ env.ARTIFACT_FILE }}
