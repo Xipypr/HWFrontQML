@@ -80,11 +80,11 @@ jobs:
 
           Compress-Archive -Path deploy\* -DestinationPath $env:ARTIFACT_FILE -Force
 
-      - name: Upload build artifact
+      - name: Upload deploy artifact
         uses: actions/upload-artifact@v6
         with:
           name: ${{ env.ARTIFACT_NAME }}
-          path: ${{ env.ARTIFACT_FILE }}
+          path: deploy/**
           if-no-files-found: error
 
       - name: Publish GitHub Release asset
