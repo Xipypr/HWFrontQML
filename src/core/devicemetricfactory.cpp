@@ -2,11 +2,13 @@
 
 #include "storages/desktopdevice.h"
 
+#include <QMetaObject>
+
 namespace {
 struct DeviceMetricDefinition
 {
     Metrics::MetricId metricId = Metrics::MetricId::Unknown;
-    const char *propertyName = nullptr;
+    const char *readerMethod = nullptr;
 };
 
 QString displayName(Device *deviceObject, const QString &fallbackDeviceId)
@@ -15,17 +17,49 @@ QString displayName(Device *deviceObject, const QString &fallbackDeviceId)
     return deviceName.isEmpty() ? fallbackDeviceId.toUpper() : deviceName;
 }
 
-QVariant propertyValue(Device *deviceObject, const char *propertyName)
+QVariant invokeMetricReader(Device *deviceObject, const char *readerMethod)
 {
-    if (!deviceObject || !propertyName)
+    if (!deviceObject || !readerMethod)
         return {};
 
-    return deviceObject->property(propertyName);
+    QVariant variantValue;
+    if (QMetaObject::invokeMethod(deviceObject,
+                                  readerMethod,
+                                  Qt::DirectConnection,
+                                  Q_RETURN_ARG(QVariant, variantValue))) {
+        return variantValue;
+    }
+
+    int intValue = 0;
+    if (QMetaObject::invokeMethod(deviceObject,
+                                  readerMethod,
+                                  Qt::DirectConnection,
+                                  Q_RETURN_ARG(int, intValue))) {
+        return intValue;
+    }
+
+    double doubleValue = 0.0;
+    if (QMetaObject::invokeMethod(deviceObject,
+                                  readerMethod,
+                                  Qt::DirectConnection,
+                                  Q_RETURN_ARG(double, doubleValue))) {
+        return doubleValue;
+    }
+
+    float floatValue = 0.0F;
+    if (QMetaObject::invokeMethod(deviceObject,
+                                  readerMethod,
+                                  Qt::DirectConnection,
+                                  Q_RETURN_ARG(float, floatValue))) {
+        return floatValue;
+    }
+
+    return {};
 }
 
-bool hasProperty(Device *deviceObject, const char *propertyName)
+bool canReadMetric(Device *deviceObject, const char *readerMethod)
 {
-    return propertyValue(deviceObject, propertyName).isValid();
+    return invokeMetricReader(deviceObject, readerMethod).isValid();
 }
 
 QList<MetricDescriptor> createDescriptors(Device *deviceObject,
@@ -38,7 +72,7 @@ QList<MetricDescriptor> createDescriptors(Device *deviceObject,
 
     for (const DeviceMetricDefinition &definition : definitions) {
         if (definition.metricId == Metrics::MetricId::Unknown
-                || !hasProperty(deviceObject, definition.propertyName)) {
+                || !canReadMetric(deviceObject, definition.readerMethod)) {
             continue;
         }
 
@@ -95,7 +129,7 @@ const QList<DeviceMetricDefinition> &hardDiskMetricDefinitions()
     return definitions;
 }
 
-const char *metricPropertyName(Device *deviceObject, Metrics::MetricId metricId)
+const char *metricReaderMethod(Device *deviceObject, Metrics::MetricId metricId)
 {
     if (!deviceObject || metricId == Metrics::MetricId::Unknown)
         return nullptr;
@@ -120,7 +154,7 @@ const char *metricPropertyName(Device *deviceObject, Metrics::MetricId metricId)
 
     for (const DeviceMetricDefinition &definition : *definitions) {
         if (definition.metricId == metricId)
-            return definition.propertyName;
+            return definition.readerMethod;
     }
 
     return nullptr;
@@ -161,7 +195,7 @@ QString DeviceMetricFactory::deviceId(Device *deviceObject)
 
 QVariant DeviceMetricFactory::metricValue(Device *deviceObject, Metrics::MetricId metricId)
 {
-    return propertyValue(deviceObject, metricPropertyName(deviceObject, metricId));
+    return invokeMetricReader(deviceObject, metricReaderMethod(deviceObject, metricId));
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::createDescriptorsForDevice(Device *deviceObject)
