@@ -2,6 +2,31 @@
 
 #include "storages/desktopdevice.h"
 
+namespace {
+QString displayName(Device *deviceObject, const QString &fallbackDeviceId)
+{
+    const QString deviceName = deviceObject ? deviceObject->name() : QString();
+    return deviceName.isEmpty() ? fallbackDeviceId.toUpper() : deviceName;
+}
+
+QList<MetricDescriptor> createCoreMetricDescriptors(Device *deviceObject, const QString &deviceId)
+{
+    const QString name = displayName(deviceObject, deviceId);
+    return {
+        MetricDescriptor::createLoadingDescr(deviceId, name),
+        MetricDescriptor::createTempDescr(deviceId, name),
+        MetricDescriptor::createFrequencyDescr(deviceId, name)
+    };
+}
+
+QList<MetricDescriptor> createLoadingMetricDescriptor(Device *deviceObject, const QString &deviceId)
+{
+    return {
+        MetricDescriptor::createLoadingDescr(deviceId, displayName(deviceObject, deviceId))
+    };
+}
+}
+
 QList<MetricDescriptor> DeviceMetricFactory::createDescriptors(DesktopDevice *desktopDevice)
 {
     QList<MetricDescriptor> descriptors;
@@ -74,30 +99,22 @@ QList<MetricDescriptor> DeviceMetricFactory::createDescriptorsForDevice(Device *
 
 QList<MetricDescriptor> DeviceMetricFactory::parseProcessor(Device *deviceObject)
 {
-    Q_UNUSED(deviceObject)
-
-    return {};
+    return createCoreMetricDescriptors(deviceObject, QStringLiteral("cpu"));
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseMemory(Device *deviceObject)
 {
-    Q_UNUSED(deviceObject)
-
-    return {};
+    return createCoreMetricDescriptors(deviceObject, QStringLiteral("ram"));
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseVideoCard(Device *deviceObject)
 {
-    Q_UNUSED(deviceObject)
-
-    return {};
+    return createCoreMetricDescriptors(deviceObject, QStringLiteral("gpu"));
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseHardDisk(Device *deviceObject)
 {
-    Q_UNUSED(deviceObject)
-
-    return {};
+    return createLoadingMetricDescriptor(deviceObject, QStringLiteral("hdd"));
 }
 
 QVariant DeviceMetricFactory::processorMetricValue(Device *deviceObject, Metrics::MetricId metricId)
