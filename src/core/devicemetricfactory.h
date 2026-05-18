@@ -17,10 +17,10 @@ public:
 
 private:
     static QList<MetricDescriptor> createDescriptorsForDevice(Device *deviceObject);
-    static QList<MetricDescriptor> parseProcessor(Device *deviceObject);
-    static QList<MetricDescriptor> parseMemory(Device *deviceObject);
-    static QList<MetricDescriptor> parseVideoCard(Device *deviceObject);
-    static QList<MetricDescriptor> parseHardDisk(Device *deviceObject);
+    static QList<MetricDescriptor> processorDescriptors(Device *deviceObject);
+    static QList<MetricDescriptor> memoryDescriptors(Device *deviceObject);
+    static QList<MetricDescriptor> videoCardDescriptors(Device *deviceObject);
+    static QList<MetricDescriptor> hardDiskDescriptors(Device *deviceObject);
 
     static QVariant processorMetricValue(Device *deviceObject, Metrics::MetricId metricId);
     static QVariant memoryMetricValue(Device *deviceObject, Metrics::MetricId metricId);
