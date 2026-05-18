@@ -3,42 +3,26 @@
 #include "storages/desktopdevice.h"
 
 namespace {
-QString deviceTypeName(DeviceMetricType deviceType)
-{
-    switch (deviceType) {
-    case Device::PROCESSOR:
-        return QStringLiteral("CPU");
-    case Device::MEMORY:
-        return QStringLiteral("RAM");
-    case Device::VIDEO_CARD:
-        return QStringLiteral("GPU");
-    case Device::HARD_DISK:
-        return QStringLiteral("HDD");
-    default:
-        return {};
-    }
-}
-
-QString displayName(Device *deviceObject, DeviceMetricType deviceType)
+QString displayName(Device *deviceObject, const QString &fallbackDeviceId)
 {
     const QString deviceName = deviceObject ? deviceObject->name() : QString();
-    return deviceName.isEmpty() ? deviceTypeName(deviceType) : deviceName;
+    return deviceName.isEmpty() ? fallbackDeviceId.toUpper() : deviceName;
 }
 
-QList<MetricDescriptor> createCoreMetricDescriptors(Device *deviceObject, DeviceMetricType deviceType)
+QList<MetricDescriptor> createCoreMetricDescriptors(Device *deviceObject, const QString &deviceId)
 {
-    const QString name = displayName(deviceObject, deviceType);
+    const QString name = displayName(deviceObject, deviceId);
     return {
-        MetricDescriptor::createLoadingDescr(deviceType, name),
-        MetricDescriptor::createTempDescr(deviceType, name),
-        MetricDescriptor::createFrequencyDescr(deviceType, name)
+        MetricDescriptor::createLoadingDescr(deviceId, name),
+        MetricDescriptor::createTempDescr(deviceId, name),
+        MetricDescriptor::createFrequencyDescr(deviceId, name)
     };
 }
 
-QList<MetricDescriptor> createLoadingMetricDescriptor(Device *deviceObject, DeviceMetricType deviceType)
+QList<MetricDescriptor> createLoadingMetricDescriptor(Device *deviceObject, const QString &deviceId)
 {
     return {
-        MetricDescriptor::createLoadingDescr(deviceType, displayName(deviceObject, deviceType))
+        MetricDescriptor::createLoadingDescr(deviceId, displayName(deviceObject, deviceId))
     };
 }
 }
@@ -56,9 +40,23 @@ QList<MetricDescriptor> DeviceMetricFactory::createDescriptors(DesktopDevice *de
     return descriptors;
 }
 
-DeviceMetricType DeviceMetricFactory::deviceType(Device *deviceObject)
+QString DeviceMetricFactory::deviceId(Device *deviceObject)
 {
-    return deviceObject ? deviceObject->type() : DeviceMetricType{};
+    if (!deviceObject)
+        return {};
+
+    switch (deviceObject->type()) {
+    case Device::PROCESSOR:
+        return QStringLiteral("cpu");
+    case Device::MEMORY:
+        return QStringLiteral("ram");
+    case Device::VIDEO_CARD:
+        return QStringLiteral("gpu");
+    case Device::HARD_DISK:
+        return QStringLiteral("hdd");
+    default:
+        return {};
+    }
 }
 
 QVariant DeviceMetricFactory::metricValue(Device *deviceObject, Metrics::MetricId metricId)
@@ -101,22 +99,22 @@ QList<MetricDescriptor> DeviceMetricFactory::createDescriptorsForDevice(Device *
 
 QList<MetricDescriptor> DeviceMetricFactory::parseProcessor(Device *deviceObject)
 {
-    return createCoreMetricDescriptors(deviceObject, Device::PROCESSOR);
+    return createCoreMetricDescriptors(deviceObject, QStringLiteral("cpu"));
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseMemory(Device *deviceObject)
 {
-    return createCoreMetricDescriptors(deviceObject, Device::MEMORY);
+    return createCoreMetricDescriptors(deviceObject, QStringLiteral("ram"));
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseVideoCard(Device *deviceObject)
 {
-    return createCoreMetricDescriptors(deviceObject, Device::VIDEO_CARD);
+    return createCoreMetricDescriptors(deviceObject, QStringLiteral("gpu"));
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseHardDisk(Device *deviceObject)
 {
-    return createLoadingMetricDescriptor(deviceObject, Device::HARD_DISK);
+    return createLoadingMetricDescriptor(deviceObject, QStringLiteral("hdd"));
 }
 
 QVariant DeviceMetricFactory::processorMetricValue(Device *deviceObject, Metrics::MetricId metricId)

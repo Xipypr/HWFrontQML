@@ -4,38 +4,6 @@
 #include <QJsonObject>
 #include <QSet>
 
-namespace {
-QString deviceTypeToId(DeviceMetricType deviceType)
-{
-    switch (deviceType) {
-    case Device::PROCESSOR:
-        return QStringLiteral("cpu");
-    case Device::MEMORY:
-        return QStringLiteral("ram");
-    case Device::VIDEO_CARD:
-        return QStringLiteral("gpu");
-    case Device::HARD_DISK:
-        return QStringLiteral("hdd");
-    default:
-        return {};
-    }
-}
-
-DeviceMetricType deviceTypeFromId(const QString &deviceId)
-{
-    if (deviceId == QStringLiteral("cpu"))
-        return Device::PROCESSOR;
-    if (deviceId == QStringLiteral("ram"))
-        return Device::MEMORY;
-    if (deviceId == QStringLiteral("gpu"))
-        return Device::VIDEO_CARD;
-    if (deviceId == QStringLiteral("hdd"))
-        return Device::HARD_DISK;
-
-    return DeviceMetricType{};
-}
-}
-
 uint qHash(const DashboardMetricWidgetKey &key, uint seed)
 {
     const uint titleHash = ::qHash(key.title, seed);
@@ -176,14 +144,13 @@ QVariantList DashboardMetricsModel::availableDevices() const
     QSet<QString> seenDeviceIds;
 
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
-        const QString deviceId = deviceTypeToId(descriptor.deviceType);
-        if (deviceId.isEmpty() || seenDeviceIds.contains(deviceId))
+        if (descriptor.deviceId.isEmpty() || seenDeviceIds.contains(descriptor.deviceId))
             continue;
 
-        seenDeviceIds.insert(deviceId);
+        seenDeviceIds.insert(descriptor.deviceId);
         devices.push_back(QVariantMap{
-            { "deviceId", deviceId },
-            { "label", descriptor.displayName.isEmpty() ? deviceId : descriptor.displayName }
+            { "deviceId", descriptor.deviceId },
+            { "label", descriptor.displayName.isEmpty() ? descriptor.deviceId : descriptor.displayName }
         });
     }
 
@@ -194,12 +161,11 @@ QVariantList DashboardMetricsModel::availableMetricsForDevice(const QString &dev
 {
     QVariantList metrics;
 
-    const DeviceMetricType deviceType = deviceTypeFromId(deviceId);
-    if (!isValidDeviceMetricType(deviceType))
+    if (deviceId.isEmpty())
         return metrics;
 
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
-        if (descriptor.deviceType != deviceType || descriptor.metricId == Metrics::MetricId::Unknown)
+        if (descriptor.deviceId != deviceId || descriptor.metricId == Metrics::MetricId::Unknown)
             continue;
 
         const QString metricName = Metrics::metricIdToString(descriptor.metricId);
@@ -311,7 +277,7 @@ void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescript
     syncInitialWidgetsWithMetrics();
 
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
-        if (!isValidDeviceMetricType(descriptor.deviceType) || descriptor.metricId == Metrics::MetricId::Unknown)
+        if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)
             continue;
 
         const int widgetIndex = widgetIndexForMetric(descriptor.displayName, descriptor.metricId);
@@ -443,7 +409,7 @@ void DashboardMetricsModel::syncInitialWidgetsWithMetrics()
         return;
 
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
-        if (!isValidDeviceMetricType(descriptor.deviceType) || descriptor.metricId == Metrics::MetricId::Unknown)
+        if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)
             continue;
 
         addWidget(descriptor.displayName,
@@ -459,9 +425,8 @@ void DashboardMetricsModel::syncInitialWidgetsWithMetrics()
 const MetricDescriptor *DashboardMetricsModel::descriptorForMetric(const QString &deviceId,
                                                                    Metrics::MetricId metricId) const
 {
-    const DeviceMetricType deviceType = deviceTypeFromId(deviceId);
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
-        if (descriptor.deviceType == deviceType && descriptor.metricId == metricId)
+        if (descriptor.deviceId == deviceId && descriptor.metricId == metricId)
             return &descriptor;
     }
 
