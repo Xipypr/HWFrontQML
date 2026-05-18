@@ -2,13 +2,11 @@
 
 #include "storages/desktopdevice.h"
 
-#include <QMetaObject>
-
 namespace {
 struct DeviceMetricDefinition
 {
     Metrics::MetricId metricId = Metrics::MetricId::Unknown;
-    const char *readerMethod = nullptr;
+    const char *legacyPropertyName = nullptr;
 };
 
 QString displayName(Device *deviceObject, const QString &fallbackDeviceId)
@@ -17,49 +15,24 @@ QString displayName(Device *deviceObject, const QString &fallbackDeviceId)
     return deviceName.isEmpty() ? fallbackDeviceId.toUpper() : deviceName;
 }
 
-QVariant invokeMetricReader(Device *deviceObject, const char *readerMethod)
+MetricDescriptor makeDescriptor(Device *deviceObject,
+                                const QString &deviceId,
+                                Metrics::MetricId metricId)
 {
-    if (!deviceObject || !readerMethod)
-        return {};
-
-    QVariant variantValue;
-    if (QMetaObject::invokeMethod(deviceObject,
-                                  readerMethod,
-                                  Qt::DirectConnection,
-                                  Q_RETURN_ARG(QVariant, variantValue))) {
-        return variantValue;
-    }
-
-    int intValue = 0;
-    if (QMetaObject::invokeMethod(deviceObject,
-                                  readerMethod,
-                                  Qt::DirectConnection,
-                                  Q_RETURN_ARG(int, intValue))) {
-        return intValue;
-    }
-
-    double doubleValue = 0.0;
-    if (QMetaObject::invokeMethod(deviceObject,
-                                  readerMethod,
-                                  Qt::DirectConnection,
-                                  Q_RETURN_ARG(double, doubleValue))) {
-        return doubleValue;
-    }
-
-    float floatValue = 0.0F;
-    if (QMetaObject::invokeMethod(deviceObject,
-                                  readerMethod,
-                                  Qt::DirectConnection,
-                                  Q_RETURN_ARG(float, floatValue))) {
-        return floatValue;
-    }
-
-    return {};
+    return {
+        deviceId,
+        metricId,
+        displayName(deviceObject, deviceId),
+        Metrics::metricUnit(metricId)
+    };
 }
 
-bool canReadMetric(Device *deviceObject, const char *readerMethod)
+QVariant legacyPropertyValue(Device *deviceObject, const char *propertyName)
 {
-    return invokeMetricReader(deviceObject, readerMethod).isValid();
+    if (!deviceObject || !propertyName)
+        return {};
+
+    return deviceObject->property(propertyName);
 }
 
 QList<MetricDescriptor> createDescriptors(Device *deviceObject,
@@ -71,17 +44,10 @@ QList<MetricDescriptor> createDescriptors(Device *deviceObject,
         return descriptors;
 
     for (const DeviceMetricDefinition &definition : definitions) {
-        if (definition.metricId == Metrics::MetricId::Unknown
-                || !canReadMetric(deviceObject, definition.readerMethod)) {
+        if (definition.metricId == Metrics::MetricId::Unknown)
             continue;
-        }
 
-        descriptors.push_back({
-            deviceId,
-            definition.metricId,
-            displayName(deviceObject, deviceId),
-            Metrics::metricUnit(definition.metricId)
-        });
+        descriptors.push_back(makeDescriptor(deviceObject, deviceId, definition.metricId));
     }
 
     return descriptors;
@@ -129,32 +95,12 @@ const QList<DeviceMetricDefinition> &hardDiskMetricDefinitions()
     return definitions;
 }
 
-const char *metricReaderMethod(Device *deviceObject, Metrics::MetricId metricId)
+const char *legacyPropertyName(const QList<DeviceMetricDefinition> &definitions,
+                               Metrics::MetricId metricId)
 {
-    if (!deviceObject || metricId == Metrics::MetricId::Unknown)
-        return nullptr;
-
-    const QList<DeviceMetricDefinition> *definitions = nullptr;
-    switch (deviceObject->type()) {
-    case Device::PROCESSOR:
-        definitions = &processorMetricDefinitions();
-        break;
-    case Device::MEMORY:
-        definitions = &memoryMetricDefinitions();
-        break;
-    case Device::VIDEO_CARD:
-        definitions = &videoCardMetricDefinitions();
-        break;
-    case Device::HARD_DISK:
-        definitions = &hardDiskMetricDefinitions();
-        break;
-    default:
-        return nullptr;
-    }
-
-    for (const DeviceMetricDefinition &definition : *definitions) {
+    for (const DeviceMetricDefinition &definition : definitions) {
         if (definition.metricId == metricId)
-            return definition.readerMethod;
+            return definition.legacyPropertyName;
     }
 
     return nullptr;
@@ -195,7 +141,21 @@ QString DeviceMetricFactory::deviceId(Device *deviceObject)
 
 QVariant DeviceMetricFactory::metricValue(Device *deviceObject, Metrics::MetricId metricId)
 {
-    return invokeMetricReader(deviceObject, metricReaderMethod(deviceObject, metricId));
+    if (!deviceObject || metricId == Metrics::MetricId::Unknown)
+        return {};
+
+    switch (deviceObject->type()) {
+    case Device::PROCESSOR:
+        return processorMetricValue(deviceObject, metricId);
+    case Device::MEMORY:
+        return memoryMetricValue(deviceObject, metricId);
+    case Device::VIDEO_CARD:
+        return videoCardMetricValue(deviceObject, metricId);
+    case Device::HARD_DISK:
+        return hardDiskMetricValue(deviceObject, metricId);
+    default:
+        return {};
+    }
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::createDescriptorsForDevice(Device *deviceObject)
@@ -219,20 +179,59 @@ QList<MetricDescriptor> DeviceMetricFactory::createDescriptorsForDevice(Device *
 
 QList<MetricDescriptor> DeviceMetricFactory::parseProcessor(Device *deviceObject)
 {
+    // TODO(DeviceBuilder): replace Device* with the concrete processor class, e.g.
+    // auto *processor = qobject_cast<ProcessorDevice *>(deviceObject);
+    // and create descriptors only for metrics supported by processor.
     return createDescriptors(deviceObject, QStringLiteral("cpu"), processorMetricDefinitions());
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseMemory(Device *deviceObject)
 {
+    // TODO(DeviceBuilder): cast to the concrete memory class and keep only
+    // descriptors that are meaningful for that type.
     return createDescriptors(deviceObject, QStringLiteral("ram"), memoryMetricDefinitions());
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseVideoCard(Device *deviceObject)
 {
+    // TODO(DeviceBuilder): cast to the concrete video-card class and fill
+    // descriptors from its typed API.
     return createDescriptors(deviceObject, QStringLiteral("gpu"), videoCardMetricDefinitions());
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseHardDisk(Device *deviceObject)
 {
+    // TODO(DeviceBuilder): cast to the concrete hard-disk class and fill
+    // descriptors from its typed API.
     return createDescriptors(deviceObject, QStringLiteral("hdd"), hardDiskMetricDefinitions());
+}
+
+QVariant DeviceMetricFactory::processorMetricValue(Device *deviceObject, Metrics::MetricId metricId)
+{
+    // TODO(DeviceBuilder): replace the temporary legacy fallback with typed calls:
+    // auto *processor = qobject_cast<ProcessorDevice *>(deviceObject);
+    // switch (metricId) { case Metrics::MetricId::Loading: return processor->loading(); ... }
+    return legacyPropertyValue(deviceObject, legacyPropertyName(processorMetricDefinitions(), metricId));
+}
+
+QVariant DeviceMetricFactory::memoryMetricValue(Device *deviceObject, Metrics::MetricId metricId)
+{
+    // TODO(DeviceBuilder): replace the temporary legacy fallback with typed calls
+    // to the concrete memory device class.
+    return legacyPropertyValue(deviceObject, legacyPropertyName(memoryMetricDefinitions(), metricId));
+}
+
+QVariant DeviceMetricFactory::videoCardMetricValue(Device *deviceObject, Metrics::MetricId metricId)
+{
+    // TODO(DeviceBuilder): replace the temporary legacy fallback with typed calls
+    // to the concrete video-card device class.
+    return legacyPropertyValue(deviceObject, legacyPropertyName(videoCardMetricDefinitions(), metricId));
+}
+
+QVariant DeviceMetricFactory::hardDiskMetricValue(Device *deviceObject, Metrics::MetricId metricId)
+{
+    // TODO(DeviceBuilder): replace the temporary legacy fallback with typed calls:
+    // auto *hardDisk = qobject_cast<HardDiskDevice *>(deviceObject);
+    // case Metrics::MetricId::Loading: return hardDisk->load();
+    return legacyPropertyValue(deviceObject, legacyPropertyName(hardDiskMetricDefinitions(), metricId));
 }

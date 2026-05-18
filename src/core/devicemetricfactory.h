@@ -21,6 +21,11 @@ private:
     static QList<MetricDescriptor> parseMemory(Device *deviceObject);
     static QList<MetricDescriptor> parseVideoCard(Device *deviceObject);
     static QList<MetricDescriptor> parseHardDisk(Device *deviceObject);
+
+    static QVariant processorMetricValue(Device *deviceObject, Metrics::MetricId metricId);
+    static QVariant memoryMetricValue(Device *deviceObject, Metrics::MetricId metricId);
+    static QVariant videoCardMetricValue(Device *deviceObject, Metrics::MetricId metricId);
+    static QVariant hardDiskMetricValue(Device *deviceObject, Metrics::MetricId metricId);
 };
 
 #endif // DEVICEMETRICFACTORY_H
