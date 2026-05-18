@@ -3,26 +3,42 @@
 #include "storages/desktopdevice.h"
 
 namespace {
-QString displayName(Device *deviceObject, const QString &fallbackDeviceId)
+QString deviceTypeName(DeviceMetricType deviceType)
 {
-    const QString deviceName = deviceObject ? deviceObject->name() : QString();
-    return deviceName.isEmpty() ? fallbackDeviceId.toUpper() : deviceName;
+    switch (deviceType) {
+    case Device::PROCESSOR:
+        return QStringLiteral("CPU");
+    case Device::MEMORY:
+        return QStringLiteral("RAM");
+    case Device::VIDEO_CARD:
+        return QStringLiteral("GPU");
+    case Device::HARD_DISK:
+        return QStringLiteral("HDD");
+    default:
+        return {};
+    }
 }
 
-QList<MetricDescriptor> createCoreMetricDescriptors(Device *deviceObject, const QString &deviceId)
+QString displayName(Device *deviceObject, DeviceMetricType deviceType)
 {
-    const QString name = displayName(deviceObject, deviceId);
+    const QString deviceName = deviceObject ? deviceObject->name() : QString();
+    return deviceName.isEmpty() ? deviceTypeName(deviceType) : deviceName;
+}
+
+QList<MetricDescriptor> createCoreMetricDescriptors(Device *deviceObject, DeviceMetricType deviceType)
+{
+    const QString name = displayName(deviceObject, deviceType);
     return {
-        MetricDescriptor::createLoadingDescr(deviceId, name),
-        MetricDescriptor::createTempDescr(deviceId, name),
-        MetricDescriptor::createFrequencyDescr(deviceId, name)
+        MetricDescriptor::createLoadingDescr(deviceType, name),
+        MetricDescriptor::createTempDescr(deviceType, name),
+        MetricDescriptor::createFrequencyDescr(deviceType, name)
     };
 }
 
-QList<MetricDescriptor> createLoadingMetricDescriptor(Device *deviceObject, const QString &deviceId)
+QList<MetricDescriptor> createLoadingMetricDescriptor(Device *deviceObject, DeviceMetricType deviceType)
 {
     return {
-        MetricDescriptor::createLoadingDescr(deviceId, displayName(deviceObject, deviceId))
+        MetricDescriptor::createLoadingDescr(deviceType, displayName(deviceObject, deviceType))
     };
 }
 }
@@ -40,23 +56,9 @@ QList<MetricDescriptor> DeviceMetricFactory::createDescriptors(DesktopDevice *de
     return descriptors;
 }
 
-QString DeviceMetricFactory::deviceId(Device *deviceObject)
+DeviceMetricType DeviceMetricFactory::deviceType(Device *deviceObject)
 {
-    if (!deviceObject)
-        return {};
-
-    switch (deviceObject->type()) {
-    case Device::PROCESSOR:
-        return QStringLiteral("cpu");
-    case Device::MEMORY:
-        return QStringLiteral("ram");
-    case Device::VIDEO_CARD:
-        return QStringLiteral("gpu");
-    case Device::HARD_DISK:
-        return QStringLiteral("hdd");
-    default:
-        return {};
-    }
+    return deviceObject ? deviceObject->type() : DeviceMetricType{};
 }
 
 QVariant DeviceMetricFactory::metricValue(Device *deviceObject, Metrics::MetricId metricId)
@@ -99,22 +101,22 @@ QList<MetricDescriptor> DeviceMetricFactory::createDescriptorsForDevice(Device *
 
 QList<MetricDescriptor> DeviceMetricFactory::parseProcessor(Device *deviceObject)
 {
-    return createCoreMetricDescriptors(deviceObject, QStringLiteral("cpu"));
+    return createCoreMetricDescriptors(deviceObject, Device::PROCESSOR);
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseMemory(Device *deviceObject)
 {
-    return createCoreMetricDescriptors(deviceObject, QStringLiteral("ram"));
+    return createCoreMetricDescriptors(deviceObject, Device::MEMORY);
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseVideoCard(Device *deviceObject)
 {
-    return createCoreMetricDescriptors(deviceObject, QStringLiteral("gpu"));
+    return createCoreMetricDescriptors(deviceObject, Device::VIDEO_CARD);
 }
 
 QList<MetricDescriptor> DeviceMetricFactory::parseHardDisk(Device *deviceObject)
 {
-    return createLoadingMetricDescriptor(deviceObject, QStringLiteral("hdd"));
+    return createLoadingMetricDescriptor(deviceObject, Device::HARD_DISK);
 }
 
 QVariant DeviceMetricFactory::processorMetricValue(Device *deviceObject, Metrics::MetricId metricId)

@@ -12,7 +12,7 @@ class DeviceMetricFactory
 {
 public:
     static QList<MetricDescriptor> createDescriptors(DesktopDevice *desktopDevice);
-    static QString deviceId(Device *deviceObject);
+    static DeviceMetricType deviceType(Device *deviceObject);
     static QVariant metricValue(Device *deviceObject, Metrics::MetricId metricId);
 
 private:

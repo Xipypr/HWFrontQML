@@ -52,12 +52,12 @@ public:
     void restoreFromJson(const QJsonArray &widgets);
     bool hasSeededInitialWidgets() const;
     Q_INVOKABLE QVariantList availableDevices() const;
-    Q_INVOKABLE QVariantList availableMetricsForDevice(const QString &deviceId) const;
+    Q_INVOKABLE QVariantList availableMetricsForDevice(int deviceType) const;
     Q_INVOKABLE bool addWidget(const QString &title,
                                Metrics::MetricId metricId,
                                const QString &unit,
                                const QString &variant);
-    Q_INVOKABLE bool addWidgetForMetric(const QString &deviceId,
+    Q_INVOKABLE bool addWidgetForMetric(int deviceType,
                                          const QString &metricId,
                                          const QString &variant = QStringLiteral("segments"));
     Q_INVOKABLE bool removeWidget(const QString &widgetId);
@@ -98,7 +98,7 @@ private:
                         int value,
                         const QString &unit = QString());
     void syncInitialWidgetsWithMetrics();
-    const MetricDescriptor *descriptorForMetric(const QString &deviceId,
+    const MetricDescriptor *descriptorForMetric(DeviceMetricType deviceType,
                                                 Metrics::MetricId metricId) const;
 
     QVector<WidgetItem> m_items;

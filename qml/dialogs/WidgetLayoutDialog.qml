@@ -20,11 +20,11 @@ Dialog {
     property var metricOptions: []
     property string addError: ""
 
-    function selectedDeviceId() {
+    function selectedDeviceType() {
         if (deviceCombo.currentIndex < 0 || deviceCombo.currentIndex >= deviceOptions.length)
-            return ""
+            return -1
 
-        return deviceOptions[deviceCombo.currentIndex].deviceId || ""
+        return deviceOptions[deviceCombo.currentIndex].deviceType
     }
 
     function selectedMetricId() {
@@ -35,12 +35,12 @@ Dialog {
     }
 
     function refreshDevices() {
-        const currentDeviceId = selectedDeviceId()
+        const currentDeviceType = selectedDeviceType()
         deviceOptions = widgetsModel.availableDevices()
         deviceCombo.currentIndex = -1
 
         for (let i = 0; i < deviceOptions.length; ++i) {
-            if (deviceOptions[i].deviceId === currentDeviceId) {
+            if (deviceOptions[i].deviceType === currentDeviceType) {
                 deviceCombo.currentIndex = i
                 break
             }
@@ -54,7 +54,7 @@ Dialog {
 
     function refreshMetrics() {
         const currentMetricId = selectedMetricId()
-        metricOptions = widgetsModel.availableMetricsForDevice(selectedDeviceId())
+        metricOptions = widgetsModel.availableMetricsForDevice(selectedDeviceType())
         metricCombo.currentIndex = -1
 
         for (let i = 0; i < metricOptions.length; ++i) {
@@ -183,9 +183,9 @@ Dialog {
                 text: "Добавить"
                 enabled: root.deviceOptions.length > 0 && root.metricOptions.length > 0
                 onClicked: {
-                    const deviceId = root.selectedDeviceId()
+                    const deviceType = root.selectedDeviceType()
                     const metricId = root.selectedMetricId()
-                    if (!root.widgetsModel.addWidgetForMetric(deviceId, metricId, "segments"))
+                    if (!root.widgetsModel.addWidgetForMetric(deviceType, metricId, "segments"))
                         root.addError = "Метрика уже добавлена или недоступна."
                     else
                         root.addError = ""

@@ -1,10 +1,14 @@
 #ifndef METRICDESCRIPTOR_H
 #define METRICDESCRIPTOR_H
 
+#include "storages/desktopdevice.h"
+
 #include <QList>
 #include <QMetaType>
 #include <QObject>
 #include <QString>
+
+#include <utility>
 
 namespace Metrics {
 Q_NAMESPACE
@@ -63,49 +67,64 @@ inline QString metricUnit(MetricId metricId)
 }
 }
 
+using DeviceMetricType = decltype(std::declval<Device>().type());
+
+inline bool isValidDeviceMetricType(DeviceMetricType deviceType)
+{
+    switch (deviceType) {
+    case Device::PROCESSOR:
+    case Device::MEMORY:
+    case Device::VIDEO_CARD:
+    case Device::HARD_DISK:
+        return true;
+    default:
+        return false;
+    }
+}
+
 struct MetricDescriptor
 {
     MetricDescriptor() = delete;
 
-    MetricDescriptor(const QString &deviceId,
+    MetricDescriptor(DeviceMetricType deviceType,
                      Metrics::MetricId metricId,
                      const QString &displayName)
-        : MetricDescriptor(deviceId, metricId, displayName, Metrics::metricUnit(metricId))
+        : MetricDescriptor(deviceType, metricId, displayName, Metrics::metricUnit(metricId))
     {
     }
 
-    MetricDescriptor(const QString &deviceId,
+    MetricDescriptor(DeviceMetricType deviceType,
                      Metrics::MetricId metricId,
                      const QString &displayName,
                      const QString &unit)
-        : deviceId(deviceId)
+        : deviceType(deviceType)
         , metricId(metricId)
         , displayName(displayName)
         , unit(unit)
     {
     }
 
-    static MetricDescriptor createLoadingDescr(const QString &deviceId, const QString &displayName)
+    static MetricDescriptor createLoadingDescr(DeviceMetricType deviceType, const QString &displayName)
     {
-        return { deviceId, Metrics::MetricId::Loading, displayName };
+        return { deviceType, Metrics::MetricId::Loading, displayName };
     }
 
-    static MetricDescriptor createTempDescr(const QString &deviceId, const QString &displayName)
+    static MetricDescriptor createTempDescr(DeviceMetricType deviceType, const QString &displayName)
     {
-        return createTemperatureDescr(deviceId, displayName);
+        return createTemperatureDescr(deviceType, displayName);
     }
 
-    static MetricDescriptor createTemperatureDescr(const QString &deviceId, const QString &displayName)
+    static MetricDescriptor createTemperatureDescr(DeviceMetricType deviceType, const QString &displayName)
     {
-        return { deviceId, Metrics::MetricId::Temperature, displayName };
+        return { deviceType, Metrics::MetricId::Temperature, displayName };
     }
 
-    static MetricDescriptor createFrequencyDescr(const QString &deviceId, const QString &displayName)
+    static MetricDescriptor createFrequencyDescr(DeviceMetricType deviceType, const QString &displayName)
     {
-        return { deviceId, Metrics::MetricId::Frequency, displayName };
+        return { deviceType, Metrics::MetricId::Frequency, displayName };
     }
 
-    QString deviceId;
+    DeviceMetricType deviceType;
     Metrics::MetricId metricId;
     QString displayName;
     QString unit;

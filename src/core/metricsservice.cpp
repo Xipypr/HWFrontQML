@@ -39,18 +39,19 @@ void MetricsService::discoverMetrics(DesktopDevice *desktopDevice)
 
 void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
 {
-    QHash<QString, Device *> devicesById;
+    QHash<int, Device *> devicesByType;
 
     for (Device *deviceObject : desktopDevice->devicesList())
     {
-        const QString deviceId = DeviceMetricFactory::deviceId(deviceObject);
-        if (!deviceId.isEmpty() && !devicesById.contains(deviceId))
-            devicesById.insert(deviceId, deviceObject);
+        const DeviceMetricType deviceType = DeviceMetricFactory::deviceType(deviceObject);
+        const int deviceTypeKey = static_cast<int>(deviceType);
+        if (isValidDeviceMetricType(deviceType) && !devicesByType.contains(deviceTypeKey))
+            devicesByType.insert(deviceTypeKey, deviceObject);
     }
 
     for (const MetricDescriptor &descriptor : m_availableMetrics)
     {
-        Device *deviceObject = devicesById.value(descriptor.deviceId, nullptr);
+        Device *deviceObject = devicesByType.value(static_cast<int>(descriptor.deviceType), nullptr);
         if (!deviceObject)
             continue;
 
