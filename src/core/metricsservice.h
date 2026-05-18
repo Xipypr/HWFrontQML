@@ -8,7 +8,6 @@
 #include <QVariant>
 
 class DesktopDevice;
-class Device;
 
 class MetricsService : public QObject
 {
@@ -30,11 +29,6 @@ signals:
 private:
     void discoverMetrics(DesktopDevice *desktopDevice);
     void refreshMetricValues(DesktopDevice *desktopDevice);
-
-    static QString metricDeviceId(Device *deviceObject);
-    static QString metricDisplayName(Device *deviceObject, const QString &deviceId);
-    static bool hasMetric(Device *deviceObject, Metrics::MetricId metricId);
-    QVariant metricValue(Device *deviceObject, Metrics::MetricId metricId) const;
 
     bool m_metricsDiscovered = false;
     QList<MetricDescriptor> m_availableMetrics;

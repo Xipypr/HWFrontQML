@@ -104,6 +104,8 @@ qt_add_executable(HWFrontQML
 
     src/core/core.cpp
     src/core/core.h
+    src/core/devicemetricfactory.cpp
+    src/core/devicemetricfactory.h
     src/core/metricdescriptor.h
     src/core/metricsservice.cpp
     src/core/metricsservice.h
