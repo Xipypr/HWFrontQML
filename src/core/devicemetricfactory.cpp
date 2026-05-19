@@ -1,12 +1,14 @@
 #include "devicemetricfactory.h"
 
 #include "storages/desktopdevice.h"
+#include "storages/cpu.h"
+#include "storages/hdd.h"
+#include "storages/ram.h"
+#include "storages/videocard.h"
 
 QList<MetricDescriptor> DeviceMetricFactory::createDescriptors(DesktopDevice *desktopDevice)
 {
     QList<MetricDescriptor> descriptors;
-    if (!desktopDevice)
-        return descriptors;
 
     const QList<Device *> devices = desktopDevice->devicesList();
     for (Device *deviceObject : devices)
@@ -17,9 +19,6 @@ QList<MetricDescriptor> DeviceMetricFactory::createDescriptors(DesktopDevice *de
 
 QString DeviceMetricFactory::deviceId(Device *deviceObject)
 {
-    if (!deviceObject)
-        return {};
-
     switch (deviceObject->type()) {
     case Device::PROCESSOR:
         return QStringLiteral("cpu");
@@ -36,9 +35,6 @@ QString DeviceMetricFactory::deviceId(Device *deviceObject)
 
 QVariant DeviceMetricFactory::metricValue(Device *deviceObject, Metrics::MetricId metricId)
 {
-    if (!deviceObject || metricId == Metrics::MetricId::Unknown)
-        return {};
-
     switch (deviceObject->type()) {
     case Device::PROCESSOR:
         return processorMetricValue(deviceObject, metricId);
@@ -55,9 +51,6 @@ QVariant DeviceMetricFactory::metricValue(Device *deviceObject, Metrics::MetricI
 
 QList<MetricDescriptor> DeviceMetricFactory::createDescriptorsForDevice(Device *deviceObject)
 {
-    if (!deviceObject)
-        return {};
-
     switch (deviceObject->type()) {
     case Device::PROCESSOR:
         return processorDescriptors(deviceObject);
@@ -77,8 +70,8 @@ QList<MetricDescriptor> DeviceMetricFactory::processorDescriptors(Device *device
     const QString deviceName = deviceObject->name();
     return {
         MetricDescriptor::createLoadingDescr(QStringLiteral("cpu"), deviceName),
-        MetricDescriptor::createTempDescr(QStringLiteral("cpu"), deviceName),
-        MetricDescriptor::createFrequencyDescr(QStringLiteral("cpu"), deviceName)
+        MetricDescriptor::createTemperatureDescr(QStringLiteral("cpu"), deviceName),
+        // MetricDescriptor::createFrequencyDescr(QStringLiteral("cpu"), deviceName)
     };
 }
 
@@ -87,8 +80,8 @@ QList<MetricDescriptor> DeviceMetricFactory::memoryDescriptors(Device *deviceObj
     const QString deviceName = deviceObject->name();
     return {
         MetricDescriptor::createLoadingDescr(QStringLiteral("ram"), deviceName),
-        MetricDescriptor::createTempDescr(QStringLiteral("ram"), deviceName),
-        MetricDescriptor::createFrequencyDescr(QStringLiteral("ram"), deviceName)
+        MetricDescriptor::createTemperatureDescr(QStringLiteral("ram"), deviceName),
+        // MetricDescriptor::createFrequencyDescr(QStringLiteral("ram"), deviceName)
     };
 }
 
@@ -97,8 +90,8 @@ QList<MetricDescriptor> DeviceMetricFactory::videoCardDescriptors(Device *device
     const QString deviceName = deviceObject->name();
     return {
         MetricDescriptor::createLoadingDescr(QStringLiteral("gpu"), deviceName),
-        MetricDescriptor::createTempDescr(QStringLiteral("gpu"), deviceName),
-        MetricDescriptor::createFrequencyDescr(QStringLiteral("gpu"), deviceName)
+        MetricDescriptor::createTemperatureDescr(QStringLiteral("gpu"), deviceName),
+        // MetricDescriptor::createFrequencyDescr(QStringLiteral("gpu"), deviceName)
     };
 }
 
@@ -111,32 +104,74 @@ QList<MetricDescriptor> DeviceMetricFactory::hardDiskDescriptors(Device *deviceO
 
 QVariant DeviceMetricFactory::processorMetricValue(Device *deviceObject, Metrics::MetricId metricId)
 {
-    Q_UNUSED(deviceObject)
-    Q_UNUSED(metricId)
+    auto cpu = dynamic_cast<Cpu *>(deviceObject);
+    switch (metricId) {
+    case Metrics::MetricId::Loading:
+        return cpu->loading();
+
+    case Metrics::MetricId::Frequency:
+        return {};
+
+    case Metrics::MetricId::Temperature:
+        return cpu->temperature();
+
+    case Metrics::MetricId::Unknown:
+        return {};
+    }
 
     return {};
 }
 
 QVariant DeviceMetricFactory::memoryMetricValue(Device *deviceObject, Metrics::MetricId metricId)
 {
-    Q_UNUSED(deviceObject)
-    Q_UNUSED(metricId)
+    auto ram = dynamic_cast<Ram *>(deviceObject);
+    switch (metricId) {
+    case Metrics::MetricId::Loading:
+        return ram->loading();
+
+    case Metrics::MetricId::Frequency:
+    case Metrics::MetricId::Temperature:
+    case Metrics::MetricId::Unknown:
+        return {};
+    }
 
     return {};
 }
 
 QVariant DeviceMetricFactory::videoCardMetricValue(Device *deviceObject, Metrics::MetricId metricId)
 {
-    Q_UNUSED(deviceObject)
-    Q_UNUSED(metricId)
+    auto gpu = dynamic_cast<VideoCard *>(deviceObject);
+    switch (metricId) {
+    case Metrics::MetricId::Loading:
+        return gpu->loading();
+
+    case Metrics::MetricId::Frequency:
+        return {};
+
+    case Metrics::MetricId::Temperature:
+        return gpu->temperature();
+
+    case Metrics::MetricId::Unknown:
+        return {};
+    }
 
     return {};
 }
 
 QVariant DeviceMetricFactory::hardDiskMetricValue(Device *deviceObject, Metrics::MetricId metricId)
 {
-    Q_UNUSED(deviceObject)
-    Q_UNUSED(metricId)
+    auto hdd = dynamic_cast<Hdd *>(deviceObject);
+    switch (metricId) {
+    case Metrics::MetricId::Loading:
+        return hdd->loadValue();
+
+    case Metrics::MetricId::Temperature:
+        return hdd->temperatureValue();
+
+    case Metrics::MetricId::Frequency:
+    case Metrics::MetricId::Unknown:
+        return {};
+    }
 
     return {};
 }
