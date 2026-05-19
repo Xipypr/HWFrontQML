@@ -1,43 +1,9 @@
 #include "metricsservice.h"
+
+#include "devicemetricfactory.h"
 #include "storages/desktopdevice.h"
 
 #include <QHash>
-
-namespace {
-const QList<Metrics::MetricId> &metricDefinitions(Device *deviceObject)
-{
-    static const QList<Metrics::MetricId> definitions = {
-        Metrics::MetricId::Loading,
-        Metrics::MetricId::Temperature,
-        Metrics::MetricId::Frequency
-    };
-
-    static const QList<Metrics::MetricId> hardDiskDefinitions = {
-        Metrics::MetricId::Loading
-    };
-
-    if (deviceObject && deviceObject->type() == Device::HARD_DISK)
-        return hardDiskDefinitions;
-
-    return definitions;
-}
-
-QString metricPropertyName(Device *deviceObject, Metrics::MetricId metricId)
-{
-    if (!deviceObject || metricId == Metrics::MetricId::Unknown)
-        return {};
-
-    if (deviceObject->type() == Device::HARD_DISK && metricId == Metrics::MetricId::Loading)
-        return QStringLiteral("load");
-
-    if ((deviceObject->type() == Device::PROCESSOR || deviceObject->type() == Device::VIDEO_CARD)
-            && metricId == Metrics::MetricId::Temperature) {
-        return QStringLiteral("temperature");
-    }
-
-    return Metrics::metricIdToString(metricId);
-}
-}
 
 
 MetricsService::MetricsService(QObject *parent)
@@ -66,31 +32,7 @@ void MetricsService::processDeviceSnapshot(DesktopDevice *desktopDevice)
 
 void MetricsService::discoverMetrics(DesktopDevice *desktopDevice)
 {
-    QList<MetricDescriptor> discoveredMetrics;
-
-    const QList<Device *> devices = desktopDevice->devicesList();
-    for (Device *deviceObject : devices) {
-        if (!deviceObject)
-            continue;
-
-        const QString deviceId = metricDeviceId(deviceObject);
-        if (deviceId.isEmpty())
-            continue;
-
-        for (Metrics::MetricId metricId : metricDefinitions(deviceObject)) {
-            if (!hasMetric(deviceObject, metricId))
-                continue;
-
-            discoveredMetrics.push_back({
-                deviceId,
-                metricId,
-                metricDisplayName(deviceObject, deviceId),
-                Metrics::metricUnit(metricId)
-            });
-        }
-    }
-
-    m_availableMetrics = discoveredMetrics;
+    m_availableMetrics = DeviceMetricFactory::createDescriptors(desktopDevice);
     m_metricsDiscovered = true;
     emit availableMetricsChanged(m_availableMetrics);
 }
@@ -101,7 +43,7 @@ void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
 
     for (Device *deviceObject : desktopDevice->devicesList())
     {
-        const QString deviceId = metricDeviceId(deviceObject);
+        const QString deviceId = DeviceMetricFactory::deviceId(deviceObject);
         if (!deviceId.isEmpty() && !devicesById.contains(deviceId))
             devicesById.insert(deviceId, deviceObject);
     }
@@ -114,58 +56,6 @@ void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
 
         emit metricUpdated(descriptor.displayName,
                            descriptor.metricId,
-                           metricValue(deviceObject, descriptor.metricId));
+                           DeviceMetricFactory::metricValue(deviceObject, descriptor.metricId));
     }
-}
-
-
-QString MetricsService::metricDeviceId(Device *deviceObject)
-{
-    if (!deviceObject)
-        return {};
-
-    switch (deviceObject->type()) {
-    case Device::PROCESSOR:
-        return QStringLiteral("cpu");
-    case Device::MEMORY:
-        return QStringLiteral("ram");
-    case Device::VIDEO_CARD:
-        return QStringLiteral("gpu");
-    case Device::HARD_DISK:
-        return QStringLiteral("hdd");
-    default:
-        return {};
-    }
-}
-
-
-QString MetricsService::metricDisplayName(Device *deviceObject, const QString &deviceId)
-{
-    const QString deviceName = deviceObject->name();
-    return deviceName.isEmpty() ? deviceId.toUpper() : deviceName;
-}
-
-bool MetricsService::hasMetric(Device *deviceObject, Metrics::MetricId metricId)
-{
-    if (!deviceObject)
-        return false;
-
-    const QString metricName = metricPropertyName(deviceObject, metricId);
-    return !metricName.isEmpty()
-           && deviceObject->property(metricName.toLatin1().constData()).isValid();
-}
-
-QVariant MetricsService::metricValue(Device *deviceObject, Metrics::MetricId metricId) const
-{
-    if (!deviceObject)
-        return {};
-
-    if (metricId == Metrics::MetricId::Unknown)
-        return {};
-
-    const QString metricName = metricPropertyName(deviceObject, metricId);
-    if (metricName.isEmpty())
-        return {};
-
-    return deviceObject->property(metricName.toLatin1().constData());
 }

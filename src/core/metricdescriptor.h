@@ -65,8 +65,25 @@ inline QString metricUnit(MetricId metricId)
 
 struct MetricDescriptor
 {
+    MetricDescriptor() = delete;
+
+    static MetricDescriptor createLoadingDescr(const QString &deviceId, const QString &displayName)
+    {
+        return { deviceId, Metrics::MetricId::Loading, displayName, metricUnit(Metrics::MetricId::Loading)};
+    }
+
+    static MetricDescriptor createTemperatureDescr(const QString &deviceId, const QString &displayName)
+    {
+        return { deviceId, Metrics::MetricId::Temperature, displayName, metricUnit(Metrics::MetricId::Temperature) };
+    }
+
+    static MetricDescriptor createFrequencyDescr(const QString &deviceId, const QString &displayName)
+    {
+        return { deviceId, Metrics::MetricId::Frequency, displayName, metricUnit(Metrics::MetricId::Frequency) };
+    }
+
     QString deviceId;
-    Metrics::MetricId metricId = Metrics::MetricId::Unknown;
+    Metrics::MetricId metricId;
     QString displayName;
     QString unit;
 };
