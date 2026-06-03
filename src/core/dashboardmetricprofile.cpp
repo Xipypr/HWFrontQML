@@ -109,31 +109,6 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 QStringLiteral("GPU Temperature"),
                 { QStringLiteral("/temperature/0") },
                 false
-            },
-            {
-                Metrics::MetricId::FanSpeed,
-                MetricKind::Fan,
-                QStringLiteral("GPU Fan Speed"),
-                { QStringLiteral("/fan/1"), QStringLiteral("/fan/2") },
-                false
-            }
-        };
-    case HardwareKind::Motherboard:
-        return {
-            {
-                Metrics::MetricId::FanSpeed,
-                MetricKind::Fan,
-                QStringLiteral("Fan Speed"),
-                {
-                    QStringLiteral("/fan/1"),
-                    QStringLiteral("/fan/0"),
-                    QStringLiteral("/fan/2"),
-                    QStringLiteral("/fan/3"),
-                    QStringLiteral("/fan/4"),
-                    QStringLiteral("/fan/5"),
-                    QStringLiteral("/fan/6")
-                },
-                false
             }
         };
     case HardwareKind::Memory:
@@ -175,6 +150,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
         };
     case HardwareKind::Unknown:
     case HardwareKind::Computer:
+    case HardwareKind::Motherboard:
     case HardwareKind::MemoryModule:
     case HardwareKind::Network:
         return {};
