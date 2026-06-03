@@ -14,6 +14,8 @@ add_library(HardwareMonitor
     hardwarekind.h
     measurement.h
     metrickind.h
+    parsedsensorvalue.cpp
+    parsedsensorvalue.h
     unit.h
 )
 
