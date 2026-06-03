@@ -44,6 +44,8 @@ QVariant DashboardMetricsModel::data(const QModelIndex &index, int role) const
         return Metrics::metricIdToString(item.metricId);
     case UnitRole:
         return item.unit;
+    case ShowProgressBarRole:
+        return item.showProgressBar;
     default:
         return {};
     }
@@ -57,7 +59,8 @@ QHash<int, QByteArray> DashboardMetricsModel::roleNames() const
         { ValueRole, "value" },
         { VariantRole, "variant" },
         { MetricIdRole, "metricId" },
-        { UnitRole, "unit" }
+        { UnitRole, "unit" },
+        { ShowProgressBarRole, "showProgressBar" }
     };
 }
 
@@ -73,7 +76,8 @@ QVariantMap DashboardMetricsModel::get(int row) const
         { "value", item.value },
         { "variant", item.variant },
         { "metricId", Metrics::metricIdToString(item.metricId) },
-        { "unit", item.unit }
+        { "unit", item.unit },
+        { "showProgressBar", item.showProgressBar }
     };
 }
 
@@ -86,6 +90,7 @@ QJsonArray DashboardMetricsModel::toJson() const
         widgetObject[QStringLiteral("title")] = item.title;
         widgetObject[QStringLiteral("metricId")] = Metrics::metricIdToString(item.metricId);
         widgetObject[QStringLiteral("unit")] = item.unit;
+        widgetObject[QStringLiteral("showProgressBar")] = item.showProgressBar;
         widgetObject[QStringLiteral("variant")] = item.variant;
         widgetsArray.append(widgetObject);
     }
@@ -118,7 +123,7 @@ void DashboardMetricsModel::restoreFromJson(const QJsonArray &widgets)
         WidgetItem item;
         item.widgetId = makeWidgetId(key);
         item.title = key.title;
-        item.value = 0;
+        item.value = 0.0;
         item.variant = widgetObject.value(QStringLiteral("variant")).toString(QStringLiteral("segments"));
         if (item.variant.isEmpty())
             item.variant = QStringLiteral("segments");
@@ -126,6 +131,7 @@ void DashboardMetricsModel::restoreFromJson(const QJsonArray &widgets)
         item.unit = widgetObject.value(QStringLiteral("unit")).toString();
         if (item.unit.isEmpty())
             item.unit = Metrics::metricUnit(key.metricId);
+        item.showProgressBar = widgetObject.value(QStringLiteral("showProgressBar")).toBool(key.metricId == Metrics::MetricId::Loading);
 
         restoredIndexes.insert(key, restoredItems.size());
         restoredItems.push_back(item);
@@ -173,7 +179,8 @@ QVariantList DashboardMetricsModel::availableMetricsForDevice(const QString &dev
             { "metricId", metricName },
             { "label", metricName },
             { "title", descriptor.displayName },
-            { "unit", descriptor.unit }
+            { "unit", descriptor.unit },
+            { "showProgressBar", descriptor.showProgressBar }
         });
     }
 
@@ -183,6 +190,7 @@ QVariantList DashboardMetricsModel::availableMetricsForDevice(const QString &dev
 bool DashboardMetricsModel::addWidget(const QString &title,
                                       Metrics::MetricId metricId,
                                       const QString &unit,
+                                      bool showProgressBar,
                                       const QString &variant)
 {
     const DashboardMetricWidgetKey key = makeWidgetKey(title, metricId);
@@ -192,10 +200,11 @@ bool DashboardMetricsModel::addWidget(const QString &title,
     return insertWidget({
         makeWidgetId(key),
         key.title,
-        0,
+        0.0,
         variant.isEmpty() ? QStringLiteral("segments") : variant,
         key.metricId,
-        unit.isEmpty() ? Metrics::metricUnit(key.metricId) : unit
+        unit.isEmpty() ? Metrics::metricUnit(key.metricId) : unit,
+        showProgressBar
     });
 }
 
@@ -214,6 +223,7 @@ bool DashboardMetricsModel::addWidgetForMetric(const QString &deviceId,
     return addWidget(descriptor->displayName,
                      descriptor->metricId,
                      descriptor->unit,
+                     descriptor->showProgressBar,
                      variant);
 }
 
@@ -261,7 +271,7 @@ bool DashboardMetricsModel::setVariant(const QString &widgetId, const QString &v
 
 bool DashboardMetricsModel::updateWidget(const QString &title,
                                          Metrics::MetricId metricId,
-                                         int value)
+                                         double value)
 {
     const int index = widgetIndexForMetric(title, metricId);
     if (index < 0)
@@ -285,10 +295,21 @@ void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescript
             continue;
 
         WidgetItem &item = m_items[widgetIndex];
+        QVector<int> changedRoles;
+
         if (!descriptor.unit.isEmpty() && item.unit != descriptor.unit) {
             item.unit = descriptor.unit;
+            changedRoles.push_back(UnitRole);
+        }
+
+        if (item.showProgressBar != descriptor.showProgressBar) {
+            item.showProgressBar = descriptor.showProgressBar;
+            changedRoles.push_back(ShowProgressBarRole);
+        }
+
+        if (!changedRoles.isEmpty()) {
             const QModelIndex modelIndex = this->index(widgetIndex);
-            emit dataChanged(modelIndex, modelIndex, { UnitRole });
+            emit dataChanged(modelIndex, modelIndex, changedRoles);
         }
     }
 }
@@ -298,11 +319,11 @@ void DashboardMetricsModel::onMetricUpdated(const QString &title,
                                             const QVariant &value)
 {
     if (title.isEmpty() || metricId == Metrics::MetricId::Unknown
-            || !value.isValid() || value.isNull() || !value.canConvert<int>()) {
+            || !value.isValid() || value.isNull() || !value.canConvert<double>()) {
         return;
     }
 
-    setWidgetValue(title, metricId, value.toInt());
+    setWidgetValue(title, metricId, value.toDouble());
 }
 
 DashboardMetricWidgetKey DashboardMetricsModel::makeWidgetKey(const QString &title, Metrics::MetricId metricId)
@@ -375,7 +396,7 @@ void DashboardMetricsModel::rebuildWidgetIndexes()
 
 void DashboardMetricsModel::setWidgetValue(const QString &title,
                                            Metrics::MetricId metricId,
-                                           int value,
+                                           double value,
                                            const QString &unit)
 {
     const int index = widgetIndexForMetric(title, metricId);
@@ -415,6 +436,7 @@ void DashboardMetricsModel::syncInitialWidgetsWithMetrics()
         addWidget(descriptor.displayName,
                   descriptor.metricId,
                   descriptor.unit,
+                  descriptor.showProgressBar,
                   QStringLiteral("segments"));
     }
 
