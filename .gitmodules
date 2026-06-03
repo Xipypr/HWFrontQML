@@ -1,6 +1,3 @@
 [submodule "HWConnector"]
 	path = HWConnector
 	url = https://github.com/Xipypr/HWConnector.git
-[submodule "DeviceBuilder"]
-	path = DeviceBuilder
-	url = https://github.com/Xipypr/DeviceBuilder.git

@@ -7,7 +7,6 @@
 #include <QString>
 #include <QVariant>
 
-class DesktopDevice;
 struct HardwareSnapshot;
 
 class MetricsService : public QObject
@@ -19,7 +18,6 @@ public:
     QList<MetricDescriptor> metricDescriptors() const;
 
 public slots:
-    void processDeviceSnapshot(DesktopDevice *desktopDevice);
     void processSnapshot(const HardwareSnapshot &snapshot);
 
 signals:
@@ -29,8 +27,6 @@ signals:
                        const QVariant &value);
 
 private:
-    void discoverMetrics(DesktopDevice *desktopDevice);
-    void refreshMetricValues(DesktopDevice *desktopDevice);
     void discoverMetrics(const HardwareSnapshot &snapshot);
     void refreshMetricValues(const HardwareSnapshot &snapshot);
 

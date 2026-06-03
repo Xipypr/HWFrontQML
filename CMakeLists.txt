@@ -44,8 +44,6 @@ function(initialize_required_submodule submodule_dir)
 endfunction()
 
 initialize_required_submodule(HWConnector)
-initialize_required_submodule(DeviceBuilder)
-
 find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml)
 
 if(HWFRONTQML_DEPLOY_AFTER_BUILD)
@@ -64,14 +62,9 @@ endif()
 
 add_subdirectory(HWConnector)
 add_subdirectory(HardwareMonitor)
-add_subdirectory(DeviceBuilder)
 
 if(NOT TARGET HWConnector)
     message(FATAL_ERROR "Required target 'HWConnector' was not created by submodule 'HWConnector'")
-endif()
-
-if(NOT TARGET DeviceBuilder)
-    message(FATAL_ERROR "Required target 'DeviceBuilder' was not created by submodule 'DeviceBuilder'")
 endif()
 
 if(NOT TARGET HardwareMonitor)
@@ -99,18 +92,11 @@ configure_required_dependency_linkage(HWConnector
     HWCONNECTOR_STATIC
     HWCONNECTOR_LIBRARY
 )
-configure_required_dependency_linkage(DeviceBuilder
-    DEVICEBUILDER_STATIC
-    DEVICEBUILDER_LIBRARY
-)
-
 qt_add_executable(HWFrontQML
     src/app/main.cpp
 
     src/core/core.cpp
     src/core/core.h
-    src/core/devicemetricfactory.cpp
-    src/core/devicemetricfactory.h
     src/core/metricdescriptor.h
     src/core/metricsservice.cpp
     src/core/metricsservice.h
@@ -137,7 +123,6 @@ target_include_directories(HWFrontQML
 target_link_libraries(HWFrontQML
     PRIVATE
         HWConnector
-        DeviceBuilder
         HardwareMonitor
         Qt6::Quick
         Qt6::Qml

@@ -175,7 +175,7 @@ Item {
         Connections{
             target: sessionManager
 
-            function onDeviceReady(sessionId, deviceRef) {
+            function onDeviceReady(sessionId, displayName) {
                 if (!awaitingDeviceCreation || root.sessionId !== sessionId)
                     return
 
@@ -183,7 +183,7 @@ Item {
                 connectingIndicator.running = false
                 connectButton.text = "Reconnect"
                 connectionInitialized = true
-                root.connectedDeviceName = deviceRef.name
+                root.connectedDeviceName = displayName
                 if (sessionManager.sessionsModel.rowCount() === 1)
                     root.sessionSelected(sessionId)
             }
