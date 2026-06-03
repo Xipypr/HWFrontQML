@@ -1,6 +1,7 @@
 #ifndef METRICSSERVICE_H
 #define METRICSSERVICE_H
 
+#include "dashboardmetricprofile.h"
 #include "metricdescriptor.h"
 
 #include <QObject>
@@ -32,6 +33,7 @@ private:
 
     bool m_metricsDiscovered = false;
     QList<MetricDescriptor> m_availableMetrics;
+    DashboardMetricProfile m_metricProfile;
 };
 
 #endif // METRICSSERVICE_H

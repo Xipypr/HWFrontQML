@@ -69,23 +69,24 @@ struct MetricDescriptor
 
     static MetricDescriptor createLoadingDescr(const QString &deviceId, const QString &displayName)
     {
-        return { deviceId, Metrics::MetricId::Loading, displayName, metricUnit(Metrics::MetricId::Loading)};
+        return { deviceId, Metrics::MetricId::Loading, displayName, metricUnit(Metrics::MetricId::Loading), true };
     }
 
     static MetricDescriptor createTemperatureDescr(const QString &deviceId, const QString &displayName)
     {
-        return { deviceId, Metrics::MetricId::Temperature, displayName, metricUnit(Metrics::MetricId::Temperature) };
+        return { deviceId, Metrics::MetricId::Temperature, displayName, metricUnit(Metrics::MetricId::Temperature), false };
     }
 
     static MetricDescriptor createFrequencyDescr(const QString &deviceId, const QString &displayName)
     {
-        return { deviceId, Metrics::MetricId::Frequency, displayName, metricUnit(Metrics::MetricId::Frequency) };
+        return { deviceId, Metrics::MetricId::Frequency, displayName, metricUnit(Metrics::MetricId::Frequency), false };
     }
 
     QString deviceId;
     Metrics::MetricId metricId;
     QString displayName;
     QString unit;
+    bool showProgressBar = false;
 };
 
 Q_DECLARE_METATYPE(Metrics::MetricId)
