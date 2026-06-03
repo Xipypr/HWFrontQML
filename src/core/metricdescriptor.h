@@ -13,7 +13,9 @@ enum class MetricId {
     Unknown = 0,
     Loading,
     Temperature,
-    Frequency
+    Frequency,
+    BatteryLevel,
+    FanSpeed
 };
 Q_ENUM_NS(MetricId)
 
@@ -26,6 +28,10 @@ inline QString metricIdToString(MetricId metricId)
         return QStringLiteral("temperature");
     case MetricId::Frequency:
         return QStringLiteral("frequency");
+    case MetricId::BatteryLevel:
+        return QStringLiteral("batteryLevel");
+    case MetricId::FanSpeed:
+        return QStringLiteral("fanSpeed");
     case MetricId::Unknown:
         return QStringLiteral("unknown");
     }
@@ -42,6 +48,10 @@ inline MetricId metricIdFromString(const QString &metricId)
         return MetricId::Temperature;
     if (normalizedMetricId == QStringLiteral("frequency"))
         return MetricId::Frequency;
+    if (normalizedMetricId == QStringLiteral("batterylevel"))
+        return MetricId::BatteryLevel;
+    if (normalizedMetricId == QStringLiteral("fanspeed"))
+        return MetricId::FanSpeed;
 
     return MetricId::Unknown;
 }
@@ -55,6 +65,10 @@ inline QString metricUnit(MetricId metricId)
         return QStringLiteral("°C");
     case MetricId::Frequency:
         return QStringLiteral("MHz");
+    case MetricId::BatteryLevel:
+        return QStringLiteral("%");
+    case MetricId::FanSpeed:
+        return QStringLiteral("RPM");
     case MetricId::Unknown:
         return {};
     }
@@ -80,6 +94,16 @@ struct MetricDescriptor
     static MetricDescriptor createFrequencyDescr(const QString &deviceId, const QString &displayName)
     {
         return { deviceId, Metrics::MetricId::Frequency, displayName, metricUnit(Metrics::MetricId::Frequency), false };
+    }
+
+    static MetricDescriptor createBatteryLevelDescr(const QString &deviceId, const QString &displayName)
+    {
+        return { deviceId, Metrics::MetricId::BatteryLevel, displayName, metricUnit(Metrics::MetricId::BatteryLevel), true };
+    }
+
+    static MetricDescriptor createFanSpeedDescr(const QString &deviceId, const QString &displayName)
+    {
+        return { deviceId, Metrics::MetricId::FanSpeed, displayName, metricUnit(Metrics::MetricId::FanSpeed), false };
     }
 
     QString deviceId;
