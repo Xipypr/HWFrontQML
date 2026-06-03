@@ -15,7 +15,7 @@ QList<DashboardMetricDefinition> DashboardMetricProfile::definitionsForSnapshot(
             definition.deviceId = device.id;
             definition.metricId = rule.metricId;
             definition.displayName = rule.displayName.isEmpty() ? device.name : rule.displayName;
-            definition.unit = rule.unit;
+            definition.unit = Metrics::metricUnit(rule.metricId);
             definition.showProgressBar = rule.showProgressBar;
 
             if (measurementForDefinition(snapshot, definition).has_value())
@@ -77,24 +77,21 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 MetricKind::Load,
                 QStringLiteral("CPU Loading"),
                 { QStringLiteral("/load/0") },
-                true,
-                Metrics::metricUnit(Metrics::MetricId::Loading)
+                true
             },
             {
                 Metrics::MetricId::Temperature,
                 MetricKind::Temperature,
                 QStringLiteral("CPU Temperature"),
                 { QStringLiteral("/temperature/2") },
-                false,
-                Metrics::metricUnit(Metrics::MetricId::Temperature)
+                false
             },
             {
                 Metrics::MetricId::Frequency,
                 MetricKind::Clock,
                 QStringLiteral("CPU Frequency"),
                 { QStringLiteral("/clock/1") },
-                false,
-                Metrics::metricUnit(Metrics::MetricId::Frequency)
+                false
             }
         };
     case HardwareKind::Gpu:
@@ -104,16 +101,14 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 MetricKind::Load,
                 QStringLiteral("GPU Loading"),
                 { QStringLiteral("/load/0") },
-                true,
-                Metrics::metricUnit(Metrics::MetricId::Loading)
+                true
             },
             {
                 Metrics::MetricId::Temperature,
                 MetricKind::Temperature,
                 QStringLiteral("GPU Temperature"),
                 { QStringLiteral("/temperature/0") },
-                false,
-                Metrics::metricUnit(Metrics::MetricId::Temperature)
+                false
             }
         };
     case HardwareKind::Memory:
@@ -123,8 +118,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 MetricKind::Load,
                 QStringLiteral("RAM Loading"),
                 { QStringLiteral("/load/0") },
-                true,
-                Metrics::metricUnit(Metrics::MetricId::Loading)
+                true
             }
         };
     case HardwareKind::Storage:
@@ -134,16 +128,14 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 MetricKind::Load,
                 QStringLiteral("Storage Loading"),
                 { QStringLiteral("/load/30") },
-                true,
-                Metrics::metricUnit(Metrics::MetricId::Loading)
+                true
             },
             {
                 Metrics::MetricId::Temperature,
                 MetricKind::Temperature,
                 QStringLiteral("Storage Temperature"),
                 { QStringLiteral("/temperature/0") },
-                false,
-                Metrics::metricUnit(Metrics::MetricId::Temperature)
+                false
             }
         };
     case HardwareKind::Unknown:

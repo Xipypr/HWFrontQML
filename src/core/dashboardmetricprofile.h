@@ -34,7 +34,6 @@ private:
         QString displayName;
         QStringList sensorIdSuffixes;
         bool showProgressBar = false;
-        QString unit;
     };
 
     QList<MetricRule> rulesForDeviceKind(HardwareKind kind) const;
