@@ -8,6 +8,7 @@ Rectangle {
     property string title: "N/A"
     property real value: 0
     property string unit: ""
+    property string metricId: ""
     property bool showProgressBar: true
     // segments | ring | linear | arc180
     property string variant: "segments"
@@ -26,8 +27,9 @@ Rectangle {
     readonly property color warningAccentColor: "#F59E0B"
     readonly property color criticalAccentColor: "#EF4444"
     readonly property int safeValue: Math.max(0, Math.min(100, value))
-    readonly property bool isCriticalValue: safeValue >= criticalThreshold
-    readonly property bool isWarningValue: safeValue >= warningThreshold && !isCriticalValue
+    readonly property bool useStatusColor: showProgressBar && metricId !== "batteryLevel"
+    readonly property bool isCriticalValue: useStatusColor && safeValue >= criticalThreshold
+    readonly property bool isWarningValue: useStatusColor && safeValue >= warningThreshold && !isCriticalValue
     readonly property color accentColor: resolveAccentColor()
     readonly property string statusText: resolveStatusText()
     readonly property int valueFontSize: 42
@@ -46,6 +48,9 @@ Rectangle {
         if (!showProgressBar)
             return valueOnlyAccentColor
 
+        if (!useStatusColor)
+            return normalAccentColor
+
         if (isCriticalValue)
             return criticalAccentColor
 
@@ -56,7 +61,7 @@ Rectangle {
     }
 
     function resolveStatusText() {
-        if (!showProgressBar)
+        if (!useStatusColor)
             return ""
 
         if (isCriticalValue)
@@ -156,7 +161,7 @@ Rectangle {
                 width: 8
                 height: 8
                 radius: 4
-                visible: card.showProgressBar
+                visible: card.useStatusColor
                 color: card.accentColor
 
                 SequentialAnimation on opacity {
@@ -167,7 +172,7 @@ Rectangle {
             }
 
             Text {
-                visible: card.showProgressBar
+                visible: card.useStatusColor
                 text: card.statusText
                 color: card.accentColor
                 font.pixelSize: 11

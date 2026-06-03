@@ -69,9 +69,13 @@ private:
 
     static bool isMetricKeyValid(const QString &deviceId, Metrics::MetricId metricId);
     static QString makeWidgetId(const QString &deviceId, Metrics::MetricId metricId);
+    static bool deviceIdContains(const MetricDescriptor &descriptor, const QString &text);
     int widgetIndexById(const QString &widgetId) const;
     int widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const;
     bool addWidget(const MetricDescriptor &descriptor, const QString &variant);
+    bool addFirstDefaultWidget(Metrics::MetricId metricId,
+                               const QString &deviceIdText,
+                               const QString &variant);
     bool insertWidget(const WidgetItem &item);
     bool removeWidgetAt(int index);
     void rebuildWidgetIndexes();

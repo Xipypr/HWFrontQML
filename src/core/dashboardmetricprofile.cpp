@@ -69,6 +69,9 @@ std::optional<Measurement> DashboardMetricProfile::measurementForDefinition(
 
 QString DashboardMetricProfile::displayNameForDeviceMetric(const HardwareDevice &device, const MetricRule &rule)
 {
+    if (device.kind == HardwareKind::Battery)
+        return QStringLiteral("Battery");
+
     const QString deviceName = device.name.trimmed().isEmpty() ? device.id : device.name.trimmed();
     const QString metricLabel = rule.metricLabel.trimmed();
 

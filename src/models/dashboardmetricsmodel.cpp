@@ -311,6 +311,14 @@ QString DashboardMetricsModel::makeWidgetId(const QString &deviceId, Metrics::Me
     return deviceId + QStringLiteral(":") + Metrics::metricIdToString(metricId);
 }
 
+bool DashboardMetricsModel::deviceIdContains(const MetricDescriptor &descriptor, const QString &text)
+{
+    if (text.isEmpty())
+        return true;
+
+    return descriptor.deviceId.contains(text, Qt::CaseInsensitive);
+}
+
 int DashboardMetricsModel::widgetIndexById(const QString &widgetId) const
 {
     const auto indexIt = m_widgetIndexById.constFind(widgetId);
@@ -338,6 +346,18 @@ bool DashboardMetricsModel::addWidget(const MetricDescriptor &descriptor, const 
         descriptor.unit.isEmpty() ? Metrics::metricUnit(descriptor.metricId) : descriptor.unit,
         descriptor.showProgressBar
     });
+}
+
+bool DashboardMetricsModel::addFirstDefaultWidget(Metrics::MetricId metricId,
+                                                  const QString &deviceIdText,
+                                                  const QString &variant)
+{
+    for (const MetricDescriptor &descriptor : m_availableMetrics) {
+        if (descriptor.metricId == metricId && deviceIdContains(descriptor, deviceIdText))
+            return addWidget(descriptor, variant);
+    }
+
+    return false;
 }
 
 bool DashboardMetricsModel::insertWidget(const WidgetItem &item)
@@ -415,12 +435,12 @@ void DashboardMetricsModel::syncInitialWidgetsWithMetrics()
     if (m_hasSeededInitialWidgets)
         return;
 
-    for (const MetricDescriptor &descriptor : m_availableMetrics) {
-        if (descriptor.deviceId.isEmpty() || descriptor.metricId == Metrics::MetricId::Unknown)
-            continue;
-
-        addWidget(descriptor, QStringLiteral("segments"));
-    }
+    addFirstDefaultWidget(Metrics::MetricId::Loading, QStringLiteral("cpu"), QStringLiteral("arc180"));
+    addFirstDefaultWidget(Metrics::MetricId::Temperature, QStringLiteral("cpu"), QStringLiteral("segments"));
+    addFirstDefaultWidget(Metrics::MetricId::Loading, QStringLiteral("gpu"), QStringLiteral("arc180"));
+    addFirstDefaultWidget(Metrics::MetricId::Temperature, QStringLiteral("gpu"), QStringLiteral("segments"));
+    addFirstDefaultWidget(Metrics::MetricId::Loading, QStringLiteral("ram"), QStringLiteral("segments"));
+    addFirstDefaultWidget(Metrics::MetricId::BatteryLevel, QString(), QStringLiteral("segments"));
 
     if (!m_items.isEmpty())
         m_hasSeededInitialWidgets = true;
