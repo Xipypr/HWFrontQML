@@ -2,19 +2,6 @@
 
 #include <hardwaredevice.h>
 
-namespace {
-
-bool nameContainsAny(const QString &name, const QStringList &parts)
-{
-    for (const QString &part : parts) {
-        if (name.contains(part, Qt::CaseInsensitive))
-            return true;
-    }
-    return false;
-}
-
-} // namespace
-
 QList<DashboardMetricDefinition> DashboardMetricProfile::definitionsForSnapshot(const HardwareSnapshot &snapshot) const
 {
     QList<DashboardMetricDefinition> definitions;
@@ -59,29 +46,20 @@ std::optional<Measurement> DashboardMetricProfile::measurementForDefinition(
         if (rule.metricId != definition.metricId)
             continue;
 
-        QList<Measurement> candidates;
-        for (const Measurement &measurement : snapshot.measurements) {
-            if (measurement.deviceId == definition.deviceId
-                    && measurement.kind == rule.measurementKind
-                    && measurement.value.has_value()) {
-                candidates.append(measurement);
+        QStringList sensorIds;
+        for (const QString &suffix : rule.sensorIdSuffixes)
+            sensorIds.append(definition.deviceId + suffix);
+
+        for (const QString &sensorId : sensorIds) {
+            for (const Measurement &measurement : snapshot.measurements) {
+                if (measurement.id == sensorId
+                        && measurement.deviceId == definition.deviceId
+                        && measurement.kind == rule.measurementKind
+                        && measurement.value.has_value()) {
+                    return measurement;
+                }
             }
         }
-
-        for (const QString &primaryName : rule.primaryNames) {
-            for (const Measurement &candidate : candidates) {
-                if (candidate.name.compare(primaryName, Qt::CaseInsensitive) == 0)
-                    return candidate;
-            }
-        }
-
-        for (const Measurement &candidate : candidates) {
-            if (nameContainsAny(candidate.name, rule.primaryNames))
-                return candidate;
-        }
-
-        if (rule.allowFirstMatchFallback && !candidates.isEmpty())
-            return candidates.first();
 
         return std::nullopt;
     }
@@ -98,8 +76,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 Metrics::MetricId::Loading,
                 MetricKind::Load,
                 QStringLiteral("CPU Loading"),
-                { QStringLiteral("CPU Total"), QStringLiteral("Total") },
-                true,
+                { QStringLiteral("/load/0") },
                 true,
                 Metrics::metricUnit(Metrics::MetricId::Loading)
             },
@@ -107,8 +84,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 Metrics::MetricId::Temperature,
                 MetricKind::Temperature,
                 QStringLiteral("CPU Temperature"),
-                { QStringLiteral("Core (Tctl/Tdie)"), QStringLiteral("CPU Package"), QStringLiteral("Package"), QStringLiteral("Core Average") },
-                true,
+                { QStringLiteral("/temperature/2") },
                 false,
                 Metrics::metricUnit(Metrics::MetricId::Temperature)
             },
@@ -116,8 +92,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 Metrics::MetricId::Frequency,
                 MetricKind::Clock,
                 QStringLiteral("CPU Frequency"),
-                { QStringLiteral("Cores (Average)"), QStringLiteral("Core Average") },
-                true,
+                { QStringLiteral("/clock/1") },
                 false,
                 Metrics::metricUnit(Metrics::MetricId::Frequency)
             }
@@ -128,8 +103,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 Metrics::MetricId::Loading,
                 MetricKind::Load,
                 QStringLiteral("GPU Loading"),
-                { QStringLiteral("GPU Core"), QStringLiteral("D3D 3D"), QStringLiteral("Total") },
-                true,
+                { QStringLiteral("/load/0") },
                 true,
                 Metrics::metricUnit(Metrics::MetricId::Loading)
             },
@@ -137,8 +111,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 Metrics::MetricId::Temperature,
                 MetricKind::Temperature,
                 QStringLiteral("GPU Temperature"),
-                { QStringLiteral("GPU Core"), QStringLiteral("Temperature") },
-                true,
+                { QStringLiteral("/temperature/0") },
                 false,
                 Metrics::metricUnit(Metrics::MetricId::Temperature)
             }
@@ -149,8 +122,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 Metrics::MetricId::Loading,
                 MetricKind::Load,
                 QStringLiteral("RAM Loading"),
-                { QStringLiteral("Memory"), QStringLiteral("Memory Used") },
-                true,
+                { QStringLiteral("/load/0") },
                 true,
                 Metrics::metricUnit(Metrics::MetricId::Loading)
             }
@@ -161,8 +133,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 Metrics::MetricId::Loading,
                 MetricKind::Load,
                 QStringLiteral("Storage Loading"),
-                { QStringLiteral("Used Space"), QStringLiteral("Total Activity") },
-                true,
+                { QStringLiteral("/load/30") },
                 true,
                 Metrics::metricUnit(Metrics::MetricId::Loading)
             },
@@ -170,8 +141,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 Metrics::MetricId::Temperature,
                 MetricKind::Temperature,
                 QStringLiteral("Storage Temperature"),
-                { QStringLiteral("Temperature") },
-                true,
+                { QStringLiteral("/temperature/0") },
                 false,
                 Metrics::metricUnit(Metrics::MetricId::Temperature)
             }

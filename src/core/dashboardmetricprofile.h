@@ -32,8 +32,7 @@ private:
         Metrics::MetricId metricId = Metrics::MetricId::Unknown;
         MetricKind measurementKind = MetricKind::Unknown;
         QString displayName;
-        QStringList primaryNames;
-        bool allowFirstMatchFallback = false;
+        QStringList sensorIdSuffixes;
         bool showProgressBar = false;
         QString unit;
     };
