@@ -63,8 +63,8 @@ if(HWFRONTQML_DEPLOY_AFTER_BUILD)
 endif()
 
 add_subdirectory(HWConnector)
-add_subdirectory(DeviceBuilder)
 add_subdirectory(HardwareMonitor)
+add_subdirectory(DeviceBuilder)
 
 if(NOT TARGET HWConnector)
     message(FATAL_ERROR "Required target 'HWConnector' was not created by submodule 'HWConnector'")
