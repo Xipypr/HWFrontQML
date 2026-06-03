@@ -55,7 +55,7 @@ void MetricsService::refreshMetricValues(const HardwareSnapshot &snapshot)
         if (!measurement.has_value())
             continue;
 
-        emit metricUpdated(descriptor.displayName,
+        emit metricUpdated(descriptor.deviceId,
                            descriptor.metricId,
                            QVariant::fromValue(measurement.value().value.value_or(0.0f)));
     }
