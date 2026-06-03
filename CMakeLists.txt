@@ -64,6 +64,7 @@ endif()
 
 add_subdirectory(HWConnector)
 add_subdirectory(DeviceBuilder)
+add_subdirectory(HardwareMonitor)
 
 if(NOT TARGET HWConnector)
     message(FATAL_ERROR "Required target 'HWConnector' was not created by submodule 'HWConnector'")
@@ -71,6 +72,10 @@ endif()
 
 if(NOT TARGET DeviceBuilder)
     message(FATAL_ERROR "Required target 'DeviceBuilder' was not created by submodule 'DeviceBuilder'")
+endif()
+
+if(NOT TARGET HardwareMonitor)
+    message(FATAL_ERROR "Required target 'HardwareMonitor' was not created")
 endif()
 
 function(configure_required_dependency_linkage target_name)
@@ -133,6 +138,7 @@ target_link_libraries(HWFrontQML
     PRIVATE
         HWConnector
         DeviceBuilder
+        HardwareMonitor
         Qt6::Quick
         Qt6::Qml
         Qt6::Gui
