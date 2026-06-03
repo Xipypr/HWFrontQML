@@ -31,10 +31,15 @@ Rectangle {
     readonly property color accentColor: resolveAccentColor()
     readonly property string statusText: resolveStatusText()
     readonly property int valueFontSize: 42
+    readonly property int compactValueFontSize: 24
+    readonly property string valueFontFamily: "Consolas"
+    readonly property string valueWidthSampleText: (showProgressBar ? "100" : "0000.0") + unit
+    readonly property real valueTextWidth: valueWidthProbe.implicitWidth
+    readonly property real compactValueTextWidth: compactValueWidthProbe.implicitWidth
 
     function formattedValue() {
         const rounded = Math.round(value * 10) / 10
-        return Math.abs(rounded - Math.round(rounded)) < 0.05 ? Math.round(rounded).toString() : rounded.toFixed(1)
+        return showProgressBar ? Math.round(rounded).toString() : rounded.toFixed(1)
     }
 
     function resolveAccentColor() {
@@ -102,6 +107,24 @@ Rectangle {
     border.width: 1
     border.color: Qt.rgba(100 / 255, 116 / 255, 139 / 255, 0.55)
 
+    Text {
+        id: valueWidthProbe
+        visible: false
+        text: card.valueWidthSampleText
+        font.family: card.valueFontFamily
+        font.pixelSize: card.valueFontSize
+        font.bold: true
+    }
+
+    Text {
+        id: compactValueWidthProbe
+        visible: false
+        text: card.valueWidthSampleText
+        font.family: card.valueFontFamily
+        font.pixelSize: card.compactValueFontSize
+        font.bold: true
+    }
+
     Rectangle {
         anchors.fill: parent
         anchors.margins: -1
@@ -157,7 +180,11 @@ Rectangle {
             visible: !card.showProgressBar || (card.variant !== "arc180" && card.variant !== "ring")
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
+            font.family: card.valueFontFamily
             font.bold: true
+            horizontalAlignment: Text.AlignRight
+            Layout.preferredWidth: card.valueTextWidth
+            Layout.maximumWidth: parent.width
         }
 
         Loader {
@@ -322,7 +349,10 @@ Rectangle {
                 anchors.centerIn: parent
                 text: card.formattedValue() + card.unit
                 color: "#F8FAFC"
-                font.pixelSize: 24
+                width: card.compactValueTextWidth
+                horizontalAlignment: Text.AlignHCenter
+                font.family: card.valueFontFamily
+                font.pixelSize: card.compactValueFontSize
                 font.bold: true
             }
         }
@@ -395,7 +425,10 @@ Rectangle {
                 anchors.verticalCenterOffset: 28
                 text: card.formattedValue() + card.unit
                 color: "#F8FAFC"
-                font.pixelSize: 24
+                width: card.compactValueTextWidth
+                horizontalAlignment: Text.AlignHCenter
+                font.family: card.valueFontFamily
+                font.pixelSize: card.compactValueFontSize
                 font.bold: true
             }
         }
