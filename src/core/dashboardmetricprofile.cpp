@@ -14,7 +14,7 @@ QList<DashboardMetricDefinition> DashboardMetricProfile::definitionsForSnapshot(
             DashboardMetricDefinition definition;
             definition.deviceId = device.id;
             definition.metricId = rule.metricId;
-            definition.displayName = rule.displayName.isEmpty() ? device.name : rule.displayName;
+            definition.displayName = displayNameForDeviceMetric(device, rule);
             definition.unit = Metrics::metricUnit(rule.metricId);
             definition.showProgressBar = rule.showProgressBar;
 
@@ -67,6 +67,20 @@ std::optional<Measurement> DashboardMetricProfile::measurementForDefinition(
     return std::nullopt;
 }
 
+QString DashboardMetricProfile::displayNameForDeviceMetric(const HardwareDevice &device, const MetricRule &rule)
+{
+    const QString deviceName = device.name.trimmed().isEmpty() ? device.id : device.name.trimmed();
+    const QString metricLabel = rule.metricLabel.trimmed();
+
+    if (deviceName.isEmpty())
+        return metricLabel;
+
+    if (metricLabel.isEmpty())
+        return deviceName;
+
+    return deviceName + QStringLiteral(" ") + metricLabel;
+}
+
 QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDeviceKind(HardwareKind kind) const
 {
     switch (kind) {
@@ -75,21 +89,21 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
             {
                 Metrics::MetricId::Loading,
                 MetricKind::Load,
-                QStringLiteral("CPU Loading"),
+                QStringLiteral("Loading"),
                 { QStringLiteral("/load/0") },
                 true
             },
             {
                 Metrics::MetricId::Temperature,
                 MetricKind::Temperature,
-                QStringLiteral("CPU Temperature"),
+                QStringLiteral("Temperature"),
                 { QStringLiteral("/temperature/2") },
                 false
             },
             {
                 Metrics::MetricId::Frequency,
                 MetricKind::Clock,
-                QStringLiteral("CPU Frequency"),
+                QStringLiteral("Frequency"),
                 { QStringLiteral("/clock/1") },
                 false
             }
@@ -99,14 +113,14 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
             {
                 Metrics::MetricId::Loading,
                 MetricKind::Load,
-                QStringLiteral("GPU Loading"),
+                QStringLiteral("Loading"),
                 { QStringLiteral("/load/0") },
                 true
             },
             {
                 Metrics::MetricId::Temperature,
                 MetricKind::Temperature,
-                QStringLiteral("GPU Temperature"),
+                QStringLiteral("Temperature"),
                 { QStringLiteral("/temperature/0") },
                 false
             }
@@ -116,7 +130,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
             {
                 Metrics::MetricId::Loading,
                 MetricKind::Load,
-                QStringLiteral("RAM Loading"),
+                QStringLiteral("Loading"),
                 { QStringLiteral("/load/0") },
                 true
             }
@@ -126,14 +140,14 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
             {
                 Metrics::MetricId::Loading,
                 MetricKind::Load,
-                QStringLiteral("Storage Loading"),
+                QStringLiteral("Used Space"),
                 { QStringLiteral("/load/30") },
                 true
             },
             {
                 Metrics::MetricId::Temperature,
                 MetricKind::Temperature,
-                QStringLiteral("Storage Temperature"),
+                QStringLiteral("Temperature"),
                 { QStringLiteral("/temperature/0") },
                 false
             }
@@ -143,7 +157,7 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
             {
                 Metrics::MetricId::BatteryLevel,
                 MetricKind::Level,
-                QStringLiteral("Battery Level"),
+                QStringLiteral("Level"),
                 { QStringLiteral("/level/0") },
                 true
             }

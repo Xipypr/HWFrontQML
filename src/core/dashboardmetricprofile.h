@@ -31,11 +31,12 @@ private:
     struct MetricRule {
         Metrics::MetricId metricId = Metrics::MetricId::Unknown;
         MetricKind measurementKind = MetricKind::Unknown;
-        QString displayName;
+        QString metricLabel;
         QStringList sensorIdSuffixes;
         bool showProgressBar = false;
     };
 
+    static QString displayNameForDeviceMetric(const HardwareDevice &device, const MetricRule &rule);
     QList<MetricRule> rulesForDeviceKind(HardwareKind kind) const;
 };
 
