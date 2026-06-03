@@ -9,24 +9,6 @@
 #include <QVector>
 #include <QVariantList>
 
-struct DashboardMetricWidgetKey
-{
-    QString title;
-    Metrics::MetricId metricId = Metrics::MetricId::Unknown;
-
-    bool operator==(const DashboardMetricWidgetKey &other) const
-    {
-        return title == other.title && metricId == other.metricId;
-    }
-
-    bool isValid() const
-    {
-        return !title.isEmpty() && metricId != Metrics::MetricId::Unknown;
-    }
-};
-
-uint qHash(const DashboardMetricWidgetKey &key, uint seed = 0);
-
 class DashboardMetricsModel : public QAbstractListModel
 {
     Q_OBJECT
@@ -54,18 +36,13 @@ public:
     bool hasSeededInitialWidgets() const;
     Q_INVOKABLE QVariantList availableDevices() const;
     Q_INVOKABLE QVariantList availableMetricsForDevice(const QString &deviceId) const;
-    Q_INVOKABLE bool addWidget(const QString &title,
-                               Metrics::MetricId metricId,
-                               const QString &unit,
-                               bool showProgressBar,
-                               const QString &variant);
     Q_INVOKABLE bool addWidgetForMetric(const QString &deviceId,
                                          const QString &metricId,
                                          const QString &variant = QStringLiteral("segments"));
     Q_INVOKABLE bool removeWidget(const QString &widgetId);
     Q_INVOKABLE bool moveWidget(int from, int to);
     Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);
-    Q_INVOKABLE bool updateWidget(const QString &title,
+    Q_INVOKABLE bool updateWidget(const QString &deviceId,
                                   Metrics::MetricId metricId,
                                   double value);
 
@@ -74,13 +51,14 @@ signals:
 
 public slots:
     void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
-    void onMetricUpdated(const QString &title,
+    void onMetricUpdated(const QString &deviceId,
                          Metrics::MetricId metricId,
                          const QVariant &value);
 
 private:
     struct WidgetItem {
         QString widgetId;
+        QString deviceId;
         QString title;
         double value = 0.0;
         QString variant;
@@ -89,14 +67,15 @@ private:
         bool showProgressBar = false;
     };
 
-    static DashboardMetricWidgetKey makeWidgetKey(const QString &title, Metrics::MetricId metricId);
-    static QString makeWidgetId(const DashboardMetricWidgetKey &key);
+    static bool isMetricKeyValid(const QString &deviceId, Metrics::MetricId metricId);
+    static QString makeWidgetId(const QString &deviceId, Metrics::MetricId metricId);
     int widgetIndexById(const QString &widgetId) const;
-    int widgetIndexForMetric(const QString &title, Metrics::MetricId metricId) const;
+    int widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const;
+    bool addWidget(const MetricDescriptor &descriptor, const QString &variant);
     bool insertWidget(const WidgetItem &item);
     bool removeWidgetAt(int index);
     void rebuildWidgetIndexes();
-    void setWidgetValue(const QString &title,
+    bool setWidgetValue(const QString &deviceId,
                         Metrics::MetricId metricId,
                         double value,
                         const QString &unit = QString());
@@ -106,7 +85,7 @@ private:
 
     QVector<WidgetItem> m_items;
     QList<MetricDescriptor> m_availableMetrics;
-    QHash<DashboardMetricWidgetKey, int> m_widgetIndexByKey;
+    QHash<QString, int> m_widgetIndexById;
     bool m_hasSeededInitialWidgets = false;
 };
 
