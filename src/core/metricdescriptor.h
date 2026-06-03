@@ -13,7 +13,8 @@ enum class MetricId {
     Unknown = 0,
     Loading,
     Temperature,
-    Frequency
+    Frequency,
+    BatteryLevel
 };
 Q_ENUM_NS(MetricId)
 
@@ -26,6 +27,8 @@ inline QString metricIdToString(MetricId metricId)
         return QStringLiteral("temperature");
     case MetricId::Frequency:
         return QStringLiteral("frequency");
+    case MetricId::BatteryLevel:
+        return QStringLiteral("batteryLevel");
     case MetricId::Unknown:
         return QStringLiteral("unknown");
     }
@@ -42,6 +45,8 @@ inline MetricId metricIdFromString(const QString &metricId)
         return MetricId::Temperature;
     if (normalizedMetricId == QStringLiteral("frequency"))
         return MetricId::Frequency;
+    if (normalizedMetricId == QStringLiteral("batterylevel"))
+        return MetricId::BatteryLevel;
 
     return MetricId::Unknown;
 }
@@ -55,6 +60,8 @@ inline QString metricUnit(MetricId metricId)
         return QStringLiteral("°C");
     case MetricId::Frequency:
         return QStringLiteral("MHz");
+    case MetricId::BatteryLevel:
+        return QStringLiteral("%");
     case MetricId::Unknown:
         return {};
     }
@@ -69,23 +76,29 @@ struct MetricDescriptor
 
     static MetricDescriptor createLoadingDescr(const QString &deviceId, const QString &displayName)
     {
-        return { deviceId, Metrics::MetricId::Loading, displayName, metricUnit(Metrics::MetricId::Loading)};
+        return { deviceId, Metrics::MetricId::Loading, displayName, metricUnit(Metrics::MetricId::Loading), true };
     }
 
     static MetricDescriptor createTemperatureDescr(const QString &deviceId, const QString &displayName)
     {
-        return { deviceId, Metrics::MetricId::Temperature, displayName, metricUnit(Metrics::MetricId::Temperature) };
+        return { deviceId, Metrics::MetricId::Temperature, displayName, metricUnit(Metrics::MetricId::Temperature), false };
     }
 
     static MetricDescriptor createFrequencyDescr(const QString &deviceId, const QString &displayName)
     {
-        return { deviceId, Metrics::MetricId::Frequency, displayName, metricUnit(Metrics::MetricId::Frequency) };
+        return { deviceId, Metrics::MetricId::Frequency, displayName, metricUnit(Metrics::MetricId::Frequency), false };
+    }
+
+    static MetricDescriptor createBatteryLevelDescr(const QString &deviceId, const QString &displayName)
+    {
+        return { deviceId, Metrics::MetricId::BatteryLevel, displayName, metricUnit(Metrics::MetricId::BatteryLevel), true };
     }
 
     QString deviceId;
     Metrics::MetricId metricId;
     QString displayName;
     QString unit;
+    bool showProgressBar = false;
 };
 
 Q_DECLARE_METATYPE(Metrics::MetricId)

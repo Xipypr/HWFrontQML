@@ -97,6 +97,8 @@ qt_add_executable(HWFrontQML
 
     src/core/core.cpp
     src/core/core.h
+    src/core/dashboardmetricprofile.cpp
+    src/core/dashboardmetricprofile.h
     src/core/metricdescriptor.h
     src/core/metricsservice.cpp
     src/core/metricsservice.h
