@@ -18,6 +18,8 @@ add_library(HardwareMonitor
     lhmclassification.h
     lhmsnapshotparser.cpp
     lhmsnapshotparser.h
+    legacydesktopdeviceadapter.cpp
+    legacydesktopdeviceadapter.h
     parsedsensorvalue.cpp
     parsedsensorvalue.h
     unit.h
@@ -41,5 +43,6 @@ target_include_directories(HardwareMonitor
 
 target_link_libraries(HardwareMonitor
     PUBLIC
+        DeviceBuilder
         Qt6::Core
 )
