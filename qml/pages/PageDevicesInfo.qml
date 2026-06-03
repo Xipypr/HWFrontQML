@@ -113,6 +113,7 @@ Page {
                 title: model.title
                 value: model.value
                 unit: model.unit
+                showProgressBar: model.showProgressBar
                 variant: model.variant
                 onVariantSelected: function(mode) {
                     widgetModel.setVariant(model.widgetId, mode)

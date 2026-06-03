@@ -37,7 +37,8 @@ public:
         ValueRole,
         VariantRole,
         MetricIdRole,
-        UnitRole
+        UnitRole,
+        ShowProgressBarRole
     };
     Q_ENUM(Roles)
 
@@ -56,6 +57,7 @@ public:
     Q_INVOKABLE bool addWidget(const QString &title,
                                Metrics::MetricId metricId,
                                const QString &unit,
+                               bool showProgressBar,
                                const QString &variant);
     Q_INVOKABLE bool addWidgetForMetric(const QString &deviceId,
                                          const QString &metricId,
@@ -65,7 +67,7 @@ public:
     Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);
     Q_INVOKABLE bool updateWidget(const QString &title,
                                   Metrics::MetricId metricId,
-                                  int value);
+                                  double value);
 
 signals:
     void widgetsStateChanged();
@@ -80,10 +82,11 @@ private:
     struct WidgetItem {
         QString widgetId;
         QString title;
-        int value = 0;
+        double value = 0.0;
         QString variant;
         Metrics::MetricId metricId = Metrics::MetricId::Unknown;
         QString unit;
+        bool showProgressBar = false;
     };
 
     static DashboardMetricWidgetKey makeWidgetKey(const QString &title, Metrics::MetricId metricId);
@@ -95,7 +98,7 @@ private:
     void rebuildWidgetIndexes();
     void setWidgetValue(const QString &title,
                         Metrics::MetricId metricId,
-                        int value,
+                        double value,
                         const QString &unit = QString());
     void syncInitialWidgetsWithMetrics();
     const MetricDescriptor *descriptorForMetric(const QString &deviceId,
