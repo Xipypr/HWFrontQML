@@ -19,14 +19,48 @@ Rectangle {
         { label: "Arc 180°", value: "arc180" }
     ]
 
+    readonly property int warningThreshold: 70
+    readonly property int criticalThreshold: 90
+    readonly property color valueOnlyAccentColor: "#38BDF8"
+    readonly property color normalAccentColor: "#22C55E"
+    readonly property color warningAccentColor: "#F59E0B"
+    readonly property color criticalAccentColor: "#EF4444"
     readonly property int safeValue: Math.max(0, Math.min(100, value))
-    readonly property color accentColor: !showProgressBar ? "#38BDF8" : safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
-    readonly property string statusText: safeValue >= 90 ? "CRITICAL" : safeValue >= 70 ? "WARNING" : "NORMAL"
+    readonly property bool isCriticalValue: safeValue >= criticalThreshold
+    readonly property bool isWarningValue: safeValue >= warningThreshold && !isCriticalValue
+    readonly property color accentColor: resolveAccentColor()
+    readonly property string statusText: resolveStatusText()
     readonly property int valueFontSize: 42
 
     function formattedValue() {
         const rounded = Math.round(value * 10) / 10
         return Math.abs(rounded - Math.round(rounded)) < 0.05 ? Math.round(rounded).toString() : rounded.toFixed(1)
+    }
+
+    function resolveAccentColor() {
+        if (!showProgressBar)
+            return valueOnlyAccentColor
+
+        if (isCriticalValue)
+            return criticalAccentColor
+
+        if (isWarningValue)
+            return warningAccentColor
+
+        return normalAccentColor
+    }
+
+    function resolveStatusText() {
+        if (!showProgressBar)
+            return ""
+
+        if (isCriticalValue)
+            return "CRITICAL"
+
+        if (isWarningValue)
+            return "WARNING"
+
+        return "NORMAL"
     }
 
     function resolveVizComponent() {
