@@ -32,7 +32,7 @@ jobs:
           $ErrorActionPreference = 'Stop'
 
           if ([string]::IsNullOrWhiteSpace($env:SUBMODULES_TOKEN)) {
-            throw "Required repository secret SUBMODULES_TOKEN is not configured. Create a fine-grained PAT with Contents: Read access to Xipypr/HWConnector and Xipypr/DeviceBuilder, then add it as the SUBMODULES_TOKEN repository secret."
+            throw "Required repository secret SUBMODULES_TOKEN is not configured. Create a fine-grained PAT with Contents: Read access to Xipypr/HWConnector and Xipypr/HardwareMonitorContract, then add it as the SUBMODULES_TOKEN repository secret."
           }
 
           $authenticatedGitHubUrl = "https://x-access-token:$env:SUBMODULES_TOKEN@github.com/"
@@ -48,7 +48,7 @@ jobs:
             }
           }
 
-          foreach ($submodule in @('HWConnector', 'DeviceBuilder')) {
+          foreach ($submodule in @('HWConnector', 'HardwareMonitorContract')) {
             if (-not (Test-Path "$submodule/CMakeLists.txt" -PathType Leaf)) {
               throw "Required submodule '$submodule' was not checked out. Verify that SUBMODULES_TOKEN has Contents: Read access to Xipypr/$submodule."
             }
