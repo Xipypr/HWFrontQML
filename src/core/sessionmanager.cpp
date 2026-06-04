@@ -6,6 +6,12 @@
 #include <QSettings>
 #include <QSortFilterProxyModel>
 
+#if defined(Q_OS_WIN)
+#include <windows.h>
+#elif defined(Q_OS_ANDROID)
+#include <QJniObject>
+#endif
+
 class ConnectedSessionsProxyModel : public QSortFilterProxyModel
 {
 public:
@@ -23,20 +29,26 @@ protected:
 namespace {
 constexpr auto SavedSessionsKey = "sessions/state";
 constexpr auto PersistSessionStateKey = "app/persistSessionState";
+constexpr auto KeepScreenAwakeKey = "app/keepScreenAwake";
 constexpr bool DefaultPersistSessionState = true;
+constexpr bool DefaultKeepScreenAwake = false;
 }
 
 SessionManager::SessionManager(QObject *parent)
     : QObject(parent)
+    , m_keepScreenAwake(QSettings().value(QString::fromLatin1(KeepScreenAwakeKey), DefaultKeepScreenAwake).toBool())
 {
     auto *proxy = new ConnectedSessionsProxyModel(this);
     proxy->setSourceModel(&m_sessionsModel);
     proxy->setDynamicSortFilter(true);
     m_connectedSessionsModel = proxy;
+    applyKeepScreenAwake(m_keepScreenAwake);
 }
 
 SessionManager::~SessionManager()
 {
+    applyKeepScreenAwake(false);
+
     const QList<SessionEntry> sessions = m_sessions.values();
     m_sessions.clear();
 
@@ -303,6 +315,23 @@ void SessionManager::setPersistSessionState(bool enabled)
     }
 }
 
+bool SessionManager::keepScreenAwake() const
+{
+    return m_keepScreenAwake;
+}
+
+void SessionManager::setKeepScreenAwake(bool enabled)
+{
+    if (m_keepScreenAwake == enabled) {
+        return;
+    }
+
+    m_keepScreenAwake = enabled;
+    QSettings().setValue(QString::fromLatin1(KeepScreenAwakeKey), enabled);
+    applyKeepScreenAwake(enabled);
+    emit keepScreenAwakeChanged();
+}
+
 SessionManager::SessionEntry SessionManager::createSessionEntry(const Session &session)
 {
     Core *core = new Core(this);
@@ -380,6 +409,32 @@ bool SessionManager::hasSessionWithTarget(const QString &target) const
     }
 
     return false;
+}
+
+void SessionManager::applyKeepScreenAwake(bool enabled) const
+{
+#if defined(Q_OS_WIN)
+    SetThreadExecutionState(enabled
+                            ? ES_CONTINUOUS | ES_DISPLAY_REQUIRED
+                            : ES_CONTINUOUS);
+#elif defined(Q_OS_ANDROID)
+    QJniObject activity = QJniObject::callStaticObjectMethod("org/qtproject/qt/android/QtNative",
+                                                            "activity",
+                                                            "()Landroid/app/Activity;");
+    if (!activity.isValid()) {
+        return;
+    }
+
+    QJniObject window = activity.callObjectMethod("getWindow", "()Landroid/view/Window;");
+    if (!window.isValid()) {
+        return;
+    }
+
+    constexpr jint FlagKeepScreenOn = 128;
+    window.callMethod<void>(enabled ? "addFlags" : "clearFlags", "(I)V", FlagKeepScreenOn);
+#else
+    Q_UNUSED(enabled)
+#endif
 }
 
 SessionManager::SessionEntry *SessionManager::findSessionEntry(const QString &sessionId)

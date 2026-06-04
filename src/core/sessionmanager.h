@@ -19,6 +19,7 @@ class SessionManager : public QObject
     Q_PROPERTY(QAbstractListModel *sessionsModel READ sessionsModel NOTIFY sessionsModelChanged)
     Q_PROPERTY(QAbstractItemModel *connectedSessionsModel READ connectedSessionsModel NOTIFY connectedSessionsModelChanged)
     Q_PROPERTY(bool persistSessionState READ persistSessionState WRITE setPersistSessionState NOTIFY persistSessionStateChanged)
+    Q_PROPERTY(bool keepScreenAwake READ keepScreenAwake WRITE setKeepScreenAwake NOTIFY keepScreenAwakeChanged)
 
 public:
     explicit SessionManager(QObject *parent = nullptr);
@@ -36,6 +37,8 @@ public:
     Q_INVOKABLE void clearSavedSessionsState();
     Q_INVOKABLE bool persistSessionState() const;
     Q_INVOKABLE void setPersistSessionState(bool enabled);
+    Q_INVOKABLE bool keepScreenAwake() const;
+    Q_INVOKABLE void setKeepScreenAwake(bool enabled);
     Q_INVOKABLE QString deviceAlias(const QString &sessionId) const;
     Q_INVOKABLE DashboardMetricsModel *dashboardModelForSession(const QString &sessionId) const;
     QAbstractListModel *sessionsModel();
@@ -53,6 +56,7 @@ signals:
     void deviceReady(const QString &sessionId, const QString &displayName);
     void sessionAliasChanged(const QString &sessionId, const QString &alias);
     void persistSessionStateChanged();
+    void keepScreenAwakeChanged();
 
 private:
     struct SessionEntry {
@@ -65,10 +69,12 @@ private:
     SessionEntry *findSessionEntry(const QString &sessionId);
     SessionEntry createSessionEntry(const Session &session);
     bool hasSessionWithTarget(const QString &target) const;
+    void applyKeepScreenAwake(bool enabled) const;
 
     QMap<QString, SessionEntry> m_sessions;
     SessionListModel m_sessionsModel;
     QAbstractItemModel *m_connectedSessionsModel = nullptr;
+    bool m_keepScreenAwake = false;
 };
 
 #endif // SESSIONMANAGER_H
