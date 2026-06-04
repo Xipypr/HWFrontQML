@@ -114,6 +114,9 @@ qt_add_executable(HWFrontQML
     src/lhmparser/parsedsensorvalue.cpp
     src/lhmparser/parsedsensorvalue.h
 
+    src/linuxadapter/linuxsnapshotparser.cpp
+    src/linuxadapter/linuxsnapshotparser.h
+
     src/models/dashboardmetricsmodel.cpp
     src/models/dashboardmetricsmodel.h
     src/models/sessionlistmodel.cpp
@@ -127,6 +130,7 @@ target_include_directories(HWFrontQML
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/core
         ${CMAKE_CURRENT_SOURCE_DIR}/src/lhmparser
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/linuxadapter
         ${CMAKE_CURRENT_SOURCE_DIR}/src/models
 )
 

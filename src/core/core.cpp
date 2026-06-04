@@ -1,6 +1,7 @@
 #include "core.h"
 
 #include <lhmsnapshotparser.h>
+#include <linuxsnapshotparser.h>
 
 #include <QDebug>
 #include <QJsonArray>
@@ -12,7 +13,8 @@ Core::Core(QObject *parent)
     m_connector = new HWConnector(this);
 
     connect(m_connector, &HWConnector::connectionStatusChanged, this, &Core::onStatusChanged);
-    connect(m_connector, &HWConnector::documentReceived, this, &Core::onDocumentReceived);
+    connect(m_connector, &HWConnector::lhmDocumentReceived, this, &Core::onLhmDocumentReceived);
+    connect(m_connector, &HWConnector::linuxDocumentReceived, this, &Core::onLinuxDocumentReceived);
 }
 
 Core::~Core()
@@ -29,12 +31,20 @@ void Core::onCloseConnection()
     m_connector->closeConnection();
 }
 
-void Core::onDocumentReceived(const QJsonObject &document)
+void Core::onLhmDocumentReceived(const QJsonObject &document)
 {
     const LhmSnapshotParser parser;
     const HardwareSnapshot snapshot = parser.parse(document);
 
     emit snapshotReady(snapshot, displayNameFromDocument(document));
+}
+
+void Core::onLinuxDocumentReceived(const QJsonObject &document)
+{
+    const LinuxSnapshotParser parser;
+    const HardwareSnapshot snapshot = parser.parse(document);
+
+    emit snapshotReady(snapshot, parser.displayName(document));
 }
 
 void Core::onStatusChanged(HWConnector::ConnectionStatus status)

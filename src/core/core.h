@@ -18,7 +18,8 @@ public:
 public slots:
     void onStartConnection(const QString &target);
     void onCloseConnection();
-    void onDocumentReceived(const QJsonObject &document);
+    void onLhmDocumentReceived(const QJsonObject &document);
+    void onLinuxDocumentReceived(const QJsonObject &document);
     void onStatusChanged(HWConnector::ConnectionStatus status);
 
 signals:
