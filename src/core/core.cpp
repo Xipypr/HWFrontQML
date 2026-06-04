@@ -1,18 +1,18 @@
 #include "core.h"
-#include "storages/desktopdevice.h"
+
+#include <lhmsnapshotparser.h>
 
 #include <QDebug>
+#include <QJsonArray>
+#include <QJsonValue>
 
 Core::Core(QObject *parent)
     : QObject(parent)
 {
     m_connector = new HWConnector(this);
-    m_deviceCreator = new DeviceBuilder(this);
 
     connect(m_connector, &HWConnector::connectionStatusChanged, this, &Core::onStatusChanged);
-    connect(m_connector, &HWConnector::documentReceived, m_deviceCreator, &DeviceBuilder::onDocumentRecieved);
-
-    connect(m_deviceCreator, &DeviceBuilder::desktopCreated, this, &Core::onDeviceCreated);
+    connect(m_connector, &HWConnector::documentReceived, this, &Core::onDocumentReceived);
 }
 
 Core::~Core()
@@ -29,22 +29,17 @@ void Core::onCloseConnection()
     m_connector->closeConnection();
 }
 
-void Core::onDeviceCreated(DesktopDevice *device)
+void Core::onDocumentReceived(const QJsonObject &document)
 {
-    // Core is a non-owning observer by design. Ownership stays outside Core.
-    m_device = device;
+    const LhmSnapshotParser parser;
+    const HardwareSnapshot snapshot = parser.parse(document);
 
-    emit deviceReady(device);
+    emit snapshotReady(snapshot, displayNameFromDocument(document));
 }
 
 void Core::onStatusChanged(HWConnector::ConnectionStatus status)
 {
     setState(convertConnectorEnum(status));
-}
-
-DesktopDevice *Core::device() const
-{
-    return m_device;
 }
 
 bool Core::isValidTransition(SessionState from, SessionState to) const
@@ -88,4 +83,19 @@ void Core::setState(SessionState newState)
     m_state = newState;
 
     emit sessionStateChanged(newState);
+}
+
+QString Core::displayNameFromDocument(const QJsonObject &document)
+{
+    const QJsonArray children = document.value(QStringLiteral("Children")).toArray();
+    for (const QJsonValue &child : children) {
+        if (!child.isObject())
+            continue;
+
+        const QString text = child.toObject().value(QStringLiteral("Text")).toString().trimmed();
+        if (!text.isEmpty())
+            return text;
+    }
+
+    return document.value(QStringLiteral("Text")).toString().trimmed();
 }

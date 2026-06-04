@@ -1,12 +1,12 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include "devicebuilder.h"
+#include <hardwaresnapshot.h>
 #include "hwconnector.h"
 #include "sessionstate.h"
 
 #include <QObject>
-#include <QPointer>
+#include <QJsonObject>
 
 class Core : public QObject
 {
@@ -15,17 +15,15 @@ public:
     explicit Core(QObject *parent = nullptr);
     ~Core();
 
-    Q_INVOKABLE DesktopDevice *device() const;
-
 public slots:
     void onStartConnection(const QString &target);
     void onCloseConnection();
-    void onDeviceCreated(DesktopDevice *device);
+    void onDocumentReceived(const QJsonObject &document);
     void onStatusChanged(HWConnector::ConnectionStatus status);
 
 signals:
     void sessionStateChanged(SessionState state);
-    void deviceReady(DesktopDevice *deviceRef);
+    void snapshotReady(const HardwareSnapshot &snapshot, const QString &displayName);
 
     void testSignal();
 
@@ -55,11 +53,9 @@ private:
 
     bool isValidTransition(SessionState from, SessionState to) const;
     void setState(SessionState newState);
+    static QString displayNameFromDocument(const QJsonObject &document);
 
     HWConnector *m_connector;
-    DeviceBuilder *m_deviceCreator;
-    // Non-owning guarded pointer: becomes nullptr automatically if deleted by owner.
-    QPointer<DesktopDevice> m_device;
     SessionState m_state = SessionState::IDLE;
 };
 

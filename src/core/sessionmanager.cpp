@@ -1,4 +1,3 @@
-#include "devicebuilder.h"
 #include "sessionmanager.h"
 
 #include <QJsonArray>
@@ -318,17 +317,17 @@ SessionManager::SessionEntry SessionManager::createSessionEntry(const Session &s
         emit sessionStateChanged(sessionId, state);
     });
 
-    connect(core, &Core::deviceReady, this, [this, sessionId = session.sessionId](DesktopDevice *deviceRef) {
+    connect(core, &Core::snapshotReady, this, [this, sessionId = session.sessionId](const HardwareSnapshot &, const QString &displayName) {
         SessionEntry *entry = findSessionEntry(sessionId);
         if (!entry) {
             return;
         }
 
         entry->session.hasDevice = true;
-        entry->session.displayName = deviceRef ? deviceRef->property("name").toString() : entry->session.displayName;
+        entry->session.displayName = displayName.isEmpty() ? entry->session.displayName : displayName;
         m_sessionsModel.upsertSession(entry->session);
         emit connectedSessionIdsChanged();
-        emit deviceReady(sessionId, deviceRef);
+        emit deviceReady(sessionId, entry->session.displayName);
         saveSessionsState();
     });
 
@@ -362,7 +361,7 @@ SessionManager::SessionEntry SessionManager::createSessionEntry(const Session &s
             saveSessionsState();
         }
     });
-    connect(core, &Core::deviceReady, entry.metricsService, &MetricsService::processDeviceSnapshot);
+    connect(core, &Core::snapshotReady, entry.metricsService, &MetricsService::processSnapshot);
     connect(entry.metricsService, &MetricsService::availableMetricsChanged, entry.dashboardModel, &DashboardMetricsModel::onAvailableMetricsChanged);
     connect(entry.metricsService, &MetricsService::metricUpdated, entry.dashboardModel, &DashboardMetricsModel::onMetricUpdated);
     return entry;

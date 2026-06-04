@@ -6,8 +6,10 @@ Rectangle {
     id: card
 
     property string title: "N/A"
-    property int value: 0
+    property real value: 0
     property string unit: ""
+    property string metricId: ""
+    property bool showProgressBar: true
     // segments | ring | linear | arc180
     property string variant: "segments"
     signal variantSelected(string mode)
@@ -18,10 +20,58 @@ Rectangle {
         { label: "Arc 180°", value: "arc180" }
     ]
 
+    readonly property int warningThreshold: 70
+    readonly property int criticalThreshold: 90
+    readonly property color valueOnlyAccentColor: "#38BDF8"
+    readonly property color normalAccentColor: "#22C55E"
+    readonly property color warningAccentColor: "#F59E0B"
+    readonly property color criticalAccentColor: "#EF4444"
     readonly property int safeValue: Math.max(0, Math.min(100, value))
-    readonly property color accentColor: safeValue >= 90 ? "#EF4444" : safeValue >= 70 ? "#F59E0B" : "#22C55E"
-    readonly property string statusText: safeValue >= 90 ? "CRITICAL" : safeValue >= 70 ? "WARNING" : "NORMAL"
+    readonly property bool useStatusColor: showProgressBar && metricId !== "batteryLevel"
+    readonly property bool isCriticalValue: useStatusColor && safeValue >= criticalThreshold
+    readonly property bool isWarningValue: useStatusColor && safeValue >= warningThreshold && !isCriticalValue
+    readonly property color accentColor: resolveAccentColor()
+    readonly property string statusText: resolveStatusText()
     readonly property int valueFontSize: 42
+    readonly property int compactValueFontSize: 24
+    readonly property string valueFontFamily: "Consolas"
+    readonly property string valueWidthSampleText: (showProgressBar ? "100" : "0000.0") + unit
+    readonly property real valueTextWidth: valueWidthProbe.implicitWidth
+    readonly property real compactValueTextWidth: compactValueWidthProbe.implicitWidth
+
+    function formattedValue() {
+        const rounded = Math.round(value * 10) / 10
+        return showProgressBar ? Math.round(rounded).toString() : rounded.toFixed(1)
+    }
+
+    function resolveAccentColor() {
+        if (!showProgressBar)
+            return valueOnlyAccentColor
+
+        if (!useStatusColor)
+            return normalAccentColor
+
+        if (isCriticalValue)
+            return criticalAccentColor
+
+        if (isWarningValue)
+            return warningAccentColor
+
+        return normalAccentColor
+    }
+
+    function resolveStatusText() {
+        if (!useStatusColor)
+            return ""
+
+        if (isCriticalValue)
+            return "CRITICAL"
+
+        if (isWarningValue)
+            return "WARNING"
+
+        return "NORMAL"
+    }
 
     function resolveVizComponent() {
         switch (variant) {
@@ -62,6 +112,24 @@ Rectangle {
     border.width: 1
     border.color: Qt.rgba(100 / 255, 116 / 255, 139 / 255, 0.55)
 
+    Text {
+        id: valueWidthProbe
+        visible: false
+        text: card.valueWidthSampleText
+        font.family: card.valueFontFamily
+        font.pixelSize: card.valueFontSize
+        font.bold: true
+    }
+
+    Text {
+        id: compactValueWidthProbe
+        visible: false
+        text: card.valueWidthSampleText
+        font.family: card.valueFontFamily
+        font.pixelSize: card.compactValueFontSize
+        font.bold: true
+    }
+
     Rectangle {
         anchors.fill: parent
         anchors.margins: -1
@@ -93,6 +161,7 @@ Rectangle {
                 width: 8
                 height: 8
                 radius: 4
+                visible: card.useStatusColor
                 color: card.accentColor
 
                 SequentialAnimation on opacity {
@@ -103,6 +172,7 @@ Rectangle {
             }
 
             Text {
+                visible: card.useStatusColor
                 text: card.statusText
                 color: card.accentColor
                 font.pixelSize: 11
@@ -111,11 +181,15 @@ Rectangle {
         }
 
         Text {
-            text: card.safeValue + card.unit
-            visible: card.variant !== "arc180" && card.variant !== "ring"
+            text: card.formattedValue() + card.unit
+            visible: !card.showProgressBar || (card.variant !== "arc180" && card.variant !== "ring")
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
+            font.family: card.valueFontFamily
             font.bold: true
+            horizontalAlignment: Text.AlignRight
+            Layout.preferredWidth: card.valueTextWidth
+            Layout.maximumWidth: parent.width
         }
 
         Loader {
@@ -123,17 +197,20 @@ Rectangle {
             Layout.fillHeight: card.variant === "arc180"
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 86 : 12)
+            visible: card.showProgressBar
             sourceComponent: card.resolveVizComponent()
         }
 
     }
 
     TapHandler {
+        enabled: card.showProgressBar
         acceptedButtons: Qt.RightButton
         onTapped: card.openVariantDialog()
     }
 
     TapHandler {
+        enabled: card.showProgressBar
         acceptedButtons: Qt.LeftButton
         gesturePolicy: TapHandler.WithinBounds
         onLongPressed: card.openVariantDialog()
@@ -275,9 +352,12 @@ Rectangle {
 
             Text {
                 anchors.centerIn: parent
-                text: card.safeValue + card.unit
+                text: card.formattedValue() + card.unit
                 color: "#F8FAFC"
-                font.pixelSize: 24
+                width: card.compactValueTextWidth
+                horizontalAlignment: Text.AlignHCenter
+                font.family: card.valueFontFamily
+                font.pixelSize: card.compactValueFontSize
                 font.bold: true
             }
         }
@@ -348,9 +428,12 @@ Rectangle {
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.verticalCenterOffset: 28
-                text: card.safeValue + card.unit
+                text: card.formattedValue() + card.unit
                 color: "#F8FAFC"
-                font.pixelSize: 24
+                width: card.compactValueTextWidth
+                horizontalAlignment: Text.AlignHCenter
+                font.family: card.valueFontFamily
+                font.pixelSize: card.compactValueFontSize
                 font.bold: true
             }
         }

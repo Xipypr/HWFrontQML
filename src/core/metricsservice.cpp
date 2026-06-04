@@ -1,10 +1,6 @@
 #include "metricsservice.h"
 
-#include "devicemetricfactory.h"
-#include "storages/desktopdevice.h"
-
-#include <QHash>
-
+#include <hardwaresnapshot.h>
 
 MetricsService::MetricsService(QObject *parent)
     : QObject(parent)
@@ -19,43 +15,48 @@ QList<MetricDescriptor> MetricsService::metricDescriptors() const
     return m_availableMetrics;
 }
 
-void MetricsService::processDeviceSnapshot(DesktopDevice *desktopDevice)
+void MetricsService::processSnapshot(const HardwareSnapshot &snapshot)
 {
-    if (!desktopDevice)
-        return;
-
     if (!m_metricsDiscovered)
-        discoverMetrics(desktopDevice);
+        discoverMetrics(snapshot);
 
-    refreshMetricValues(desktopDevice);
+    refreshMetricValues(snapshot);
 }
 
-void MetricsService::discoverMetrics(DesktopDevice *desktopDevice)
+void MetricsService::discoverMetrics(const HardwareSnapshot &snapshot)
 {
-    m_availableMetrics = DeviceMetricFactory::createDescriptors(desktopDevice);
+    m_availableMetrics.clear();
+
+    for (const DashboardMetricDefinition &definition : m_metricProfile.definitionsForSnapshot(snapshot)) {
+        m_availableMetrics.append({
+            definition.deviceId,
+            definition.metricId,
+            definition.displayName,
+            definition.unit,
+            definition.showProgressBar
+        });
+    }
+
     m_metricsDiscovered = true;
     emit availableMetricsChanged(m_availableMetrics);
 }
 
-void MetricsService::refreshMetricValues(DesktopDevice *desktopDevice)
+void MetricsService::refreshMetricValues(const HardwareSnapshot &snapshot)
 {
-    QHash<QString, Device *> devicesById;
-
-    for (Device *deviceObject : desktopDevice->devicesList())
-    {
-        const QString deviceId = DeviceMetricFactory::deviceId(deviceObject);
-        if (!deviceId.isEmpty() && !devicesById.contains(deviceId))
-            devicesById.insert(deviceId, deviceObject);
-    }
-
-    for (const MetricDescriptor &descriptor : m_availableMetrics)
-    {
-        Device *deviceObject = devicesById.value(descriptor.deviceId, nullptr);
-        if (!deviceObject)
+    for (const MetricDescriptor &descriptor : m_availableMetrics) {
+        const DashboardMetricDefinition definition {
+            descriptor.deviceId,
+            descriptor.metricId,
+            descriptor.displayName,
+            descriptor.unit,
+            descriptor.showProgressBar
+        };
+        const std::optional<Measurement> measurement = m_metricProfile.measurementForDefinition(snapshot, definition);
+        if (!measurement.has_value())
             continue;
 
-        emit metricUpdated(descriptor.displayName,
+        emit metricUpdated(descriptor.deviceId,
                            descriptor.metricId,
-                           DeviceMetricFactory::metricValue(deviceObject, descriptor.metricId));
+                           QVariant::fromValue(measurement.value().value.value_or(0.0f)));
     }
 }
