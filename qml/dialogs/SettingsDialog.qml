@@ -43,5 +43,32 @@ Dialog {
             font.pixelSize: 12
             opacity: 0.75
         }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("Не гасить экран")
+                wrapMode: Text.WordWrap
+            }
+
+            Switch {
+                id: keepScreenAwakeCheckBox
+                checked: sessionManager.keepScreenAwake
+                onToggled: sessionManager.keepScreenAwake = checked
+            }
+        }
+
+        Label {
+            Layout.fillWidth: true
+            text: keepScreenAwakeCheckBox.checked
+                  ? qsTr("Экран будет оставаться включённым, пока приложение запущено.")
+                  : qsTr("Экран будет выключаться по системным настройкам.")
+            wrapMode: Text.WordWrap
+            font.pixelSize: 12
+            opacity: 0.75
+        }
     }
 }
