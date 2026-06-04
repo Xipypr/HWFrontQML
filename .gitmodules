@@ -1,3 +1,6 @@
 [submodule "HWConnector"]
 	path = HWConnector
 	url = https://github.com/Xipypr/HWConnector.git
+[submodule "HardwareMonitorContract"]
+	path = HardwareMonitorContract
+	url = https://github.com/Xipypr/HardwareMonitorContract.git

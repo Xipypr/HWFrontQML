@@ -61,14 +61,14 @@ if(HWFRONTQML_DEPLOY_AFTER_BUILD)
 endif()
 
 add_subdirectory(HWConnector)
-add_subdirectory(HardwareMonitor)
+add_subdirectory(HardwareMonitorContract)
 
 if(NOT TARGET HWConnector)
     message(FATAL_ERROR "Required target 'HWConnector' was not created by submodule 'HWConnector'")
 endif()
 
-if(NOT TARGET HardwareMonitor)
-    message(FATAL_ERROR "Required target 'HardwareMonitor' was not created")
+if(NOT TARGET HardwareMonitorContract)
+    message(FATAL_ERROR "Required target 'HardwareMonitorContract' was not created")
 endif()
 
 function(configure_required_dependency_linkage target_name)
@@ -107,6 +107,13 @@ qt_add_executable(HWFrontQML
     src/core/sessionmanager.h
     src/core/sessionstate.h
 
+    src/lhmparser/lhmclassification.cpp
+    src/lhmparser/lhmclassification.h
+    src/lhmparser/lhmsnapshotparser.cpp
+    src/lhmparser/lhmsnapshotparser.h
+    src/lhmparser/parsedsensorvalue.cpp
+    src/lhmparser/parsedsensorvalue.h
+
     src/models/dashboardmetricsmodel.cpp
     src/models/dashboardmetricsmodel.h
     src/models/sessionlistmodel.cpp
@@ -119,13 +126,14 @@ qt_add_executable(HWFrontQML
 target_include_directories(HWFrontQML
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}/src/core
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/lhmparser
         ${CMAKE_CURRENT_SOURCE_DIR}/src/models
 )
 
 target_link_libraries(HWFrontQML
     PRIVATE
         HWConnector
-        HardwareMonitor
+        HardwareMonitorContract
         Qt6::Quick
         Qt6::Qml
         Qt6::Gui
