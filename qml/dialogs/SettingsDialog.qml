@@ -23,7 +23,49 @@ Dialog {
 
             Label {
                 Layout.fillWidth: true
-                text: qsTr("Сохранять сессии и layout виджетов")
+                text: qsTr("Language")
+                wrapMode: Text.WordWrap
+            }
+
+            ComboBox {
+                id: languageComboBox
+                Layout.preferredWidth: 150
+                model: languageManager.availableLanguages
+                textRole: "label"
+
+                function updateCurrentIndex() {
+                    for (let i = 0; i < model.length; ++i) {
+                        if (model[i].code === languageManager.currentLanguage) {
+                            currentIndex = i
+                            return
+                        }
+                    }
+                    currentIndex = 0
+                }
+
+                Component.onCompleted: updateCurrentIndex()
+                onActivated: function(index) {
+                    const selectedLanguage = model[index]
+                    if (selectedLanguage)
+                        languageManager.currentLanguage = selectedLanguage.code
+                }
+
+                Connections {
+                    target: languageManager
+                    function onCurrentLanguageChanged() {
+                        languageComboBox.updateCurrentIndex()
+                    }
+                }
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("Save sessions and widget layout")
                 wrapMode: Text.WordWrap
             }
 
@@ -37,8 +79,8 @@ Dialog {
         Label {
             Layout.fillWidth: true
             text: persistSessionStateSwitch.checked
-                  ? qsTr("При следующем запуске приложение восстановит сохранённые сессии и расположение виджетов.")
-                  : qsTr("Сохранённые сессии очищены. Следующий запуск начнётся с чистого листа.")
+                  ? qsTr("The next launch will restore saved sessions and widget layout.")
+                  : qsTr("Saved sessions are cleared. The next launch will start fresh.")
             wrapMode: Text.WordWrap
             font.pixelSize: 12
             opacity: 0.75
@@ -50,7 +92,7 @@ Dialog {
 
             Label {
                 Layout.fillWidth: true
-                text: qsTr("Не гасить экран")
+                text: qsTr("Keep screen awake")
                 wrapMode: Text.WordWrap
             }
 
@@ -64,8 +106,8 @@ Dialog {
         Label {
             Layout.fillWidth: true
             text: keepScreenAwakeCheckBox.checked
-                  ? qsTr("Экран будет оставаться включённым, пока приложение запущено.")
-                  : qsTr("Экран будет выключаться по системным настройкам.")
+                  ? qsTr("The screen will stay on while the app is running.")
+                  : qsTr("The screen will turn off according to system settings.")
             wrapMode: Text.WordWrap
             font.pixelSize: 12
             opacity: 0.75

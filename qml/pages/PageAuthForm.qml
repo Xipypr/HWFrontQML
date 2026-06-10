@@ -19,7 +19,7 @@ Page {
     }
 
     footer: Button{
-                text: "Add Device"
+                text: qsTr("Add Device")
                 onClicked: addDevice()
             }
 

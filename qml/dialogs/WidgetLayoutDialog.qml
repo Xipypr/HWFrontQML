@@ -78,7 +78,7 @@ Dialog {
 
         Label {
             Layout.fillWidth: true
-            text: "Компоновка виджетов"
+            text: qsTr("Widget layout")
             color: "#E2E8F0"
             font.pixelSize: 18
             font.bold: true
@@ -180,13 +180,13 @@ Dialog {
             }
 
             Button {
-                text: "Добавить"
+                text: qsTr("Add")
                 enabled: root.deviceOptions.length > 0 && root.metricOptions.length > 0
                 onClicked: {
                     const deviceId = root.selectedDeviceId()
                     const metricId = root.selectedMetricId()
                     if (!root.widgetsModel.addWidgetForMetric(deviceId, metricId, "segments"))
-                        root.addError = "Метрика уже добавлена или недоступна."
+                        root.addError = qsTr("The metric has already been added or is unavailable.")
                     else
                         root.addError = ""
                 }
@@ -209,7 +209,7 @@ Dialog {
             Item { Layout.fillWidth: true }
 
             Button {
-                text: "Закрыть"
+                text: qsTr("Close")
                 onClicked: root.close()
             }
         }
