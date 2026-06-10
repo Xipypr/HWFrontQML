@@ -6,8 +6,6 @@
 
 **Current version:** `1.5.0`.
 
-> The project is under active development. Screenshots can be added to the marked sections below once the current UI images are ready.
-
 ## Contents
 
 - [Features](#features)
