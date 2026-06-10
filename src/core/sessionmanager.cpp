@@ -115,7 +115,7 @@ QObject *SessionManager::coreForSession(const QString &sessionId) const
 
 QStringList SessionManager::sessionIds() const
 {
-    return m_sessions.keys();
+    return m_sessionsModel.sessionIds();
 }
 
 QStringList SessionManager::connectedSessionIds() const
@@ -204,7 +204,14 @@ void SessionManager::saveSessionsState()
     }
 
     QJsonArray sessionsArray;
-    for (const SessionEntry &entry : m_sessions) {
+    const QStringList orderedSessionIds = m_sessionsModel.sessionIds();
+    for (const QString &sessionId : orderedSessionIds) {
+        const auto it = m_sessions.constFind(sessionId);
+        if (it == m_sessions.constEnd()) {
+            continue;
+        }
+
+        const SessionEntry &entry = it.value();
         QJsonObject sessionObject;
         sessionObject[QStringLiteral("sessionId")] = entry.session.sessionId;
         sessionObject[QStringLiteral("target")] = entry.session.target;

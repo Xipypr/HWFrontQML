@@ -31,6 +31,7 @@ public:
     void removeSession(const QString &sessionId);
     void setSessionAlias(const QString &sessionId, const QString &alias);
     QString deviceAliasForSession(const QString &sessionId) const;
+    QStringList sessionIds() const;
     QStringList connectedSessionIds() const;
 
 private:
