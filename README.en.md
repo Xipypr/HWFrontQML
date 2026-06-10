@@ -100,7 +100,7 @@ For a local build, install:
 - Access to the submodule repositories:
   - [`HWConnector`](https://github.com/Xipypr/HWConnector)
   - [`HardwareMonitorContract`](https://github.com/Xipypr/HardwareMonitorContract)
-- A running [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) data source for Windows device monitoring.
+- A running [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) instance with **Remote Web Server** enabled and its port open to the device running HWFrontQML.
 - A compatible Linux adapter that exposes a hardware snapshot in the project format for Linux device monitoring.
 
 > If the submodule directories are empty, CMake will try to initialize them automatically. If the repositories are private, configure Git authentication before building.

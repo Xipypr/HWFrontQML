@@ -100,7 +100,7 @@
 - Доступ к submodule-репозиториям:
   - [`HWConnector`](https://github.com/Xipypr/HWConnector)
   - [`HardwareMonitorContract`](https://github.com/Xipypr/HardwareMonitorContract)
-- Для мониторинга Windows-устройства нужен запущенный источник данных [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor).
+- Для мониторинга Windows-устройства нужен запущенный [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) с включённым **Remote Web Server** и портом, открытым для подключения с устройства, на котором запущен HWFrontQML.
 - Для мониторинга Linux-устройства нужен совместимый Linux-адаптер, отдающий аппаратный snapshot в формате проекта.
 
 > Если submodule-директории пустые, CMake попытается инициализировать их автоматически. При отсутствии доступа к приватным репозиториям выполните настройку авторизации Git заранее.
