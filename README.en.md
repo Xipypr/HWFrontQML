@@ -40,27 +40,21 @@
 
 ## Screenshots
 
-> Screenshots are not included yet. Recommended insertion points are marked below.
+### Start screen, device list, and connection states
 
-### Start screen and device list
-
-<!-- TODO: Insert a screenshot of the start screen with the list of added devices. -->
-
-### Device connection
-
-<!-- TODO: Insert a screenshot of a device card while connecting or after a successful connection. -->
+![Start screen with devices and connection states](doc/screenshots/en/start-screen.png)
 
 ### Metrics dashboard
 
-<!-- TODO: Insert a screenshot of a device page with metric cards. -->
+![Device metrics dashboard](doc/screenshots/en/dashboard.png)
 
 ### Widget layout settings
 
-<!-- TODO: Insert a screenshot of the dialog for changing the widget set and order. -->
+![Widget layout configuration dialog](doc/screenshots/en/widget-layout.png)
 
 ### General settings
 
-<!-- TODO: Insert a screenshot of the settings dialog with the session persistence switch. -->
+![General application settings dialog](doc/screenshots/en/settings.png)
 
 ## Technology stack
 
