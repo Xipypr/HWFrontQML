@@ -2,7 +2,9 @@
 
 **Language:** [Русский](README.md) | English
 
-**HWFrontQML** is a Qt/QML application for monitoring hardware metrics from remote devices. The application lets you add devices by IP address, manage connection sessions, view available metrics on a customizable dashboard, and persist session state between launches.
+**HWFrontQML** is a Qt/QML application for monitoring hardware metrics from remote devices. The application lets you add devices by IP address, connect to metric sources on Windows and Linux, view available metrics on a customizable dashboard, and persist session state between launches.
+
+**Current version:** `1.5.0`.
 
 > The project is under active development. Screenshots can be added to the marked sections below once the current UI images are ready.
 
@@ -24,11 +26,16 @@
 - Enter an IPv4 address with basic validation in the UI.
 - Display the state of each session: idle, connecting, connected, or error.
 - Open a dedicated dashboard page for every connected device.
-- Automatically discover available device metrics through `HWConnector` and `DeviceBuilder`.
-- Show metrics as cards with selectable display variants.
-- Configure the dashboard widget set and ordering.
+- Connect to Windows metric sources based on [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) instead of the legacy OpenHardwareMonitor path.
+- Support Linux metric sources through the hardware monitoring adapter.
+- Automatically discover available device metrics through `HWConnector` and the shared `HardwareMonitorContract`.
+- Show CPU, GPU, RAM, and battery metrics on the dashboard when the device provides them.
+- Show metrics as cards with selectable display variants, including segmented, ring, and arc progress views.
+- Configure the dashboard widget set and ordering: add, remove, and reorder metric cards.
 - Rename devices with a custom alias.
 - Optionally persist sessions, device aliases, and dashboard widget layouts between launches.
+- Switch the interface language between Russian and English.
+- Enable **Keep screen awake** mode while monitoring.
 - Prepare a Windows Release deployment folder with `windeployqt`.
 
 ## Screenshots
@@ -61,7 +68,7 @@
 - **Qt 6** with `Core`, `Gui`, `Quick`, and `Qml`.
 - **QML / Qt Quick Controls 2** for the user interface.
 - **CMake** for build configuration.
-- **Git submodules** for `HWConnector` and `DeviceBuilder`.
+- **Git submodules** for `HWConnector` and `HardwareMonitorContract`.
 - **GitHub Actions** for automated Windows Release builds.
 
 ## Project structure
@@ -79,7 +86,12 @@
 ├── src/
 │   ├── app/                 # Application entry point
 │   ├── core/                # Sessions, state, and metrics service
+│   ├── lhmparser/           # LibreHardwareMonitor data parser
+│   ├── linuxadapter/        # Linux metric source parser
 │   └── models/              # Models exposed to QML
+├── translations/            # UI translation files
+├── HWConnector/             # Metric source connection submodule
+├── HardwareMonitorContract/ # Shared hardware snapshot contract submodule
 ├── CMakeLists.txt           # Build configuration
 ├── qml.qrc                  # QML and resources embedded into the app
 └── .github/workflows/       # CI workflows
@@ -95,7 +107,9 @@ For a local build, install:
 - Qt 6 with the `Core`, `Gui`, `Quick`, and `Qml` modules.
 - Access to the submodule repositories:
   - [`HWConnector`](https://github.com/Xipypr/HWConnector)
-  - [`DeviceBuilder`](https://github.com/Xipypr/DeviceBuilder)
+  - [`HardwareMonitorContract`](https://github.com/Xipypr/HardwareMonitorContract)
+- A running [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) data source for Windows device monitoring.
+- A compatible Linux adapter that exposes a hardware snapshot in the project format for Linux device monitoring.
 
 > If the submodule directories are empty, CMake will try to initialize them automatically. If the repositories are private, configure Git authentication before building.
 
@@ -196,7 +210,7 @@ The repository includes a GitHub Actions workflow for Windows Release builds:
 - it publishes a build artifact;
 - for `v*` tags, it packs `deploy/` into a zip archive and attaches it to a GitHub Release.
 
-CI access to private submodules requires a repository secret named `SUBMODULES_TOKEN` with read access to the contents of `Xipypr/HWConnector` and `Xipypr/DeviceBuilder`.
+CI access to private submodules requires a repository secret named `SUBMODULES_TOKEN` with read access to the contents of `Xipypr/HWConnector` and `Xipypr/HardwareMonitorContract`.
 
 ## Useful CMake options
 
@@ -210,4 +224,5 @@ CI access to private submodules requires a repository secret named `SUBMODULES_T
 
 - Automatic deployment currently targets Windows and uses `windeployqt`.
 - Deployment is disabled automatically for non-Release builds.
+- Windows device monitoring targets LibreHardwareMonitor; OpenHardwareMonitor is no longer the primary integration path.
 - The Android package source directory is located in `android/`; actual Android builds depend on an installed Qt for Android toolchain.
