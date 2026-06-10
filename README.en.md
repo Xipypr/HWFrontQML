@@ -110,7 +110,7 @@ For a local build, install:
 ### 1. Clone the repository
 
 ```bash
-git clone --recurse-submodules <repository-url>
+git clone --recurse-submodules https://github.com/Xipypr/HWFrontQML.git
 cd HWFrontQML
 ```
 
