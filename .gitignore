@@ -13,6 +13,7 @@ build-*/
 # Android build/deployment artifacts
 android-build/
 android-*/
+android/.gradle/
 *.apk
 *.aab
 *.ap_

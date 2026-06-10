@@ -97,6 +97,9 @@ def findHwFrontQmlProjectRoot(File startDir) {
 }
 
 def hwFrontQmlDeployAndroidDir = new File(findHwFrontQmlProjectRoot(projectDir), 'deploy_android')
+def hwFrontQmlOpenDeployDir = providers.gradleProperty('hwFrontQmlOpenDeployDir')
+        .map { it.toBoolean() }
+        .orElse(false)
 
 tasks.register('copyQtApkToDeployAndroid', Copy) {
     from(fileTree("${buildDir}/outputs/apk") {
@@ -108,6 +111,25 @@ tasks.register('copyQtApkToDeployAndroid', Copy) {
     }
     includeEmptyDirs = false
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+}
+
+tasks.register('openHwFrontQmlDeployAndroidDir') {
+    onlyIf {
+        hwFrontQmlOpenDeployDir.get()
+                && hwFrontQmlDeployAndroidDir.exists()
+                && System.getProperty('os.name').toLowerCase().contains('windows')
+    }
+
+    doLast {
+        exec {
+            commandLine 'cmd', '/c', 'start', '', hwFrontQmlDeployAndroidDir.absolutePath
+            ignoreExitValue true
+        }
+    }
+}
+
+tasks.named('copyQtApkToDeployAndroid') {
+    finalizedBy tasks.named('openHwFrontQmlDeployAndroidDir')
 }
 
 afterEvaluate {
