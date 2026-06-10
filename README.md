@@ -1,220 +1,220 @@
 # HWFrontQML
 
-**Язык:** Русский | [English](README.en.md)
+**Language:** English | [Русский](README.ru.md)
 
-**HWFrontQML** — Qt/QML-приложение для мониторинга аппаратных метрик удалённых устройств. Приложение позволяет добавлять устройства по IP-адресу, подключаться к источникам метрик на Windows и Linux, просматривать доступные показатели в виде настраиваемой панели мониторинга и сохранять состояние сессий между запусками.
+**HWFrontQML** is a Qt/QML application for monitoring hardware metrics from remote devices. The application lets you add devices by IP address, connect to metric sources on Windows and Linux, view available metrics on a customizable dashboard, and persist session state between launches.
 
-**Текущая версия:** `1.5.0`.
+**Current version:** `1.5.0`.
 
-## Содержание
+## Contents
 
-- [Возможности](#возможности)
-- [Скриншоты](#скриншоты)
-- [Технологии](#технологии)
-- [Структура проекта](#структура-проекта)
-- [Зависимости](#зависимости)
-- [Сборка и запуск](#сборка-и-запуск)
-- [Работа с приложением](#работа-с-приложением)
-- [Настройки и сохранение состояния](#настройки-и-сохранение-состояния)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Technology stack](#technology-stack)
+- [Project structure](#project-structure)
+- [Requirements](#requirements)
+- [Build and run](#build-and-run)
+- [Using the application](#using-the-application)
+- [Settings and state persistence](#settings-and-state-persistence)
 - [CI/CD](#cicd)
 
-## Возможности
+## Features
 
-- Добавление нескольких устройств и управление отдельными сессиями подключения.
-- Ввод IPv4-адреса устройства с базовой валидацией на стороне интерфейса.
-- Отображение статуса каждой сессии: ожидание, подключение, активное соединение или ошибка.
-- Отдельная страница панели мониторинга для каждого подключённого устройства.
-- Подключение к Windows-источникам на базе [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) вместо устаревшего OpenHardwareMonitor.
-- Поддержка Linux-источника метрик через адаптер аппаратного мониторинга.
-- Автоматическое обнаружение доступных метрик устройства через `HWConnector` и общий контракт `HardwareMonitorContract`.
-- Панель мониторинга с метриками CPU, GPU, RAM и батареи, когда такие показатели доступны на устройстве.
-- Карточки метрик с переключаемым вариантом отображения, включая сегменты, кольца и дуги прогресса.
-- Настройка состава и порядка виджетов панели мониторинга: можно добавлять, удалять и перемещать карточки.
-- Переименование устройства через пользовательский псевдоним.
-- Опциональное сохранение списка сессий, псевдонимов устройств и расположения виджетов между запусками.
-- Переключение языка интерфейса между русским и английским.
-- Режим **«Не гасить экран»**, чтобы экран не засыпал во время мониторинга.
-- Подготовка папки поставки для Windows-сборок в конфигурации Release через `windeployqt`.
+- Add multiple devices and manage separate connection sessions.
+- Enter an IPv4 address with basic validation in the UI.
+- Display the state of each session: idle, connecting, connected, or error.
+- Open a dedicated dashboard page for every connected device.
+- Connect to Windows metric sources based on [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) instead of the legacy OpenHardwareMonitor path.
+- Support Linux metric sources through the hardware monitoring adapter.
+- Automatically discover available device metrics through `HWConnector` and the shared `HardwareMonitorContract`.
+- Show CPU, GPU, RAM, and battery metrics on the dashboard when the device provides them.
+- Show metrics as cards with selectable display variants, including segmented, ring, and arc progress views.
+- Configure the dashboard widget set and ordering: add, remove, and reorder metric cards.
+- Rename devices with a custom alias.
+- Optionally persist sessions, device aliases, and dashboard widget layouts between launches.
+- Switch the interface language between Russian and English.
+- Enable **Keep screen awake** mode while monitoring.
+- Prepare a Windows Release deployment folder with `windeployqt`.
 
-## Скриншоты
+## Screenshots
 
-### Стартовый экран, список устройств и подключение
+### Start screen, device list, and connection states
 
-![Стартовый экран со списком устройств и состояниями подключения](doc/screenshots/ru/start-screen.png)
+![Start screen with devices and connection states](doc/screenshots/en/start-screen.png)
 
-### Панель мониторинга метрик
+### Metrics dashboard
 
-![Панель мониторинга с карточками метрик устройства](doc/screenshots/ru/dashboard.png)
+![Device metrics dashboard](doc/screenshots/en/dashboard.png)
 
-### Настройка расположения виджетов
+### Widget layout settings
 
-![Диалог настройки состава и порядка виджетов](doc/screenshots/ru/widget-layout.png)
+![Widget layout configuration dialog](doc/screenshots/en/widget-layout.png)
 
-### Общие настройки
+### General settings
 
-![Диалог общих настроек приложения](doc/screenshots/ru/settings.png)
+![General application settings dialog](doc/screenshots/en/settings.png)
 
-## Технологии
+## Technology stack
 
-- **C++17** — основная логика приложения.
-- **Qt 6** — `Core`, `Gui`, `Quick`, `Qml`.
-- **QML / Qt Quick Controls 2** — интерфейс приложения.
-- **CMake** — конфигурация сборки.
-- **Git-подмодули** — подключение библиотек `HWConnector` и `HardwareMonitorContract`.
-- **GitHub Actions** — автоматическая Windows-сборка в конфигурации Release.
+- **C++17** for the core application logic.
+- **Qt 6** with `Core`, `Gui`, `Quick`, and `Qml`.
+- **QML / Qt Quick Controls 2** for the user interface.
+- **CMake** for build configuration.
+- **Git submodules** for `HWConnector` and `HardwareMonitorContract`.
+- **GitHub Actions** for automated Windows Release builds.
 
-## Структура проекта
+## Project structure
 
 ```text
 .
-├── android/                 # Исходные файлы Android-пакета для Qt-сборки
-├── icons/                   # Иконки приложения и интерфейса
-├── qml/                     # QML-интерфейс
-│   ├── components/          # Переиспользуемые компоненты экранов
-│   ├── controls/            # Пользовательские элементы управления
-│   ├── dialogs/             # Диалоги настроек, псевдонимов и расположения виджетов
-│   ├── pages/               # Основные страницы приложения
-│   └── main.qml             # Корневое окно и навигация
+├── android/                 # Android package source directory for Qt builds
+├── icons/                   # Application and UI icons
+├── qml/                     # QML user interface
+│   ├── components/          # Reusable screen components
+│   ├── controls/            # Custom UI controls
+│   ├── dialogs/             # Settings, alias, and layout dialogs
+│   ├── pages/               # Main application pages
+│   └── main.qml             # Root window and navigation
 ├── src/
-│   ├── app/                 # Точка входа приложения
-│   ├── core/                # Сессии, состояние, сервис метрик
-│   ├── lhmparser/           # Парсер данных LibreHardwareMonitor
-│   ├── linuxadapter/        # Парсер Linux-источника метрик
-│   └── models/              # Модели для QML
-├── translations/            # Файлы переводов интерфейса
-├── HWConnector/             # Подмодуль сетевого подключения к источникам метрик
-├── HardwareMonitorContract/ # Подмодуль общего контракта аппаратных снимков
-├── CMakeLists.txt           # Описание сборки
-├── qml.qrc                  # QML и ресурсы, встраиваемые в приложение
-└── .github/workflows/       # CI-сценарии
+│   ├── app/                 # Application entry point
+│   ├── core/                # Sessions, state, and metrics service
+│   ├── lhmparser/           # LibreHardwareMonitor data parser
+│   ├── linuxadapter/        # Linux metric source parser
+│   └── models/              # Models exposed to QML
+├── translations/            # UI translation files
+├── HWConnector/             # Metric source connection submodule
+├── HardwareMonitorContract/ # Shared hardware snapshot contract submodule
+├── CMakeLists.txt           # Build configuration
+├── qml.qrc                  # QML and resources embedded into the app
+└── .github/workflows/       # CI workflows
 ```
 
-## Зависимости
+## Requirements
 
-Для локальной сборки нужны:
+For a local build, install:
 
 - Git.
-- CMake 3.16 или новее.
-- Компилятор с поддержкой C++17.
-- Qt 6 с модулями `Core`, `Gui`, `Quick`, `Qml`.
-- Доступ к репозиториям подмодулей:
+- CMake 3.16 or newer.
+- A compiler with C++17 support.
+- Qt 6 with the `Core`, `Gui`, `Quick`, and `Qml` modules.
+- Access to the submodule repositories:
   - [`HWConnector`](https://github.com/Xipypr/HWConnector)
   - [`HardwareMonitorContract`](https://github.com/Xipypr/HardwareMonitorContract)
-- Для мониторинга Windows-устройства нужен запущенный [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) с включённым **Remote Web Server** и портом, открытым для подключения с устройства, на котором запущен HWFrontQML.
-- Для мониторинга Linux-устройства нужен совместимый Linux-адаптер, отдающий аппаратный снимок в формате проекта, с портом, открытым для подключения с устройства, на котором запущен HWFrontQML.
+- A running [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) instance with **Remote Web Server** enabled and its port open to the device running HWFrontQML.
+- A compatible Linux adapter that exposes a hardware snapshot in the project format, with its port open to the device running HWFrontQML.
 
-> Если директории подмодулей пустые, CMake попытается инициализировать их автоматически. При отсутствии доступа к приватным репозиториям выполните настройку авторизации Git заранее.
+> If the submodule directories are empty, CMake will try to initialize them automatically. If the repositories are private, configure Git authentication before building.
 
-## Сборка и запуск
+## Build and run
 
-### 1. Клонирование репозитория
+### 1. Clone the repository
 
 ```bash
 git clone --recurse-submodules https://github.com/Xipypr/HWFrontQML.git
 cd HWFrontQML
 ```
 
-Если репозиторий уже склонирован без подмодулей:
+If the repository was cloned without submodules:
 
 ```bash
 git submodule update --init --recursive
 ```
 
-### 2. Сборка Debug для разработки
+### 2. Debug build for development
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 cmake --build build
 ```
 
-Запуск исполняемого файла зависит от платформы и используемого генератора CMake. Например, для одно-конфигурационных генераторов:
+The executable path depends on the platform and the CMake generator. For single-configuration generators, for example:
 
 ```bash
 ./build/HWFrontQML
 ```
 
-### 3. Сборка Release
+### 3. Release build
 
 ```bash
 cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release
 cmake --build build-release --config Release
 ```
 
-На Windows сборка Release по умолчанию дополнительно создаёт папку `deploy/` с исполняемым файлом, зависимостями Qt для запуска и динамическими библиотеками подмодулей, если они собираются как динамические библиотеки.
+On Windows, a Release build creates a `deploy/` directory by default. It contains the executable, Qt runtime dependencies, and submodule dynamic libraries when they are built as shared libraries.
 
-Чтобы отключить автоматическую подготовку папки поставки:
+To disable automatic deployment:
 
 ```bash
 cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release -DHWFRONTQML_DEPLOY_AFTER_BUILD=OFF
 ```
 
-Чтобы выбрать другую папку поставки:
+To choose another deployment directory:
 
 ```bash
 cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release -DHWFRONTQML_DEPLOY_DIR=/path/to/deploy
 ```
 
-### 4. Сборка с динамическими зависимостями
+### 4. Build with shared dependencies
 
-По умолчанию зависимости собираются статически. Для сборки с динамическими библиотеками используйте стандартную CMake-опцию:
+Dependencies are built statically by default. To build them as shared libraries, use the standard CMake option:
 
 ```bash
 cmake -S . -B build-release -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=ON
 cmake --build build-release --config Release
 ```
 
-## Работа с приложением
+## Using the application
 
-1. Запустите приложение.
-2. На стартовом экране нажмите **«Добавить устройство»**.
-3. Введите IPv4-адрес целевого устройства.
-4. Дождитесь подключения и появления карточки устройства.
-5. Нажмите на подключённое устройство, чтобы открыть страницу панели мониторинга.
-6. Используйте заголовок страницы устройства для открытия настроек устройства.
-7. В настройках устройства можно:
-   - задать псевдоним устройства;
-   - открыть диалог изменения расположения виджетов;
-   - добавить, удалить или переместить карточки метрик.
+1. Start the application.
+2. On the start screen, click **Add Device**.
+3. Enter the target device IPv4 address.
+4. Wait for the connection to complete and the device card to appear.
+5. Click the connected device to open the dashboard page.
+6. Use the device page header to open device settings.
+7. In device settings, you can:
+   - set a device alias;
+   - open the widget layout dialog;
+   - add, remove, or reorder metric cards.
 
-## Настройки и сохранение состояния
+## Settings and state persistence
 
-В общих настройках доступен переключатель **«Сохранять сессии и расположение виджетов»**.
+The general settings dialog includes the **Save sessions and widget layout** switch.
 
-Когда сохранение включено, приложение восстанавливает при следующем запуске:
+When persistence is enabled, the application restores the following data on the next launch:
 
-- список сохранённых сессий;
-- адреса устройств;
-- псевдонимы устройств;
-- порядок и состав виджетов панели мониторинга;
-- выбранные варианты отображения карточек метрик.
+- saved sessions;
+- device addresses;
+- device aliases;
+- dashboard widget set and order;
+- selected metric card display variants.
 
-Когда сохранение выключено, сохранённое состояние очищается, а следующий запуск начинается с чистого списка устройств.
+When persistence is disabled, the saved state is cleared and the next launch starts with an empty device list.
 
 ## CI/CD
 
-В репозитории настроен сценарий GitHub Actions для Windows-сборки в конфигурации Release:
+The repository includes a GitHub Actions workflow for Windows Release builds:
 
-- запускается вручную через `workflow_dispatch`;
-- запускается при отправке тегов вида `v*`;
-- устанавливает Qt 6.8.3;
-- собирает проект в Release-конфигурации;
-- проверяет наличие папки `deploy/`;
-- публикует артефакт сборки;
-- для тегов `v*` упаковывает `deploy/` в zip-архив и прикладывает его к GitHub Release.
+- it can be started manually with `workflow_dispatch`;
+- it runs on pushes of tags matching `v*`;
+- it installs Qt 6.8.3;
+- it builds the project in Release configuration;
+- it validates that the `deploy/` directory exists;
+- it publishes a build artifact;
+- for `v*` tags, it packs `deploy/` into a zip archive and attaches it to a GitHub Release.
 
-Для доступа CI к приватным подмодулям нужен секрет репозитория `SUBMODULES_TOKEN` с правами чтения содержимого `Xipypr/HWConnector` и `Xipypr/HardwareMonitorContract`.
+CI access to private submodules requires a repository secret named `SUBMODULES_TOKEN` with read access to the contents of `Xipypr/HWConnector` and `Xipypr/HardwareMonitorContract`.
 
-## Полезные CMake-опции
+## Useful CMake options
 
-| Опция | Значение по умолчанию | Описание |
+| Option | Default value | Description |
 | --- | --- | --- |
-| `BUILD_SHARED_LIBS` | `OFF` | Собирать зависимости как динамические библиотеки вместо статических. |
-| `HWFRONTQML_DEPLOY_AFTER_BUILD` | `ON` для Release | Создавать папку поставки после Windows-сборки в конфигурации Release. |
-| `HWFRONTQML_DEPLOY_DIR` | `<repo>/deploy` | Папка для готового запускаемого пакета. |
+| `BUILD_SHARED_LIBS` | `OFF` | Build dependencies as shared libraries instead of static libraries. |
+| `HWFRONTQML_DEPLOY_AFTER_BUILD` | `ON` for Release | Create a deployment folder after a Windows Release build. |
+| `HWFRONTQML_DEPLOY_DIR` | `<repo>/deploy` | Directory for the runnable application bundle. |
 
-## Примечания
+## Notes
 
-- Автоматическая подготовка папки поставки сейчас рассчитана на Windows и использует `windeployqt`.
-- Для сборок не в Release-конфигурации подготовка папки поставки автоматически отключается.
-- Подключение к Windows-устройствам рассчитано на LibreHardwareMonitor; OpenHardwareMonitor больше не является основной целевой интеграцией.
-- Каталог исходных файлов Android-пакета расположен в `android/`; фактическая Android-сборка зависит от установленного набора инструментов Qt for Android.
+- Automatic deployment currently targets Windows and uses `windeployqt`.
+- Deployment is disabled automatically for non-Release builds.
+- Windows device monitoring targets LibreHardwareMonitor; OpenHardwareMonitor is no longer the primary integration path.
+- The Android package source directory is located in `android/`; actual Android builds depend on an installed Qt for Android toolchain.
