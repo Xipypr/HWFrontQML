@@ -78,14 +78,22 @@ Item {
                 id: connectButton
                 readonly property real requiredTextWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width, reconnectTextMetrics.width)
                 readonly property real requiredWidth: requiredTextWidth + leftPadding + rightPadding + root.buttonHorizontalBreathingRoom
-                text: connectingIndicator.running
-                      ? qsTr("Stop")
-                      : (root.connectionInitialized ? qsTr("Reconnect") : qsTr("Connect Device"))
+                text: connectButtonText()
                 Layout.fillWidth: root.compactMode
                 Layout.minimumWidth: requiredWidth
                 Layout.preferredWidth: requiredWidth
                 enabled: hostInfo.acceptableInput || connectingIndicator.running
                 onClicked: clickConnectButton()
+
+                function connectButtonText() {
+                    if (connectingIndicator.running)
+                        return qsTr("Stop")
+
+                    if (root.connectionInitialized)
+                        return qsTr("Reconnect")
+
+                    return qsTr("Connect Device")
+                }
 
                 function clickConnectButton(){
                     if (connectingIndicator.running)
