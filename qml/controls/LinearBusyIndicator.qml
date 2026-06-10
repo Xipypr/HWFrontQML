@@ -8,7 +8,7 @@ Control {
     property bool running: false
     readonly property color accentColor: Material.accent
 
-    implicitWidth: 80
+    implicitWidth: 40
     implicitHeight: 8
 
     contentItem: Item {

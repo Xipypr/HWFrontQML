@@ -14,10 +14,10 @@ Rectangle {
     property string variant: "segments"
     signal variantSelected(string mode)
     readonly property var variantOptions: [
-        { label: "Segments", value: "segments" },
-        { label: "Ring", value: "ring" },
-        { label: "Linear", value: "linear" },
-        { label: "Arc 180°", value: "arc180" }
+        { label: qsTr("Segments"), value: "segments" },
+        { label: qsTr("Ring"), value: "ring" },
+        { label: qsTr("Linear"), value: "linear" },
+        { label: qsTr("Arc 180°"), value: "arc180" }
     ]
 
     readonly property int warningThreshold: 70
@@ -228,7 +228,7 @@ Rectangle {
             y: (parent.height - height) / 2
             width: Math.min(parent.width - 32, 280)
             padding: 16
-            title: "Режим отображения"
+            title: qsTr("Display mode")
             standardButtons: Dialog.Ok | Dialog.Cancel
 
             onOpened: variantDialogCombo.currentIndex = initialIndex

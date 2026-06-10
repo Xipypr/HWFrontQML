@@ -22,7 +22,7 @@ Dialog {
 
         Label {
             Layout.fillWidth: true
-            text: "Настройки устройства"
+            text: qsTr("Device settings")
             color: "#E2E8F0"
             font.pixelSize: 18
             font.bold: true
@@ -31,7 +31,7 @@ Dialog {
 
         Button {
             Layout.fillWidth: true
-            text: "Задать имя устройства"
+            text: qsTr("Set device name")
             onClicked: {
                 root.setDeviceNameSelected()
                 root.close()
@@ -40,7 +40,7 @@ Dialog {
 
         Button {
             Layout.fillWidth: true
-            text: "Изменить компоновку элементов"
+            text: qsTr("Change widget layout")
             onClicked: {
                 root.changeLayoutSelected()
                 root.close()

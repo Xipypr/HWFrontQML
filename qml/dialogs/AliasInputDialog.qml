@@ -16,7 +16,7 @@ Dialog {
     focus: true
     padding: 20
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    title: "Псевдоним устройства"
+    title: qsTr("Device alias")
 
     onOpened: {
         aliasField.text = initialAlias
@@ -30,7 +30,7 @@ Dialog {
         TextField {
             id: aliasField
             Layout.fillWidth: true
-            placeholderText: "Например: Рабочий ПК"
+            placeholderText: qsTr("Example: Work PC")
             maximumLength: 64
             onAccepted: saveButton.clicked()
         }
@@ -40,13 +40,13 @@ Dialog {
             spacing: 8
 
             Button {
-                text: "Отмена"
+                text: qsTr("Cancel")
                 onClicked: root.close()
             }
 
             Button {
                 id: saveButton
-                text: "Сохранить"
+                text: qsTr("Save")
                 enabled: aliasField.text.trim().length > 0
                 onClicked: {
                     root.aliasSubmitted(aliasField.text.trim())

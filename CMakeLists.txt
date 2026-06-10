@@ -44,7 +44,7 @@ function(initialize_required_submodule submodule_dir)
 endfunction()
 
 initialize_required_submodule(HWConnector)
-find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui Quick Qml LinguistTools)
 
 if(HWFRONTQML_DEPLOY_AFTER_BUILD)
     if(NOT WIN32)
@@ -94,6 +94,8 @@ configure_required_dependency_linkage(HWConnector
 )
 qt_add_executable(HWFrontQML
     src/app/main.cpp
+    src/app/languagemanager.cpp
+    src/app/languagemanager.h
 
     src/core/core.cpp
     src/core/core.h
@@ -124,6 +126,13 @@ qt_add_executable(HWFrontQML
 
     qml.qrc
     app.rc
+)
+
+qt_add_translations(HWFrontQML
+    TS_FILES
+        translations/HWFrontQML_ru.ts
+    RESOURCE_PREFIX
+        "/i18n"
 )
 
 target_include_directories(HWFrontQML

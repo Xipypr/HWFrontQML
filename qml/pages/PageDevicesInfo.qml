@@ -126,7 +126,7 @@ Page {
             visible: root.sessionState !== SessionState.CONNECTED
             Layout.fillWidth: true
             Layout.fillHeight: true
-            text: qsTr("Устройство недоступно")
+            text: qsTr("Device unavailable")
             color: "#CBD5E1"
             font.pixelSize: 18
             font.bold: true

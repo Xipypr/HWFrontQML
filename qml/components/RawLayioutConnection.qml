@@ -11,6 +11,7 @@ Item {
     property bool connectionInitialized: false
     property int horizontalMargin: 10
     property bool compactMode: width < 560
+    readonly property int buttonHorizontalBreathingRoom: 12
     property string connectedDeviceName: ""
     property string deviceAlias: ""
     property string target: ""
@@ -42,7 +43,7 @@ Item {
 
         Label {
             visible: !root.connectionInitialized
-            text: "Введите IP-адрес"
+            text: qsTr("Enter IP address")
             Layout.fillWidth: root.compactMode
             Layout.preferredWidth: controlsLayout.implicitWidth
             Layout.alignment: root.compactMode ? Qt.AlignLeft : Qt.AlignHCenter
@@ -75,9 +76,14 @@ Item {
 
             Button{
                 id: connectButton
-                text: "Connect Device"
+                readonly property real requiredTextWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width, reconnectTextMetrics.width)
+                readonly property real requiredWidth: requiredTextWidth + leftPadding + rightPadding + root.buttonHorizontalBreathingRoom
+                text: connectingIndicator.running
+                      ? qsTr("Stop")
+                      : (root.connectionInitialized ? qsTr("Reconnect") : qsTr("Connect Device"))
                 Layout.fillWidth: root.compactMode
-                Layout.preferredWidth: Math.max(connectTextMetrics.width, stopTextMetrics.width) + leftPadding + rightPadding
+                Layout.minimumWidth: requiredWidth
+                Layout.preferredWidth: requiredWidth
                 enabled: hostInfo.acceptableInput || connectingIndicator.running
                 onClicked: clickConnectButton()
 
@@ -105,14 +111,12 @@ Item {
                         if (sessionCore)
                             sessionCore.onStartConnection(hostInfo.inputText)
                     }
-                    connectButton.text = "Stop"
                     connectingIndicator.running = true
                 }
 
                 function stopSendingRequests(){
                     awaitingDeviceCreation = false
                     root.connectionStateChanged(false)
-                    connectButton.text = "Connect Device"
                     connectingIndicator.running = false
                     const sessionCore = sessionManager.coreForSession(root.sessionId)
                     if (sessionCore)
@@ -124,13 +128,19 @@ Item {
             TextMetrics {
                 id: connectTextMetrics
                 font: connectButton.font
-                text: "Connect Device"
+                text: qsTr("Connect Device")
             }
 
             TextMetrics {
                 id: stopTextMetrics
                 font: connectButton.font
-                text: "Stop connecting"
+                text: qsTr("Stop")
+            }
+
+            TextMetrics {
+                id: reconnectTextMetrics
+                font: connectButton.font
+                text: qsTr("Reconnect")
             }
 
             LinearBusyIndicator {
@@ -143,8 +153,12 @@ Item {
 
             Button{
                 id: deleteDevice
-                text: "Delete Device"
+                readonly property real requiredTextWidth: Math.max(deleteTextMetrics.width, deleteEnglishTextMetrics.width)
+                readonly property real requiredWidth: requiredTextWidth + leftPadding + rightPadding + root.buttonHorizontalBreathingRoom
+                text: qsTr("Delete Device")
                 Layout.fillWidth: root.compactMode
+                Layout.minimumWidth: requiredWidth
+                Layout.preferredWidth: requiredWidth
                 onClicked: {
                     const removeConnectedDevicePage = connectionInitialized
                     connectionInitialized = false
@@ -158,6 +172,18 @@ Item {
                     root.connectionStateChanged(false)
                     root.removeThisObject(removeConnectedDevicePage)
                 }
+            }
+
+            TextMetrics {
+                id: deleteTextMetrics
+                font: deleteDevice.font
+                text: qsTr("Delete Device")
+            }
+
+            TextMetrics {
+                id: deleteEnglishTextMetrics
+                font: deleteDevice.font
+                text: "Delete Device"
             }
         }
 
@@ -181,7 +207,6 @@ Item {
 
                 awaitingDeviceCreation = false
                 connectingIndicator.running = false
-                connectButton.text = "Reconnect"
                 connectionInitialized = true
                 root.connectedDeviceName = displayName
                 if (sessionManager.sessionsModel.rowCount() === 1)
