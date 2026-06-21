@@ -30,7 +30,7 @@ QVariant DashboardMetricsModel::data(const QModelIndex &index, int role) const
     case TitleRole:
         return item.title;
     case ValueRole:
-        return item.value;
+        return item.metricValues.value(item.metricId, 0.0);
     case VariantRole:
         return item.variant;
     case MetricIdRole:
@@ -39,8 +39,10 @@ QVariant DashboardMetricsModel::data(const QModelIndex &index, int role) const
         return item.unit;
     case ShowProgressBarRole:
         return item.showProgressBar;
-    case SecondaryValueRole:
-        return item.secondaryValue;
+    case WidgetTypeRole:
+        return widgetTypeToString(item.type);
+    case MetricValuesRole:
+        return metricValues(item);
     default:
         return {};
     }
@@ -56,7 +58,8 @@ QHash<int, QByteArray> DashboardMetricsModel::roleNames() const
         { MetricIdRole, "metricId" },
         { UnitRole, "unit" },
         { ShowProgressBarRole, "showProgressBar" },
-        { SecondaryValueRole, "secondaryValue" }
+        { WidgetTypeRole, "widgetType" },
+        { MetricValuesRole, "metricValues" }
     };
 }
 
@@ -70,10 +73,11 @@ QVariantMap DashboardMetricsModel::get(int row) const
         { "widgetId", item.widgetId },
         { "deviceId", item.deviceId },
         { "title", item.title },
-        { "value", item.value },
-        { "secondaryValue", item.secondaryValue },
+        { "value", item.metricValues.value(item.metricId, 0.0) },
         { "variant", item.variant },
         { "metricId", Metrics::metricIdToString(item.metricId) },
+        { "widgetType", widgetTypeToString(item.type) },
+        { "metricValues", metricValues(item) },
         { "unit", item.unit },
         { "showProgressBar", item.showProgressBar }
     };
@@ -87,7 +91,12 @@ QJsonArray DashboardMetricsModel::toJson() const
         QJsonObject widgetObject;
         widgetObject[QStringLiteral("deviceId")] = item.deviceId;
         widgetObject[QStringLiteral("title")] = item.title;
+        widgetObject[QStringLiteral("widgetType")] = widgetTypeToString(item.type);
         widgetObject[QStringLiteral("metricId")] = Metrics::metricIdToString(item.metricId);
+        QJsonArray metricIds;
+        for (const Metrics::MetricId metricId : item.metricIds)
+            metricIds.append(Metrics::metricIdToString(metricId));
+        widgetObject[QStringLiteral("metricIds")] = metricIds;
         widgetObject[QStringLiteral("unit")] = item.unit;
         widgetObject[QStringLiteral("showProgressBar")] = item.showProgressBar;
         widgetObject[QStringLiteral("variant")] = item.variant;
@@ -114,22 +123,43 @@ void DashboardMetricsModel::restoreFromJson(const QJsonArray &widgets)
         const QJsonObject widgetObject = value.toObject();
         const QString deviceId = widgetObject.value(QStringLiteral("deviceId")).toString().trimmed();
         const QString title = widgetObject.value(QStringLiteral("title")).toString().trimmed();
-        const Metrics::MetricId metricId = Metrics::metricIdFromString(widgetObject.value(QStringLiteral("metricId")).toString());
+        Metrics::MetricId metricId = Metrics::metricIdFromString(widgetObject.value(QStringLiteral("metricId")).toString());
+        if (metricId == Metrics::MetricId::NetworkUpload)
+            metricId = Metrics::MetricId::NetworkDownload;
         const QString widgetId = makeWidgetId(deviceId, metricId);
 
         if (widgetId.isEmpty() || restoredIndexes.contains(widgetId))
             continue;
 
+        const bool networkWidget = widgetObject.value(QStringLiteral("widgetType")).toString() == QStringLiteral("network")
+                || metricId == Metrics::MetricId::NetworkDownload;
+
         WidgetItem item;
         item.widgetId = widgetId;
         item.deviceId = deviceId;
         item.title = title;
-        item.value = 0.0;
-        item.secondaryValue = 0.0;
+        item.type = networkWidget ? WidgetType::Network : WidgetType::Metric;
         item.variant = widgetObject.value(QStringLiteral("variant")).toString(QStringLiteral("segments"));
         if (item.variant.isEmpty())
             item.variant = QStringLiteral("segments");
         item.metricId = metricId;
+        const QJsonArray savedMetricIds = widgetObject.value(QStringLiteral("metricIds")).toArray();
+        for (const QJsonValue &savedMetricId : savedMetricIds) {
+            const Metrics::MetricId parsedMetricId = Metrics::metricIdFromString(savedMetricId.toString());
+            if (parsedMetricId != Metrics::MetricId::Unknown && !item.metricIds.contains(parsedMetricId))
+                item.metricIds.append(parsedMetricId);
+        }
+        if (networkWidget) {
+            item.metricIds = { Metrics::MetricId::NetworkDownload, Metrics::MetricId::NetworkUpload };
+        } else if (item.metricIds.isEmpty()) {
+            item.metricIds = { metricId };
+        }
+        for (const Metrics::MetricId itemMetricId : item.metricIds)
+            item.metricValues.insert(itemMetricId, 0.0);
+        if (networkWidget && item.variant != QStringLiteral("networkHorizontal")
+                && item.variant != QStringLiteral("networkVertical")) {
+            item.variant = QStringLiteral("networkVertical");
+        }
         item.unit = widgetObject.value(QStringLiteral("unit")).toString();
         if (item.unit.isEmpty())
             item.unit = Metrics::metricUnit(metricId);
@@ -305,11 +335,6 @@ void DashboardMetricsModel::onMetricUpdated(const QString &deviceId,
         return;
     }
 
-    if (metricId == Metrics::MetricId::NetworkUpload) {
-        setNetworkUploadValue(deviceId, value.toDouble());
-        return;
-    }
-
     setWidgetValue(deviceId, metricId, value.toDouble());
 }
 
@@ -351,17 +376,28 @@ bool DashboardMetricsModel::addWidget(const MetricDescriptor &descriptor, const 
     if (widgetId.isEmpty())
         return false;
 
-    return insertWidget({
-        widgetId,
-        descriptor.deviceId,
-        descriptor.displayName,
-        0.0,
-        0.0,
-        variant.isEmpty() ? QStringLiteral("segments") : variant,
-        descriptor.metricId,
-        descriptor.unit.isEmpty() ? Metrics::metricUnit(descriptor.metricId) : descriptor.unit,
-        descriptor.showProgressBar
-    });
+    WidgetItem item;
+    item.widgetId = widgetId;
+    item.deviceId = descriptor.deviceId;
+    item.title = descriptor.displayName;
+    item.metricId = descriptor.metricId;
+    item.unit = descriptor.unit.isEmpty() ? Metrics::metricUnit(descriptor.metricId) : descriptor.unit;
+    item.showProgressBar = descriptor.showProgressBar;
+
+    if (descriptor.metricId == Metrics::MetricId::NetworkDownload) {
+        item.type = WidgetType::Network;
+        item.variant = QStringLiteral("networkVertical");
+        item.metricIds = { Metrics::MetricId::NetworkDownload, Metrics::MetricId::NetworkUpload };
+    } else {
+        item.type = WidgetType::Metric;
+        item.variant = variant.isEmpty() ? QStringLiteral("segments") : variant;
+        item.metricIds = { descriptor.metricId };
+    }
+
+    for (const Metrics::MetricId metricId : item.metricIds)
+        item.metricValues.insert(metricId, 0.0);
+
+    return insertWidget(item);
 }
 
 bool DashboardMetricsModel::addFirstDefaultWidget(Metrics::MetricId metricId,
@@ -420,45 +456,54 @@ bool DashboardMetricsModel::setWidgetValue(const QString &deviceId,
                                            double value,
                                            const QString &unit)
 {
-    const int index = widgetIndexForMetric(deviceId, metricId);
-    if (index < 0)
-        return false;
+    bool updated = false;
 
-    WidgetItem &item = m_items[index];
-    QVector<int> changedRoles;
+    for (int index = 0; index < m_items.size(); ++index) {
+        WidgetItem &item = m_items[index];
+        if (item.deviceId != deviceId || !item.metricIds.contains(metricId))
+            continue;
 
-    if (item.value != value) {
-        item.value = value;
-        changedRoles.push_back(ValueRole);
+        QVector<int> changedRoles;
+        if (item.metricValues.value(metricId, 0.0) != value) {
+            item.metricValues.insert(metricId, value);
+            changedRoles.push_back(MetricValuesRole);
+            if (item.metricId == metricId)
+                changedRoles.push_back(ValueRole);
+        }
+
+        if (!unit.isEmpty() && item.unit != unit) {
+            item.unit = unit;
+            changedRoles.push_back(UnitRole);
+        }
+
+        if (!changedRoles.isEmpty()) {
+            const QModelIndex modelIndex = this->index(index);
+            emit dataChanged(modelIndex, modelIndex, changedRoles);
+        }
+        updated = true;
     }
 
-    if (!unit.isEmpty() && item.unit != unit) {
-        item.unit = unit;
-        changedRoles.push_back(UnitRole);
-    }
-
-    if (changedRoles.isEmpty())
-        return true;
-
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, changedRoles);
-    return true;
+    return updated;
 }
 
-bool DashboardMetricsModel::setNetworkUploadValue(const QString &deviceId, double value)
+QString DashboardMetricsModel::widgetTypeToString(WidgetType type)
 {
-    const int index = widgetIndexForMetric(deviceId, Metrics::MetricId::NetworkDownload);
-    if (index < 0)
-        return false;
+    switch (type) {
+    case WidgetType::Metric:
+        return QStringLiteral("metric");
+    case WidgetType::Network:
+        return QStringLiteral("network");
+    }
 
-    WidgetItem &item = m_items[index];
-    if (item.secondaryValue == value)
-        return true;
+    return QStringLiteral("metric");
+}
 
-    item.secondaryValue = value;
-    const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, { SecondaryValueRole });
-    return true;
+QVariantMap DashboardMetricsModel::metricValues(const WidgetItem &item)
+{
+    QVariantMap values;
+    for (auto it = item.metricValues.cbegin(); it != item.metricValues.cend(); ++it)
+        values.insert(Metrics::metricIdToString(it.key()), it.value());
+    return values;
 }
 
 

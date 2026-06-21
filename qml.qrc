@@ -9,6 +9,8 @@
         <file>qml/components/CustomItem.qml</file>
         <file>qml/components/DeviceStatusHeader.qml</file>
         <file>qml/components/MetricCard.qml</file>
+        <file>qml/components/DashboardCard.qml</file>
+        <file>qml/components/NetworkMetricCard.qml</file>
         <file>qml/components/RawLayioutConnection.qml</file>
         <file>qml/controls/LinearBusyIndicator.qml</file>
         <file>qml/controls/StatusIndicator.qml</file>

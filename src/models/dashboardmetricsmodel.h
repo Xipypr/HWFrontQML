@@ -21,7 +21,8 @@ public:
         MetricIdRole,
         UnitRole,
         ShowProgressBarRole,
-        SecondaryValueRole
+        WidgetTypeRole,
+        MetricValuesRole
     };
     Q_ENUM(Roles)
 
@@ -57,14 +58,20 @@ public slots:
                          const QVariant &value);
 
 private:
+    enum class WidgetType {
+        Metric,
+        Network
+    };
+
     struct WidgetItem {
         QString widgetId;
         QString deviceId;
         QString title;
-        double value = 0.0;
-        double secondaryValue = 0.0;
+        WidgetType type = WidgetType::Metric;
         QString variant;
         Metrics::MetricId metricId = Metrics::MetricId::Unknown;
+        QList<Metrics::MetricId> metricIds;
+        QHash<Metrics::MetricId, double> metricValues;
         QString unit;
         bool showProgressBar = false;
     };
@@ -85,7 +92,8 @@ private:
                         Metrics::MetricId metricId,
                         double value,
                         const QString &unit = QString());
-    bool setNetworkUploadValue(const QString &deviceId, double value);
+    static QString widgetTypeToString(WidgetType type);
+    static QVariantMap metricValues(const WidgetItem &item);
     void syncInitialWidgetsWithMetrics();
     const MetricDescriptor *descriptorForMetric(const QString &deviceId,
                                                 Metrics::MetricId metricId) const;

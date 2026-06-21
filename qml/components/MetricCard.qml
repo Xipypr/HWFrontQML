@@ -2,33 +2,26 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 
-Rectangle {
+DashboardCard {
     id: card
 
     property string title: "N/A"
     property real value: 0
-    property real secondaryValue: 0
     property string unit: ""
     property string metricId: ""
     property bool showProgressBar: true
     // segments | ring | linear | arc180
     property string variant: "segments"
     signal variantSelected(string mode)
-    readonly property var variantOptions: isNetworkCard
-        ? [
-            { label: qsTr("Vertical"), value: "networkVertical" },
-            { label: qsTr("Horizontal"), value: "networkHorizontal" }
-        ]
-        : [
-            { label: qsTr("Segments"), value: "segments" },
-            { label: qsTr("Ring"), value: "ring" },
-            { label: qsTr("Linear"), value: "linear" },
-            { label: qsTr("Arc 180°"), value: "arc180" }
-        ]
+    readonly property var variantOptions: [
+        { label: qsTr("Segments"), value: "segments" },
+        { label: qsTr("Ring"), value: "ring" },
+        { label: qsTr("Linear"), value: "linear" },
+        { label: qsTr("Arc 180°"), value: "arc180" }
+    ]
 
     readonly property int warningThreshold: 70
     readonly property int criticalThreshold: 90
-    readonly property bool isNetworkCard: metricId === "networkDownload"
     readonly property color valueOnlyAccentColor: "#38BDF8"
     readonly property color normalAccentColor: "#22C55E"
     readonly property color warningAccentColor: "#F59E0B"
@@ -37,7 +30,7 @@ Rectangle {
     readonly property bool useStatusColor: showProgressBar && metricId !== "batteryLevel"
     readonly property bool isCriticalValue: useStatusColor && safeValue >= criticalThreshold
     readonly property bool isWarningValue: useStatusColor && safeValue >= warningThreshold && !isCriticalValue
-    readonly property color accentColor: resolveAccentColor()
+    accentColor: resolveAccentColor()
     readonly property string statusText: resolveStatusText()
     readonly property int valueFontSize: 42
     readonly property int compactValueFontSize: 24
@@ -49,10 +42,6 @@ Rectangle {
     function formattedValue() {
         const rounded = Math.round(value * 10) / 10
         return showProgressBar ? Math.round(rounded).toString() : rounded.toFixed(1)
-    }
-
-    function formattedSecondaryValue() {
-        return (Math.round(secondaryValue * 10) / 10).toFixed(1)
     }
 
     function resolveAccentColor() {
@@ -118,11 +107,6 @@ Rectangle {
         variantDialogLoader.pendingOpen = true
     }
 
-    radius: 16
-    color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
-    border.width: 1
-    border.color: Qt.rgba(100 / 255, 116 / 255, 139 / 255, 0.55)
-
     Text {
         id: valueWidthProbe
         visible: false
@@ -139,15 +123,6 @@ Rectangle {
         font.family: card.valueFontFamily
         font.pixelSize: card.compactValueFontSize
         font.bold: true
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: -1
-        radius: parent.radius + 2
-        color: "transparent"
-        border.width: 2
-        border.color: Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.25)
     }
 
     ColumnLayout {
@@ -193,8 +168,7 @@ Rectangle {
 
         Text {
             text: card.formattedValue() + card.unit
-            visible: !card.isNetworkCard
-                     && (!card.showProgressBar || (card.variant !== "arc180" && card.variant !== "ring"))
+            visible: !card.showProgressBar || (card.variant !== "arc180" && card.variant !== "ring")
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
             font.family: card.valueFontFamily
@@ -209,29 +183,20 @@ Rectangle {
             Layout.fillHeight: card.variant === "arc180"
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 86 : 12)
-            visible: card.showProgressBar && !card.isNetworkCard
+            visible: card.showProgressBar
             sourceComponent: card.resolveVizComponent()
-        }
-
-        Loader {
-            visible: card.isNetworkCard
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            sourceComponent: card.variant === "networkHorizontal"
-                             ? networkHorizontalViz
-                             : networkVerticalViz
         }
 
     }
 
     TapHandler {
-        enabled: card.showProgressBar || card.isNetworkCard
+        enabled: card.showProgressBar
         acceptedButtons: Qt.RightButton
         onTapped: card.openVariantDialog()
     }
 
     TapHandler {
-        enabled: card.showProgressBar || card.isNetworkCard
+        enabled: card.showProgressBar
         acceptedButtons: Qt.LeftButton
         gesturePolicy: TapHandler.WithinBounds
         onLongPressed: card.openVariantDialog()
@@ -256,9 +221,7 @@ Rectangle {
 
             onAccepted: {
                 const selected = card.variantOptions[variantDialogCombo.currentIndex]
-                card.variantSelected(selected
-                                     ? selected.value
-                                     : (card.isNetworkCard ? "networkVertical" : "segments"))
+                card.variantSelected(selected ? selected.value : "segments")
             }
 
             contentItem: ComboBox {
@@ -281,164 +244,6 @@ Rectangle {
                 pendingOpen = false
                 item.initialIndex = card.variantIndex(card.variant)
                 item.open()
-            }
-        }
-    }
-
-    Component {
-        id: networkVerticalViz
-
-        ColumnLayout {
-            spacing: 0
-
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                spacing: 8
-
-                Text {
-                    text: "↓"
-                    color: "#93C5FD"
-                    font.pixelSize: 20
-                    font.weight: Font.Black
-                }
-
-                Label {
-                    text: qsTr("Download")
-                    color: "#93C5FD"
-                    font.pixelSize: 14
-                    font.bold: true
-                    Layout.fillWidth: true
-                }
-
-                Text {
-                    text: card.formattedValue() + card.unit
-                    color: "#F8FAFC"
-                    font.pixelSize: 25
-                    font.family: card.valueFontFamily
-                    font.bold: true
-                }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: 1
-                color: "#334155"
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                spacing: 8
-
-                Text {
-                    text: "↑"
-                    color: "#C4B5FD"
-                    font.pixelSize: 20
-                    font.weight: Font.Black
-                }
-
-                Label {
-                    text: qsTr("Upload")
-                    color: "#C4B5FD"
-                    font.pixelSize: 14
-                    font.bold: true
-                    Layout.fillWidth: true
-                }
-
-                Text {
-                    text: card.formattedSecondaryValue() + card.unit
-                    color: "#F8FAFC"
-                    font.pixelSize: 25
-                    font.family: card.valueFontFamily
-                    font.bold: true
-                }
-            }
-        }
-    }
-
-    Component {
-        id: networkHorizontalViz
-
-        RowLayout {
-            spacing: 12
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.alignment: Qt.AlignVCenter
-                spacing: 6
-
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 6
-
-                    Text {
-                        text: "↓"
-                        color: "#93C5FD"
-                        font.pixelSize: 20
-                        font.weight: Font.Black
-                    }
-
-                    Label {
-                        text: qsTr("Download")
-                        color: "#93C5FD"
-                        font.pixelSize: 14
-                        font.bold: true
-                    }
-                }
-
-                Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: card.formattedValue() + card.unit
-                    color: "#F8FAFC"
-                    font.pixelSize: 24
-                    font.family: card.valueFontFamily
-                    font.bold: true
-                }
-            }
-
-            Rectangle {
-                Layout.preferredWidth: 1
-                Layout.fillHeight: true
-                Layout.topMargin: 4
-                Layout.bottomMargin: 4
-                color: "#334155"
-            }
-
-            ColumnLayout {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                Layout.alignment: Qt.AlignVCenter
-                spacing: 6
-
-                RowLayout {
-                    Layout.alignment: Qt.AlignHCenter
-                    spacing: 6
-
-                    Text {
-                        text: "↑"
-                        color: "#C4B5FD"
-                        font.pixelSize: 20
-                        font.weight: Font.Black
-                    }
-
-                    Label {
-                        text: qsTr("Upload")
-                        color: "#C4B5FD"
-                        font.pixelSize: 14
-                        font.bold: true
-                    }
-                }
-
-                Text {
-                    Layout.alignment: Qt.AlignHCenter
-                    text: card.formattedSecondaryValue() + card.unit
-                    color: "#F8FAFC"
-                    font.pixelSize: 24
-                    font.family: card.valueFontFamily
-                    font.bold: true
-                }
             }
         }
     }
@@ -627,10 +432,4 @@ Rectangle {
         }
     }
 
-    Behavior on secondaryValue {
-        NumberAnimation {
-            duration: 200
-            easing.type: Easing.OutCubic
-        }
-    }
 }

@@ -1,0 +1,250 @@
+pragma ComponentBehavior: Bound
+
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.3
+
+DashboardCard {
+    id: card
+
+    property string title: "N/A"
+    property real downloadValue: 0
+    property real uploadValue: 0
+    property string unit: " MB/s"
+    property string variant: "networkVertical"
+
+    signal variantSelected(string mode)
+
+    readonly property var variantOptions: [
+        { label: qsTr("Vertical"), value: "networkVertical" },
+        { label: qsTr("Horizontal"), value: "networkHorizontal" }
+    ]
+    readonly property color downloadColor: "#93C5FD"
+    readonly property color uploadColor: "#C4B5FD"
+    readonly property string valueFontFamily: "Consolas"
+    accentColor: downloadColor
+
+    function formattedValue(value) {
+        return (Math.round(value * 10) / 10).toFixed(1)
+    }
+
+    function variantIndex(mode) {
+        for (let i = 0; i < variantOptions.length; ++i) {
+            if (variantOptions[i].value === mode)
+                return i
+        }
+        return 0
+    }
+
+    function openVariantDialog() {
+        variantDialog.initialIndex = variantIndex(variant)
+        variantDialog.open()
+    }
+
+    ColumnLayout {
+        anchors.fill: parent
+        anchors.margins: 14
+        spacing: 10
+
+        Text {
+            Layout.fillWidth: true
+            text: card.title
+            color: "#BFDBFE"
+            font.pixelSize: 14
+            font.bold: true
+            elide: Text.ElideRight
+        }
+
+        Loader {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            sourceComponent: card.variant === "networkHorizontal"
+                             ? horizontalLayout
+                             : verticalLayout
+        }
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.RightButton
+        onTapped: card.openVariantDialog()
+    }
+
+    TapHandler {
+        acceptedButtons: Qt.LeftButton
+        gesturePolicy: TapHandler.WithinBounds
+        onLongPressed: card.openVariantDialog()
+    }
+
+    Dialog {
+        id: variantDialog
+        property int initialIndex: 0
+
+        modal: true
+        focus: true
+        parent: Overlay.overlay
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+        width: Math.min(parent.width - 32, 280)
+        padding: 16
+        title: qsTr("Display mode")
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        onOpened: variantCombo.currentIndex = initialIndex
+        onAccepted: {
+            const selected = card.variantOptions[variantCombo.currentIndex]
+            card.variantSelected(selected ? selected.value : "networkVertical")
+        }
+
+        contentItem: ComboBox {
+            id: variantCombo
+            model: card.variantOptions
+            textRole: "label"
+            width: parent.width
+        }
+    }
+
+    Component {
+        id: verticalLayout
+
+        ColumnLayout {
+            spacing: 0
+
+            NetworkMetricRow {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                arrow: "↓"
+                label: qsTr("Download")
+                valueText: card.formattedValue(card.downloadValue) + card.unit
+                accentColor: card.downloadColor
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 1
+                color: "#334155"
+            }
+
+            NetworkMetricRow {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                arrow: "↑"
+                label: qsTr("Upload")
+                valueText: card.formattedValue(card.uploadValue) + card.unit
+                accentColor: card.uploadColor
+            }
+        }
+    }
+
+    Component {
+        id: horizontalLayout
+
+        RowLayout {
+            spacing: 12
+
+            NetworkMetricColumn {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                arrow: "↓"
+                label: qsTr("Download")
+                valueText: card.formattedValue(card.downloadValue) + card.unit
+                accentColor: card.downloadColor
+            }
+
+            Rectangle {
+                Layout.preferredWidth: 1
+                Layout.fillHeight: true
+                Layout.topMargin: 4
+                Layout.bottomMargin: 4
+                color: "#334155"
+            }
+
+            NetworkMetricColumn {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                arrow: "↑"
+                label: qsTr("Upload")
+                valueText: card.formattedValue(card.uploadValue) + card.unit
+                accentColor: card.uploadColor
+            }
+        }
+    }
+
+    component NetworkMetricRow: RowLayout {
+        required property string arrow
+        required property string label
+        required property string valueText
+        required property color accentColor
+
+        spacing: 8
+
+        Text {
+            text: parent.arrow
+            color: parent.accentColor
+            font.pixelSize: 20
+            font.weight: Font.Black
+        }
+
+        Label {
+            Layout.fillWidth: true
+            text: parent.label
+            color: parent.accentColor
+            font.pixelSize: 14
+            font.bold: true
+        }
+
+        Text {
+            text: parent.valueText
+            color: "#F8FAFC"
+            font.pixelSize: 25
+            font.family: card.valueFontFamily
+            font.bold: true
+        }
+    }
+
+    component NetworkMetricColumn: ColumnLayout {
+        id: metricColumn
+
+        required property string arrow
+        required property string label
+        required property string valueText
+        required property color accentColor
+
+        spacing: 6
+
+        RowLayout {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 6
+
+            Text {
+                text: metricColumn.arrow
+                color: metricColumn.accentColor
+                font.pixelSize: 20
+                font.weight: Font.Black
+            }
+
+            Label {
+                text: metricColumn.label
+                color: metricColumn.accentColor
+                font.pixelSize: 14
+                font.bold: true
+            }
+        }
+
+        Text {
+            Layout.alignment: Qt.AlignHCenter
+            text: metricColumn.valueText
+            color: "#F8FAFC"
+            font.pixelSize: 24
+            font.family: card.valueFontFamily
+            font.bold: true
+        }
+    }
+
+    Behavior on downloadValue {
+        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+    }
+
+    Behavior on uploadValue {
+        NumberAnimation { duration: 200; easing.type: Easing.OutCubic }
+    }
+}

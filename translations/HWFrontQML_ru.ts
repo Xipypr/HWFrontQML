@@ -90,6 +90,13 @@
         <source>Display mode</source>
         <translation>Режим отображения</translation>
     </message>
+</context>
+<context>
+    <name>NetworkMetricCard</name>
+    <message>
+        <source>Display mode</source>
+        <translation>Режим отображения</translation>
+    </message>
     <message>
         <source>Download</source>
         <translation>Загрузка</translation>
