@@ -92,18 +92,10 @@
     </message>
 </context>
 <context>
-    <name>NetworkMetricCard</name>
+    <name>NetworkDisplayModeDialog</name>
     <message>
         <source>Display mode</source>
         <translation>Режим отображения</translation>
-    </message>
-    <message>
-        <source>Download</source>
-        <translation>Загрузка</translation>
-    </message>
-    <message>
-        <source>Upload</source>
-        <translation>Отдача</translation>
     </message>
     <message>
         <source>Vertical</source>
@@ -112,6 +104,17 @@
     <message>
         <source>Horizontal</source>
         <translation>Горизонтально</translation>
+    </message>
+</context>
+<context>
+    <name>NetworkMetricCard</name>
+    <message>
+        <source>Download</source>
+        <translation>Загрузка</translation>
+    </message>
+    <message>
+        <source>Upload</source>
+        <translation>Отдача</translation>
     </message>
 </context>
 <context>

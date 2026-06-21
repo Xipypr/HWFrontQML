@@ -16,6 +16,7 @@
         <file>qml/controls/StatusIndicator.qml</file>
         <file>qml/dialogs/AliasInputDialog.qml</file>
         <file>qml/dialogs/DeviceSettingsDialog.qml</file>
+        <file>qml/dialogs/NetworkDisplayModeDialog.qml</file>
         <file>qml/dialogs/SettingsDialog.qml</file>
         <file>qml/dialogs/WidgetLayoutDialog.qml</file>
         <file>icons/arrow_down.png</file>

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import "../dialogs"
 
 DashboardCard {
     id: card
@@ -10,15 +11,11 @@ DashboardCard {
     property string title: "N/A"
     property real downloadValue: 0
     property real uploadValue: 0
-    property string unit: " MB/s"
+    property string unit: ""
     property string variant: "networkVertical"
 
     signal variantSelected(string mode)
 
-    readonly property var variantOptions: [
-        { label: qsTr("Vertical"), value: "networkVertical" },
-        { label: qsTr("Horizontal"), value: "networkHorizontal" }
-    ]
     readonly property color downloadColor: "#93C5FD"
     readonly property color uploadColor: "#C4B5FD"
     readonly property string valueFontFamily: "Consolas"
@@ -28,16 +25,8 @@ DashboardCard {
         return (Math.round(value * 10) / 10).toFixed(1)
     }
 
-    function variantIndex(mode) {
-        for (let i = 0; i < variantOptions.length; ++i) {
-            if (variantOptions[i].value === mode)
-                return i
-        }
-        return 0
-    }
-
     function openVariantDialog() {
-        variantDialog.initialIndex = variantIndex(variant)
+        variantDialog.initialVariant = variant
         variantDialog.open()
     }
 
@@ -75,31 +64,10 @@ DashboardCard {
         onLongPressed: card.openVariantDialog()
     }
 
-    Dialog {
+    NetworkDisplayModeDialog {
         id: variantDialog
-        property int initialIndex: 0
-
-        modal: true
-        focus: true
-        parent: Overlay.overlay
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
-        width: Math.min(parent.width - 32, 280)
-        padding: 16
-        title: qsTr("Display mode")
-        standardButtons: Dialog.Ok | Dialog.Cancel
-
-        onOpened: variantCombo.currentIndex = initialIndex
-        onAccepted: {
-            const selected = card.variantOptions[variantCombo.currentIndex]
-            card.variantSelected(selected ? selected.value : "networkVertical")
-        }
-
-        contentItem: ComboBox {
-            id: variantCombo
-            model: card.variantOptions
-            textRole: "label"
-            width: parent.width
+        onVariantSelected: function(selectedVariant) {
+            card.variantSelected(selectedVariant)
         }
     }
 
