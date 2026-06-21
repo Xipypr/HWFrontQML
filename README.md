@@ -4,7 +4,7 @@
 
 **HWFrontQML** is a Qt/QML application for monitoring hardware metrics from remote devices. The application lets you add devices by IP address, connect to metric sources on Windows and Linux, view available metrics on a customizable dashboard, and persist session state between launches.
 
-**Current version:** `1.5.0`.
+**Current version:** `1.6.0`.
 
 ## Contents
 
@@ -25,9 +25,10 @@
 - Display the state of each session: idle, connecting, connected, or error.
 - Open a dedicated dashboard page for every connected device.
 - Connect to Windows metric sources based on [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) instead of the legacy OpenHardwareMonitor path.
-- Support Linux metric sources through the hardware monitoring adapter.
+- Support Linux metric sources through [LinuxHardwareDaemon](https://github.com/Xipypr/LinuxHardwareDaemon).
 - Automatically discover available device metrics through `HWConnector` and the shared `HardwareMonitorContract`.
-- Show CPU, GPU, RAM, and battery metrics on the dashboard when the device provides them.
+- Show CPU, GPU, RAM, storage, battery, and network metrics on the dashboard when the device provides them.
+- Monitor network upload and download speeds in a combined card with selectable vertical and horizontal layouts.
 - Show metrics as cards with selectable display variants, including segmented, ring, and arc progress views.
 - Configure the dashboard widget set and ordering: add, remove, and reorder metric cards.
 - Rename devices with a custom alias.
@@ -101,7 +102,7 @@ For a local build, install:
   - [`HWConnector`](https://github.com/Xipypr/HWConnector)
   - [`HardwareMonitorContract`](https://github.com/Xipypr/HardwareMonitorContract)
 - A running [LibreHardwareMonitor](https://github.com/LibreHardwareMonitor/LibreHardwareMonitor) instance with **Remote Web Server** enabled and its port open to the device running HWFrontQML.
-- A compatible Linux adapter that exposes a hardware snapshot in the project format, with its port open to the device running HWFrontQML.
+- A running [LinuxHardwareDaemon](https://github.com/Xipypr/LinuxHardwareDaemon) instance that exposes hardware snapshots, with its port open to the device running HWFrontQML.
 
 > If the submodule directories are empty, CMake will try to initialize them automatically. If the repositories are private, configure Git authentication before building.
 
