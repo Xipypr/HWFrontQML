@@ -235,10 +235,7 @@ bool DashboardMetricsModel::addWidgetForMetric(const QString &deviceId,
     if (!descriptor)
         return false;
 
-    return addWidget(*descriptor,
-                     parsedMetricId == Metrics::MetricId::NetworkDownload
-                         ? DashboardDisplay::Mode::NetworkVertical
-                         : DashboardDisplay::Mode::Segments);
+    return addWidget(*descriptor, defaultDisplayMode(parsedMetricId));
 }
 
 bool DashboardMetricsModel::removeWidget(const QString &widgetId)
@@ -363,6 +360,14 @@ bool DashboardMetricsModel::deviceIdContains(const MetricDescriptor &descriptor,
         return true;
 
     return descriptor.deviceId.contains(text, Qt::CaseInsensitive);
+}
+
+DashboardDisplay::Mode DashboardMetricsModel::defaultDisplayMode(Metrics::MetricId metricId)
+{
+    if (metricId == Metrics::MetricId::NetworkDownload)
+        return DashboardDisplay::Mode::NetworkVertical;
+
+    return DashboardDisplay::Mode::Segments;
 }
 
 int DashboardMetricsModel::widgetIndexById(const QString &widgetId) const

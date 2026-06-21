@@ -79,6 +79,7 @@ private:
     static bool isMetricKeyValid(const QString &deviceId, Metrics::MetricId metricId);
     static QString makeWidgetId(const QString &deviceId, Metrics::MetricId metricId);
     static bool deviceIdContains(const MetricDescriptor &descriptor, const QString &text);
+    static DashboardDisplay::Mode defaultDisplayMode(Metrics::MetricId metricId);
     int widgetIndexById(const QString &widgetId) const;
     int widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const;
     bool addWidget(const MetricDescriptor &descriptor, DashboardDisplay::Mode displayMode);
