@@ -17,6 +17,11 @@ enum class Mode {
 };
 Q_ENUM_NS(Mode)
 
+inline bool isNetworkMode(Mode mode)
+{
+    return mode == Mode::NetworkVertical || mode == Mode::NetworkHorizontal;
+}
+
 }
 
 Q_DECLARE_METATYPE(DashboardDisplay::Mode)

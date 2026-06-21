@@ -4,46 +4,6 @@
 #include <QJsonObject>
 #include <QSet>
 
-namespace {
-
-DashboardDisplay::Mode displayModeFromLegacyVariant(const QString &variant)
-{
-    if (variant == QStringLiteral("ring"))
-        return DashboardDisplay::Mode::Ring;
-    if (variant == QStringLiteral("linear"))
-        return DashboardDisplay::Mode::Linear;
-    if (variant == QStringLiteral("arc180"))
-        return DashboardDisplay::Mode::Arc180;
-    if (variant == QStringLiteral("networkHorizontal"))
-        return DashboardDisplay::Mode::NetworkHorizontal;
-    if (variant == QStringLiteral("networkVertical"))
-        return DashboardDisplay::Mode::NetworkVertical;
-    return DashboardDisplay::Mode::Segments;
-}
-
-bool isNetworkDisplayMode(DashboardDisplay::Mode displayMode)
-{
-    return displayMode == DashboardDisplay::Mode::NetworkVertical
-            || displayMode == DashboardDisplay::Mode::NetworkHorizontal;
-}
-
-bool isValidDisplayMode(DashboardDisplay::Mode displayMode)
-{
-    switch (displayMode) {
-    case DashboardDisplay::Mode::Segments:
-    case DashboardDisplay::Mode::Ring:
-    case DashboardDisplay::Mode::Linear:
-    case DashboardDisplay::Mode::Arc180:
-    case DashboardDisplay::Mode::NetworkVertical:
-    case DashboardDisplay::Mode::NetworkHorizontal:
-        return true;
-    }
-
-    return false;
-}
-
-} // namespace
-
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
     : QAbstractListModel(parent)
 {
@@ -180,24 +140,11 @@ void DashboardMetricsModel::restoreFromJson(const QJsonArray &widgets)
         item.deviceId = deviceId;
         item.title = title;
         item.type = networkWidget ? WidgetType::Network : WidgetType::Metric;
-        if (widgetObject.contains(QStringLiteral("displayMode"))) {
-            item.displayMode = static_cast<DashboardDisplay::Mode>(
-                widgetObject.value(QStringLiteral("displayMode")).toInt());
-        } else if (widgetObject.contains(QStringLiteral("networkHorizontal"))) {
-            item.displayMode = widgetObject.value(QStringLiteral("networkHorizontal")).toBool()
-                    ? DashboardDisplay::Mode::NetworkHorizontal
-                    : DashboardDisplay::Mode::NetworkVertical;
-        } else {
-            item.displayMode = displayModeFromLegacyVariant(
-                widgetObject.value(QStringLiteral("variant")).toString());
-        }
-        if (!isValidDisplayMode(item.displayMode))
-            item.displayMode = networkWidget
-                    ? DashboardDisplay::Mode::NetworkVertical
-                    : DashboardDisplay::Mode::Segments;
-        if (networkWidget && !isNetworkDisplayMode(item.displayMode))
+        item.displayMode = static_cast<DashboardDisplay::Mode>(
+            widgetObject.value(QStringLiteral("displayMode")).toInt());
+        if (networkWidget && !DashboardDisplay::isNetworkMode(item.displayMode))
             item.displayMode = DashboardDisplay::Mode::NetworkVertical;
-        if (!networkWidget && isNetworkDisplayMode(item.displayMode))
+        if (!networkWidget && DashboardDisplay::isNetworkMode(item.displayMode))
             item.displayMode = DashboardDisplay::Mode::Segments;
         item.metricId = metricId;
         const QJsonArray savedMetricIds = widgetObject.value(QStringLiteral("metricIds")).toArray();
@@ -327,11 +274,9 @@ bool DashboardMetricsModel::setDisplayMode(const QString &widgetId,
         return false;
 
     WidgetItem &item = m_items[index];
-    if (!isValidDisplayMode(displayMode))
+    if (item.type == WidgetType::Network && !DashboardDisplay::isNetworkMode(displayMode))
         return false;
-    if (item.type == WidgetType::Network && !isNetworkDisplayMode(displayMode))
-        return false;
-    if (item.type == WidgetType::Metric && isNetworkDisplayMode(displayMode))
+    if (item.type == WidgetType::Metric && DashboardDisplay::isNetworkMode(displayMode))
         return false;
 
     if (item.displayMode == displayMode)
@@ -449,12 +394,12 @@ bool DashboardMetricsModel::addWidget(const MetricDescriptor &descriptor,
 
     if (descriptor.metricId == Metrics::MetricId::NetworkDownload) {
         item.type = WidgetType::Network;
-        if (!isNetworkDisplayMode(item.displayMode))
+        if (!DashboardDisplay::isNetworkMode(item.displayMode))
             item.displayMode = DashboardDisplay::Mode::NetworkVertical;
         item.metricIds = { Metrics::MetricId::NetworkDownload, Metrics::MetricId::NetworkUpload };
     } else {
         item.type = WidgetType::Metric;
-        if (isNetworkDisplayMode(item.displayMode))
+        if (DashboardDisplay::isNetworkMode(item.displayMode))
             item.displayMode = DashboardDisplay::Mode::Segments;
         item.metricIds = { descriptor.metricId };
     }
