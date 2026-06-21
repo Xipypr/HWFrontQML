@@ -163,6 +163,8 @@ Dialog {
                 model: root.deviceOptions
                 textRole: "label"
                 enabled: root.deviceOptions.length > 0
+                popup.width: root.contentItem.width
+                popup.x: -deviceCombo.mapToItem(root.contentItem, 0, 0).x
                 onCurrentIndexChanged: {
                     root.addError = ""
                     root.refreshMetrics()
@@ -176,6 +178,8 @@ Dialog {
                 model: root.metricOptions
                 textRole: "label"
                 enabled: root.metricOptions.length > 0
+                popup.width: root.contentItem.width
+                popup.x: -metricCombo.mapToItem(root.contentItem, 0, 0).x
                 onCurrentIndexChanged: root.addError = ""
             }
 
