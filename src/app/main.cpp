@@ -11,6 +11,7 @@
 
 #include "../core/sessionmanager.h"
 #include "../core/sessionstate.h"
+#include "../core/displaymode.h"
 #include "../models/dashboardmetricsmodel.h"
 
 int main(int argc, char *argv[])
@@ -34,6 +35,12 @@ int main(int argc, char *argv[])
     }
 
     qmlRegisterUncreatableMetaObject(SessionStateNs::staticMetaObject, "SessionState", 1, 0, "SessionState", "Session state enum");
+    qmlRegisterUncreatableMetaObject(DashboardDisplay::staticMetaObject,
+                                     "DashboardDisplay",
+                                     1,
+                                     0,
+                                     "DashboardDisplay",
+                                     "Dashboard display mode enum");
     qmlRegisterType<DashboardMetricsModel>("DashboardModels", 1, 0, "DashboardMetricsModel");
 
     context->setContextProperty("sessionManager", &sessionManager);

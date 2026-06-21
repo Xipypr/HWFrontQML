@@ -13,6 +13,7 @@
 struct DashboardMetricDefinition
 {
     QString deviceId;
+    HardwareKind hardwareKind = HardwareKind::Unknown;
     Metrics::MetricId metricId = Metrics::MetricId::Unknown;
     QString displayName;
     QString unit;

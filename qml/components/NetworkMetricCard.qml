@@ -4,6 +4,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import "../dialogs"
+import DashboardDisplay 1.0
 
 DashboardCard {
     id: card
@@ -12,9 +13,9 @@ DashboardCard {
     property real downloadValue: 0
     property real uploadValue: 0
     property string unit: ""
-    property string variant: "networkVertical"
+    property int displayMode: DashboardDisplay.NetworkVertical
 
-    signal variantSelected(string mode)
+    signal displayModeSelected(int displayMode)
 
     readonly property color downloadColor: "#93C5FD"
     readonly property color uploadColor: "#C4B5FD"
@@ -26,8 +27,8 @@ DashboardCard {
     }
 
     function openVariantDialog() {
-        variantDialog.initialVariant = variant
-        variantDialog.open()
+        displayModeDialog.initialDisplayMode = displayMode
+        displayModeDialog.open()
     }
 
     ColumnLayout {
@@ -47,9 +48,9 @@ DashboardCard {
         Loader {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            sourceComponent: card.variant === "networkHorizontal"
-                             ? horizontalLayout
-                             : verticalLayout
+            sourceComponent: card.displayMode === DashboardDisplay.NetworkHorizontal
+                             ? horizontalContent
+                             : verticalContent
         }
     }
 
@@ -65,14 +66,14 @@ DashboardCard {
     }
 
     NetworkDisplayModeDialog {
-        id: variantDialog
-        onVariantSelected: function(selectedVariant) {
-            card.variantSelected(selectedVariant)
+        id: displayModeDialog
+        onDisplayModeSelected: function(selectedDisplayMode) {
+            card.displayModeSelected(selectedDisplayMode)
         }
     }
 
     Component {
-        id: verticalLayout
+        id: verticalContent
 
         ColumnLayout {
             spacing: 0
@@ -104,7 +105,7 @@ DashboardCard {
     }
 
     Component {
-        id: horizontalLayout
+        id: horizontalContent
 
         RowLayout {
             spacing: 12

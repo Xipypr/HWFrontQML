@@ -1,25 +1,18 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import DashboardDisplay 1.0
 
 Dialog {
     id: dialog
 
-    property string initialVariant: "networkVertical"
+    property int initialDisplayMode: DashboardDisplay.NetworkVertical
 
-    signal variantSelected(string variant)
+    signal displayModeSelected(int displayMode)
 
-    readonly property var variantOptions: [
-        { label: qsTr("Vertical"), value: "networkVertical" },
-        { label: qsTr("Horizontal"), value: "networkHorizontal" }
+    readonly property var displayModeOptions: [
+        { label: qsTr("Vertical"), displayMode: DashboardDisplay.NetworkVertical },
+        { label: qsTr("Horizontal"), displayMode: DashboardDisplay.NetworkHorizontal }
     ]
-
-    function variantIndex(variant) {
-        for (let i = 0; i < variantOptions.length; ++i) {
-            if (variantOptions[i].value === variant)
-                return i
-        }
-        return 0
-    }
 
     modal: true
     focus: true
@@ -31,15 +24,18 @@ Dialog {
     title: qsTr("Display mode")
     standardButtons: Dialog.Ok | Dialog.Cancel
 
-    onOpened: variantCombo.currentIndex = variantIndex(initialVariant)
+    onOpened: displayModeCombo.currentIndex =
+                  initialDisplayMode === DashboardDisplay.NetworkHorizontal ? 1 : 0
     onAccepted: {
-        const selected = variantOptions[variantCombo.currentIndex]
-        variantSelected(selected ? selected.value : "networkVertical")
+        const selected = displayModeOptions[displayModeCombo.currentIndex]
+        displayModeSelected(selected
+                            ? selected.displayMode
+                            : DashboardDisplay.NetworkVertical)
     }
 
     contentItem: ComboBox {
-        id: variantCombo
-        model: dialog.variantOptions
+        id: displayModeCombo
+        model: dialog.displayModeOptions
         textRole: "label"
         width: parent.width
     }

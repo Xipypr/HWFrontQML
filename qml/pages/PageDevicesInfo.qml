@@ -122,9 +122,9 @@ Page {
                         unit: model.unit
                         metricId: model.metricId
                         showProgressBar: model.showProgressBar
-                        variant: model.variant
-                        onVariantSelected: function(mode) {
-                            root.widgetModel.setVariant(model.widgetId, mode)
+                        displayMode: model.displayMode
+                        onDisplayModeSelected: function(mode) {
+                            root.widgetModel.setDisplayMode(model.widgetId, mode)
                         }
                     }
                 }
@@ -139,9 +139,9 @@ Page {
                         downloadValue: model.metricValues.networkDownload || 0
                         uploadValue: model.metricValues.networkUpload || 0
                         unit: model.unit
-                        variant: model.variant
-                        onVariantSelected: function(mode) {
-                            root.widgetModel.setVariant(model.widgetId, mode)
+                        displayMode: model.displayMode
+                        onDisplayModeSelected: function(mode) {
+                            root.widgetModel.setDisplayMode(model.widgetId, mode)
                         }
                     }
                 }

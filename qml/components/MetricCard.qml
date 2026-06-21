@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import DashboardDisplay 1.0
 
 DashboardCard {
     id: card
@@ -10,14 +11,13 @@ DashboardCard {
     property string unit: ""
     property string metricId: ""
     property bool showProgressBar: true
-    // segments | ring | linear | arc180
-    property string variant: "segments"
-    signal variantSelected(string mode)
-    readonly property var variantOptions: [
-        { label: qsTr("Segments"), value: "segments" },
-        { label: qsTr("Ring"), value: "ring" },
-        { label: qsTr("Linear"), value: "linear" },
-        { label: qsTr("Arc 180°"), value: "arc180" }
+    property int displayMode: DashboardDisplay.Segments
+    signal displayModeSelected(int displayMode)
+    readonly property var displayModeOptions: [
+        { label: qsTr("Segments"), displayMode: DashboardDisplay.Segments },
+        { label: qsTr("Ring"), displayMode: DashboardDisplay.Ring },
+        { label: qsTr("Linear"), displayMode: DashboardDisplay.Linear },
+        { label: qsTr("Arc 180°"), displayMode: DashboardDisplay.Arc180 }
     ]
 
     readonly property int warningThreshold: 70
@@ -74,37 +74,37 @@ DashboardCard {
     }
 
     function resolveVizComponent() {
-        switch (variant) {
-        case "ring":
+        switch (displayMode) {
+        case DashboardDisplay.Ring:
             return ringViz
-        case "linear":
+        case DashboardDisplay.Linear:
             return linearViz
-        case "arc180":
+        case DashboardDisplay.Arc180:
             return arc180Viz
         default:
             return segmentsViz
         }
     }
 
-    function variantIndex(mode) {
-        for (let i = 0; i < variantOptions.length; ++i) {
-            if (variantOptions[i].value === mode)
+    function displayModeIndex(mode) {
+        for (let i = 0; i < displayModeOptions.length; ++i) {
+            if (displayModeOptions[i].displayMode === mode)
                 return i
         }
         return 0
     }
 
     function openVariantDialog() {
-        if (!variantDialogLoader.active)
-            variantDialogLoader.active = true
+        if (!displayModeDialogLoader.active)
+            displayModeDialogLoader.active = true
 
-        if (variantDialogLoader.status === Loader.Ready && variantDialogLoader.item) {
-            variantDialogLoader.item.initialIndex = variantIndex(variant)
-            variantDialogLoader.item.open()
+        if (displayModeDialogLoader.status === Loader.Ready && displayModeDialogLoader.item) {
+            displayModeDialogLoader.item.initialIndex = displayModeIndex(displayMode)
+            displayModeDialogLoader.item.open()
             return
         }
 
-        variantDialogLoader.pendingOpen = true
+        displayModeDialogLoader.pendingOpen = true
     }
 
     Text {
@@ -127,8 +127,10 @@ DashboardCard {
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: variant === "arc180" ? 8 : 14
-        spacing: variant === "ring" ? 8 : (variant === "arc180" ? 4 : 10)
+        anchors.margins: displayMode === DashboardDisplay.Arc180 ? 8 : 14
+        spacing: displayMode === DashboardDisplay.Ring
+                 ? 8
+                 : (displayMode === DashboardDisplay.Arc180 ? 4 : 10)
 
         RowLayout {
             Layout.fillWidth: true
@@ -168,7 +170,9 @@ DashboardCard {
 
         Text {
             text: card.formattedValue() + card.unit
-            visible: !card.showProgressBar || (card.variant !== "arc180" && card.variant !== "ring")
+            visible: !card.showProgressBar
+                     || (card.displayMode !== DashboardDisplay.Arc180
+                         && card.displayMode !== DashboardDisplay.Ring)
             color: "#F8FAFC"
             font.pixelSize: card.valueFontSize
             font.family: card.valueFontFamily
@@ -180,9 +184,11 @@ DashboardCard {
 
         Loader {
             Layout.fillWidth: true
-            Layout.fillHeight: card.variant === "arc180"
+            Layout.fillHeight: card.displayMode === DashboardDisplay.Arc180
             Layout.alignment: Qt.AlignHCenter
-            Layout.preferredHeight: card.variant === "arc180" ? 104 : (card.variant === "ring" ? 86 : 12)
+            Layout.preferredHeight: card.displayMode === DashboardDisplay.Arc180
+                                    ? 104
+                                    : (card.displayMode === DashboardDisplay.Ring ? 86 : 12)
             visible: card.showProgressBar
             sourceComponent: card.resolveVizComponent()
         }
@@ -203,7 +209,7 @@ DashboardCard {
     }
 
     Component {
-        id: variantDialogComponent
+        id: displayModeDialogComponent
         Dialog {
             property int initialIndex: 0
 
@@ -217,16 +223,18 @@ DashboardCard {
             title: qsTr("Display mode")
             standardButtons: Dialog.Ok | Dialog.Cancel
 
-            onOpened: variantDialogCombo.currentIndex = initialIndex
+            onOpened: displayModeCombo.currentIndex = initialIndex
 
             onAccepted: {
-                const selected = card.variantOptions[variantDialogCombo.currentIndex]
-                card.variantSelected(selected ? selected.value : "segments")
+                const selected = card.displayModeOptions[displayModeCombo.currentIndex]
+                card.displayModeSelected(selected
+                                         ? selected.displayMode
+                                         : DashboardDisplay.Segments)
             }
 
             contentItem: ComboBox {
-                id: variantDialogCombo
-                model: card.variantOptions
+                id: displayModeCombo
+                model: card.displayModeOptions
                 textRole: "label"
                 width: parent.width
             }
@@ -234,15 +242,15 @@ DashboardCard {
     }
 
     Loader {
-        id: variantDialogLoader
+        id: displayModeDialogLoader
         active: false
-        sourceComponent: variantDialogComponent
+        sourceComponent: displayModeDialogComponent
         property bool pendingOpen: false
 
         onLoaded: {
             if (pendingOpen && item) {
                 pendingOpen = false
-                item.initialIndex = card.variantIndex(card.variant)
+                item.initialIndex = card.displayModeIndex(card.displayMode)
                 item.open()
             }
         }

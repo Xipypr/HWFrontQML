@@ -7,6 +7,7 @@
 DashboardMetricsModel::DashboardMetricsModel(QObject *parent)
     : QAbstractListModel(parent)
 {
+    qRegisterMetaType<DashboardDisplay::Mode>("DashboardDisplay::Mode");
 }
 
 int DashboardMetricsModel::rowCount(const QModelIndex &parent) const
@@ -31,8 +32,8 @@ QVariant DashboardMetricsModel::data(const QModelIndex &index, int role) const
         return item.title;
     case ValueRole:
         return item.metricValues.value(item.metricId, 0.0);
-    case VariantRole:
-        return item.variant;
+    case DisplayModeRole:
+        return QVariant::fromValue(item.displayMode);
     case MetricIdRole:
         return Metrics::metricIdToString(item.metricId);
     case UnitRole:
@@ -54,7 +55,7 @@ QHash<int, QByteArray> DashboardMetricsModel::roleNames() const
         { WidgetIdRole, "widgetId" },
         { TitleRole, "title" },
         { ValueRole, "value" },
-        { VariantRole, "variant" },
+        { DisplayModeRole, "displayMode" },
         { MetricIdRole, "metricId" },
         { UnitRole, "unit" },
         { ShowProgressBarRole, "showProgressBar" },
@@ -74,7 +75,7 @@ QVariantMap DashboardMetricsModel::get(int row) const
         { "deviceId", item.deviceId },
         { "title", item.title },
         { "value", item.metricValues.value(item.metricId, 0.0) },
-        { "variant", item.variant },
+        { "displayMode", QVariant::fromValue(item.displayMode) },
         { "metricId", Metrics::metricIdToString(item.metricId) },
         { "widgetType", widgetTypeToString(item.type) },
         { "metricValues", metricValues(item) },
@@ -99,7 +100,7 @@ QJsonArray DashboardMetricsModel::toJson() const
         widgetObject[QStringLiteral("metricIds")] = metricIds;
         widgetObject[QStringLiteral("unit")] = item.unit;
         widgetObject[QStringLiteral("showProgressBar")] = item.showProgressBar;
-        widgetObject[QStringLiteral("variant")] = item.variant;
+        widgetObject[QStringLiteral("displayMode")] = static_cast<int>(item.displayMode);
         widgetsArray.append(widgetObject);
     }
 
@@ -139,9 +140,12 @@ void DashboardMetricsModel::restoreFromJson(const QJsonArray &widgets)
         item.deviceId = deviceId;
         item.title = title;
         item.type = networkWidget ? WidgetType::Network : WidgetType::Metric;
-        item.variant = widgetObject.value(QStringLiteral("variant")).toString(QStringLiteral("segments"));
-        if (item.variant.isEmpty())
-            item.variant = QStringLiteral("segments");
+        item.displayMode = static_cast<DashboardDisplay::Mode>(
+            widgetObject.value(QStringLiteral("displayMode")).toInt());
+        if (networkWidget && !DashboardDisplay::isNetworkMode(item.displayMode))
+            item.displayMode = DashboardDisplay::Mode::NetworkVertical;
+        if (!networkWidget && DashboardDisplay::isNetworkMode(item.displayMode))
+            item.displayMode = DashboardDisplay::Mode::Segments;
         item.metricId = metricId;
         const QJsonArray savedMetricIds = widgetObject.value(QStringLiteral("metricIds")).toArray();
         for (const QJsonValue &savedMetricId : savedMetricIds) {
@@ -156,10 +160,6 @@ void DashboardMetricsModel::restoreFromJson(const QJsonArray &widgets)
         }
         for (const Metrics::MetricId itemMetricId : item.metricIds)
             item.metricValues.insert(itemMetricId, 0.0);
-        if (networkWidget && item.variant != QStringLiteral("networkHorizontal")
-                && item.variant != QStringLiteral("networkVertical")) {
-            item.variant = QStringLiteral("networkVertical");
-        }
         item.unit = widgetObject.value(QStringLiteral("unit")).toString();
         if (item.unit.isEmpty())
             item.unit = Metrics::metricUnit(metricId);
@@ -225,8 +225,7 @@ QVariantList DashboardMetricsModel::availableMetricsForDevice(const QString &dev
 }
 
 bool DashboardMetricsModel::addWidgetForMetric(const QString &deviceId,
-                                               const QString &metricId,
-                                               const QString &variant)
+                                               const QString &metricId)
 {
     const Metrics::MetricId parsedMetricId = Metrics::metricIdFromString(metricId);
     if (deviceId.isEmpty() || parsedMetricId == Metrics::MetricId::Unknown)
@@ -236,7 +235,7 @@ bool DashboardMetricsModel::addWidgetForMetric(const QString &deviceId,
     if (!descriptor)
         return false;
 
-    return addWidget(*descriptor, variant);
+    return addWidget(*descriptor, defaultDisplayMode(parsedMetricId));
 }
 
 bool DashboardMetricsModel::removeWidget(const QString &widgetId)
@@ -264,19 +263,25 @@ bool DashboardMetricsModel::moveWidget(int from, int to)
     return true;
 }
 
-bool DashboardMetricsModel::setVariant(const QString &widgetId, const QString &variant)
+bool DashboardMetricsModel::setDisplayMode(const QString &widgetId,
+                                           DashboardDisplay::Mode displayMode)
 {
     const int index = widgetIndexById(widgetId);
     if (index < 0)
         return false;
 
     WidgetItem &item = m_items[index];
-    if (item.variant == variant)
+    if (item.type == WidgetType::Network && !DashboardDisplay::isNetworkMode(displayMode))
+        return false;
+    if (item.type == WidgetType::Metric && DashboardDisplay::isNetworkMode(displayMode))
+        return false;
+
+    if (item.displayMode == displayMode)
         return true;
 
-    item.variant = variant;
+    item.displayMode = displayMode;
     const QModelIndex modelIndex = this->index(index);
-    emit dataChanged(modelIndex, modelIndex, { VariantRole });
+    emit dataChanged(modelIndex, modelIndex, { DisplayModeRole });
     emit widgetsStateChanged();
     return true;
 }
@@ -349,12 +354,12 @@ QString DashboardMetricsModel::makeWidgetId(const QString &deviceId, Metrics::Me
     return deviceId + QStringLiteral(":") + Metrics::metricIdToString(metricId);
 }
 
-bool DashboardMetricsModel::deviceIdContains(const MetricDescriptor &descriptor, const QString &text)
+DashboardDisplay::Mode DashboardMetricsModel::defaultDisplayMode(Metrics::MetricId metricId)
 {
-    if (text.isEmpty())
-        return true;
+    if (metricId == Metrics::MetricId::NetworkDownload)
+        return DashboardDisplay::Mode::NetworkVertical;
 
-    return descriptor.deviceId.contains(text, Qt::CaseInsensitive);
+    return DashboardDisplay::Mode::Segments;
 }
 
 int DashboardMetricsModel::widgetIndexById(const QString &widgetId) const
@@ -368,7 +373,8 @@ int DashboardMetricsModel::widgetIndexForMetric(const QString &deviceId, Metrics
     return widgetIndexById(makeWidgetId(deviceId, metricId));
 }
 
-bool DashboardMetricsModel::addWidget(const MetricDescriptor &descriptor, const QString &variant)
+bool DashboardMetricsModel::addWidget(const MetricDescriptor &descriptor,
+                                      DashboardDisplay::Mode displayMode)
 {
     const QString widgetId = makeWidgetId(descriptor.deviceId, descriptor.metricId);
     if (widgetId.isEmpty())
@@ -381,14 +387,17 @@ bool DashboardMetricsModel::addWidget(const MetricDescriptor &descriptor, const 
     item.metricId = descriptor.metricId;
     item.unit = descriptor.unit.isEmpty() ? Metrics::metricUnit(descriptor.metricId) : descriptor.unit;
     item.showProgressBar = descriptor.showProgressBar;
+    item.displayMode = displayMode;
 
     if (descriptor.metricId == Metrics::MetricId::NetworkDownload) {
         item.type = WidgetType::Network;
-        item.variant = QStringLiteral("networkVertical");
+        if (!DashboardDisplay::isNetworkMode(item.displayMode))
+            item.displayMode = DashboardDisplay::Mode::NetworkVertical;
         item.metricIds = { Metrics::MetricId::NetworkDownload, Metrics::MetricId::NetworkUpload };
     } else {
         item.type = WidgetType::Metric;
-        item.variant = variant.isEmpty() ? QStringLiteral("segments") : variant;
+        if (DashboardDisplay::isNetworkMode(item.displayMode))
+            item.displayMode = DashboardDisplay::Mode::Segments;
         item.metricIds = { descriptor.metricId };
     }
 
@@ -398,13 +407,13 @@ bool DashboardMetricsModel::addWidget(const MetricDescriptor &descriptor, const 
     return insertWidget(item);
 }
 
-bool DashboardMetricsModel::addFirstDefaultWidget(Metrics::MetricId metricId,
-                                                  const QString &deviceIdText,
-                                                  const QString &variant)
+bool DashboardMetricsModel::addFirstDefaultWidget(HardwareKind hardwareKind,
+                                                  Metrics::MetricId metricId,
+                                                  DashboardDisplay::Mode displayMode)
 {
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
-        if (descriptor.metricId == metricId && deviceIdContains(descriptor, deviceIdText))
-            return addWidget(descriptor, variant);
+        if (descriptor.hardwareKind == hardwareKind && descriptor.metricId == metricId)
+            return addWidget(descriptor, displayMode);
     }
 
     return false;
@@ -510,13 +519,27 @@ void DashboardMetricsModel::syncInitialWidgetsWithMetrics()
     if (m_hasSeededInitialWidgets)
         return;
 
-    addFirstDefaultWidget(Metrics::MetricId::Loading, QStringLiteral("cpu"), QStringLiteral("arc180"));
-    addFirstDefaultWidget(Metrics::MetricId::Temperature, QStringLiteral("cpu"), QStringLiteral("segments"));
-    addFirstDefaultWidget(Metrics::MetricId::Loading, QStringLiteral("gpu"), QStringLiteral("arc180"));
-    addFirstDefaultWidget(Metrics::MetricId::Temperature, QStringLiteral("gpu"), QStringLiteral("segments"));
-    addFirstDefaultWidget(Metrics::MetricId::Loading, QStringLiteral("ram"), QStringLiteral("segments"));
-    addFirstDefaultWidget(Metrics::MetricId::BatteryLevel, QString(), QStringLiteral("segments"));
-    addFirstDefaultWidget(Metrics::MetricId::NetworkDownload, QStringLiteral("nic"), QStringLiteral("segments"));
+    addFirstDefaultWidget(HardwareKind::Cpu,
+                          Metrics::MetricId::Loading,
+                          DashboardDisplay::Mode::Arc180);
+    addFirstDefaultWidget(HardwareKind::Cpu,
+                          Metrics::MetricId::Temperature,
+                          DashboardDisplay::Mode::Segments);
+    addFirstDefaultWidget(HardwareKind::Gpu,
+                          Metrics::MetricId::Loading,
+                          DashboardDisplay::Mode::Arc180);
+    addFirstDefaultWidget(HardwareKind::Gpu,
+                          Metrics::MetricId::Temperature,
+                          DashboardDisplay::Mode::Segments);
+    addFirstDefaultWidget(HardwareKind::Memory,
+                          Metrics::MetricId::Loading,
+                          DashboardDisplay::Mode::Segments);
+    addFirstDefaultWidget(HardwareKind::Battery,
+                          Metrics::MetricId::BatteryLevel,
+                          DashboardDisplay::Mode::Segments);
+    addFirstDefaultWidget(HardwareKind::Network,
+                          Metrics::MetricId::NetworkDownload,
+                          DashboardDisplay::Mode::NetworkVertical);
 
     if (!m_items.isEmpty())
         m_hasSeededInitialWidgets = true;

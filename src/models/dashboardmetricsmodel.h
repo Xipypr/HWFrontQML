@@ -2,6 +2,7 @@
 #define DASHBOARDMETRICSMODEL_H
 
 #include "../core/metricdescriptor.h"
+#include "../core/displaymode.h"
 
 #include <QAbstractListModel>
 #include <QHash>
@@ -17,7 +18,7 @@ public:
         WidgetIdRole = Qt::UserRole + 1,
         TitleRole,
         ValueRole,
-        VariantRole,
+        DisplayModeRole,
         MetricIdRole,
         UnitRole,
         ShowProgressBarRole,
@@ -39,11 +40,10 @@ public:
     Q_INVOKABLE QVariantList availableDevices() const;
     Q_INVOKABLE QVariantList availableMetricsForDevice(const QString &deviceId) const;
     Q_INVOKABLE bool addWidgetForMetric(const QString &deviceId,
-                                         const QString &metricId,
-                                         const QString &variant = QStringLiteral("segments"));
+                                         const QString &metricId);
     Q_INVOKABLE bool removeWidget(const QString &widgetId);
     Q_INVOKABLE bool moveWidget(int from, int to);
-    Q_INVOKABLE bool setVariant(const QString &widgetId, const QString &variant);
+    Q_INVOKABLE bool setDisplayMode(const QString &widgetId, DashboardDisplay::Mode displayMode);
     Q_INVOKABLE bool updateWidget(const QString &deviceId,
                                   Metrics::MetricId metricId,
                                   double value);
@@ -68,7 +68,7 @@ private:
         QString deviceId;
         QString title;
         WidgetType type = WidgetType::Metric;
-        QString variant;
+        DashboardDisplay::Mode displayMode = DashboardDisplay::Mode::Segments;
         Metrics::MetricId metricId = Metrics::MetricId::Unknown;
         QList<Metrics::MetricId> metricIds;
         QHash<Metrics::MetricId, double> metricValues;
@@ -78,13 +78,13 @@ private:
 
     static bool isMetricKeyValid(const QString &deviceId, Metrics::MetricId metricId);
     static QString makeWidgetId(const QString &deviceId, Metrics::MetricId metricId);
-    static bool deviceIdContains(const MetricDescriptor &descriptor, const QString &text);
+    static DashboardDisplay::Mode defaultDisplayMode(Metrics::MetricId metricId);
     int widgetIndexById(const QString &widgetId) const;
     int widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const;
-    bool addWidget(const MetricDescriptor &descriptor, const QString &variant);
-    bool addFirstDefaultWidget(Metrics::MetricId metricId,
-                               const QString &deviceIdText,
-                               const QString &variant);
+    bool addWidget(const MetricDescriptor &descriptor, DashboardDisplay::Mode displayMode);
+    bool addFirstDefaultWidget(HardwareKind hardwareKind,
+                               Metrics::MetricId metricId,
+                               DashboardDisplay::Mode displayMode);
     bool insertWidget(const WidgetItem &item);
     bool removeWidgetAt(int index);
     void rebuildWidgetIndexes();

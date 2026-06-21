@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QString>
 
+#include <hardwarekind.h>
+
 namespace Metrics {
 Q_NAMESPACE
 
@@ -87,27 +89,8 @@ struct MetricDescriptor
 {
     MetricDescriptor() = delete;
 
-    static MetricDescriptor createLoadingDescr(const QString &deviceId, const QString &displayName)
-    {
-        return { deviceId, Metrics::MetricId::Loading, displayName, metricUnit(Metrics::MetricId::Loading), true };
-    }
-
-    static MetricDescriptor createTemperatureDescr(const QString &deviceId, const QString &displayName)
-    {
-        return { deviceId, Metrics::MetricId::Temperature, displayName, metricUnit(Metrics::MetricId::Temperature), false };
-    }
-
-    static MetricDescriptor createFrequencyDescr(const QString &deviceId, const QString &displayName)
-    {
-        return { deviceId, Metrics::MetricId::Frequency, displayName, metricUnit(Metrics::MetricId::Frequency), false };
-    }
-
-    static MetricDescriptor createBatteryLevelDescr(const QString &deviceId, const QString &displayName)
-    {
-        return { deviceId, Metrics::MetricId::BatteryLevel, displayName, metricUnit(Metrics::MetricId::BatteryLevel), true };
-    }
-
     QString deviceId;
+    HardwareKind hardwareKind = HardwareKind::Unknown;
     Metrics::MetricId metricId;
     QString displayName;
     QString unit;

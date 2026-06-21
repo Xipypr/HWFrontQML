@@ -53,6 +53,7 @@ void MetricsService::discoverMetrics(const HardwareSnapshot &snapshot)
     for (const DashboardMetricDefinition &definition : m_metricProfile.definitionsForSnapshot(snapshot)) {
         m_availableMetrics.append({
             definition.deviceId,
+            definition.hardwareKind,
             definition.metricId,
             definition.displayName,
             definition.unit,
@@ -69,6 +70,7 @@ void MetricsService::refreshMetricValues(const HardwareSnapshot &snapshot)
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
         const DashboardMetricDefinition definition {
             descriptor.deviceId,
+            descriptor.hardwareKind,
             descriptor.metricId,
             descriptor.displayName,
             descriptor.unit,
