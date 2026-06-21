@@ -14,7 +14,9 @@ enum class MetricId {
     Loading,
     Temperature,
     Frequency,
-    BatteryLevel
+    BatteryLevel,
+    NetworkUpload,
+    NetworkDownload
 };
 Q_ENUM_NS(MetricId)
 
@@ -29,6 +31,10 @@ inline QString metricIdToString(MetricId metricId)
         return QStringLiteral("frequency");
     case MetricId::BatteryLevel:
         return QStringLiteral("batteryLevel");
+    case MetricId::NetworkUpload:
+        return QStringLiteral("networkUpload");
+    case MetricId::NetworkDownload:
+        return QStringLiteral("networkDownload");
     case MetricId::Unknown:
         return QStringLiteral("unknown");
     }
@@ -47,6 +53,10 @@ inline MetricId metricIdFromString(const QString &metricId)
         return MetricId::Frequency;
     if (normalizedMetricId == QStringLiteral("batterylevel"))
         return MetricId::BatteryLevel;
+    if (normalizedMetricId == QStringLiteral("networkupload"))
+        return MetricId::NetworkUpload;
+    if (normalizedMetricId == QStringLiteral("networkdownload"))
+        return MetricId::NetworkDownload;
 
     return MetricId::Unknown;
 }
@@ -62,6 +72,9 @@ inline QString metricUnit(MetricId metricId)
         return QStringLiteral("MHz");
     case MetricId::BatteryLevel:
         return QStringLiteral("%");
+    case MetricId::NetworkUpload:
+    case MetricId::NetworkDownload:
+        return QStringLiteral(" MB/s");
     case MetricId::Unknown:
         return {};
     }

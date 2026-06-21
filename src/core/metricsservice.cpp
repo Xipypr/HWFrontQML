@@ -2,6 +2,29 @@
 
 #include <hardwaresnapshot.h>
 
+namespace {
+
+double dashboardMetricValue(Metrics::MetricId metricId, const Measurement &measurement)
+{
+    const double value = measurement.value.value_or(0.0f);
+
+    if (metricId != Metrics::MetricId::NetworkUpload
+            && metricId != Metrics::MetricId::NetworkDownload) {
+        return value;
+    }
+
+    switch (measurement.unit) {
+    case Unit::MegabytePerSecond:
+        return value;
+    case Unit::KilobytePerSecond:
+        return value / 1024.0;
+    default:
+        return value / (1024.0 * 1024.0);
+    }
+}
+
+} // namespace
+
 MetricsService::MetricsService(QObject *parent)
     : QObject(parent)
 {
@@ -57,6 +80,6 @@ void MetricsService::refreshMetricValues(const HardwareSnapshot &snapshot)
 
         emit metricUpdated(descriptor.deviceId,
                            descriptor.metricId,
-                           QVariant::fromValue(measurement.value().value.value_or(0.0f)));
+                           dashboardMetricValue(descriptor.metricId, measurement.value()));
     }
 }

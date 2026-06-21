@@ -2,7 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 
-Rectangle {
+DashboardCard {
     id: card
 
     property string title: "N/A"
@@ -30,7 +30,7 @@ Rectangle {
     readonly property bool useStatusColor: showProgressBar && metricId !== "batteryLevel"
     readonly property bool isCriticalValue: useStatusColor && safeValue >= criticalThreshold
     readonly property bool isWarningValue: useStatusColor && safeValue >= warningThreshold && !isCriticalValue
-    readonly property color accentColor: resolveAccentColor()
+    accentColor: resolveAccentColor()
     readonly property string statusText: resolveStatusText()
     readonly property int valueFontSize: 42
     readonly property int compactValueFontSize: 24
@@ -107,11 +107,6 @@ Rectangle {
         variantDialogLoader.pendingOpen = true
     }
 
-    radius: 16
-    color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
-    border.width: 1
-    border.color: Qt.rgba(100 / 255, 116 / 255, 139 / 255, 0.55)
-
     Text {
         id: valueWidthProbe
         visible: false
@@ -128,15 +123,6 @@ Rectangle {
         font.family: card.valueFontFamily
         font.pixelSize: card.compactValueFontSize
         font.bold: true
-    }
-
-    Rectangle {
-        anchors.fill: parent
-        anchors.margins: -1
-        radius: parent.radius + 2
-        color: "transparent"
-        border.width: 2
-        border.color: Qt.rgba(card.accentColor.r, card.accentColor.g, card.accentColor.b, 0.25)
     }
 
     ColumnLayout {
@@ -445,4 +431,5 @@ Rectangle {
             easing.type: Easing.OutCubic
         }
     }
+
 }

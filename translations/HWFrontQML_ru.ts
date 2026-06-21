@@ -92,6 +92,32 @@
     </message>
 </context>
 <context>
+    <name>NetworkDisplayModeDialog</name>
+    <message>
+        <source>Display mode</source>
+        <translation>Режим отображения</translation>
+    </message>
+    <message>
+        <source>Vertical</source>
+        <translation>Вертикально</translation>
+    </message>
+    <message>
+        <source>Horizontal</source>
+        <translation>Горизонтально</translation>
+    </message>
+</context>
+<context>
+    <name>NetworkMetricCard</name>
+    <message>
+        <source>Download</source>
+        <translation>Загрузка</translation>
+    </message>
+    <message>
+        <source>Upload</source>
+        <translation>Отдача</translation>
+    </message>
+</context>
+<context>
     <name>PageAuthForm</name>
     <message>
         <location filename="../qml/pages/PageAuthForm.qml" line="15"/>

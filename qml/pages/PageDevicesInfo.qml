@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import Qt.labs.qmlmodels 1.0
 import SessionState 1.0
 import DashboardModels 1.0
 import "../components"
@@ -107,17 +108,42 @@ Page {
             boundsBehavior: Flickable.DragAndOvershootBounds
             ScrollBar.vertical: ScrollBar { }
 
-            delegate: MetricCard {
-                width: gridView.cellWidth - 12
-                height: 160
-                title: model.title
-                value: model.value
-                unit: model.unit
-                metricId: model.metricId
-                showProgressBar: model.showProgressBar
-                variant: model.variant
-                onVariantSelected: function(mode) {
-                    widgetModel.setVariant(model.widgetId, mode)
+            delegate: DelegateChooser {
+                role: "widgetType"
+
+                DelegateChoice {
+                    roleValue: "metric"
+
+                    MetricCard {
+                        width: gridView.cellWidth - 12
+                        height: 160
+                        title: model.title
+                        value: model.value
+                        unit: model.unit
+                        metricId: model.metricId
+                        showProgressBar: model.showProgressBar
+                        variant: model.variant
+                        onVariantSelected: function(mode) {
+                            root.widgetModel.setVariant(model.widgetId, mode)
+                        }
+                    }
+                }
+
+                DelegateChoice {
+                    roleValue: "network"
+
+                    NetworkMetricCard {
+                        width: gridView.cellWidth - 12
+                        height: 160
+                        title: model.title
+                        downloadValue: model.metricValues.networkDownload || 0
+                        uploadValue: model.metricValues.networkUpload || 0
+                        unit: model.unit
+                        variant: model.variant
+                        onVariantSelected: function(mode) {
+                            root.widgetModel.setVariant(model.widgetId, mode)
+                        }
+                    }
                 }
             }
         }

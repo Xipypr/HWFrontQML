@@ -20,7 +20,9 @@ public:
         VariantRole,
         MetricIdRole,
         UnitRole,
-        ShowProgressBarRole
+        ShowProgressBarRole,
+        WidgetTypeRole,
+        MetricValuesRole
     };
     Q_ENUM(Roles)
 
@@ -53,16 +55,23 @@ public slots:
     void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
     void onMetricUpdated(const QString &deviceId,
                          Metrics::MetricId metricId,
-                         const QVariant &value);
+                         double value);
 
 private:
+    enum class WidgetType {
+        Metric,
+        Network
+    };
+
     struct WidgetItem {
         QString widgetId;
         QString deviceId;
         QString title;
-        double value = 0.0;
+        WidgetType type = WidgetType::Metric;
         QString variant;
         Metrics::MetricId metricId = Metrics::MetricId::Unknown;
+        QList<Metrics::MetricId> metricIds;
+        QHash<Metrics::MetricId, double> metricValues;
         QString unit;
         bool showProgressBar = false;
     };
@@ -83,6 +92,8 @@ private:
                         Metrics::MetricId metricId,
                         double value,
                         const QString &unit = QString());
+    static QString widgetTypeToString(WidgetType type);
+    static QVariantMap metricValues(const WidgetItem &item);
     void syncInitialWidgetsWithMetrics();
     const MetricDescriptor *descriptorForMetric(const QString &deviceId,
                                                 Metrics::MetricId metricId) const;
