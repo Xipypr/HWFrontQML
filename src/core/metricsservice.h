@@ -6,7 +6,6 @@
 
 #include <QObject>
 #include <QString>
-#include <QVariant>
 
 struct HardwareSnapshot;
 
@@ -25,7 +24,7 @@ signals:
     void availableMetricsChanged(const QList<MetricDescriptor> &metrics);
     void metricUpdated(const QString &deviceId,
                        Metrics::MetricId metricId,
-                       const QVariant &value);
+                       double value);
 
 private:
     void discoverMetrics(const HardwareSnapshot &snapshot);

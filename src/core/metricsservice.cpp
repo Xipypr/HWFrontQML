@@ -80,7 +80,6 @@ void MetricsService::refreshMetricValues(const HardwareSnapshot &snapshot)
 
         emit metricUpdated(descriptor.deviceId,
                            descriptor.metricId,
-                           QVariant::fromValue(dashboardMetricValue(descriptor.metricId,
-                                                                  measurement.value())));
+                           dashboardMetricValue(descriptor.metricId, measurement.value()));
     }
 }

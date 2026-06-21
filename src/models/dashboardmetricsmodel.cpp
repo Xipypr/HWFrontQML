@@ -328,14 +328,12 @@ void DashboardMetricsModel::onAvailableMetricsChanged(const QList<MetricDescript
 
 void DashboardMetricsModel::onMetricUpdated(const QString &deviceId,
                                             Metrics::MetricId metricId,
-                                            const QVariant &value)
+                                            double value)
 {
-    if (deviceId.isEmpty() || metricId == Metrics::MetricId::Unknown
-            || !value.isValid() || value.isNull() || !value.canConvert<double>()) {
+    if (deviceId.isEmpty() || metricId == Metrics::MetricId::Unknown)
         return;
-    }
 
-    setWidgetValue(deviceId, metricId, value.toDouble());
+    setWidgetValue(deviceId, metricId, value);
 }
 
 bool DashboardMetricsModel::isMetricKeyValid(const QString &deviceId, Metrics::MetricId metricId)

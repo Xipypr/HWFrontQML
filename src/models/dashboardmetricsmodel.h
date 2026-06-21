@@ -55,7 +55,7 @@ public slots:
     void onAvailableMetricsChanged(const QList<MetricDescriptor> &metrics);
     void onMetricUpdated(const QString &deviceId,
                          Metrics::MetricId metricId,
-                         const QVariant &value);
+                         double value);
 
 private:
     enum class WidgetType {
