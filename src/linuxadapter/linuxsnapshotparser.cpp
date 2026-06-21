@@ -31,6 +31,8 @@ HardwareKind hardwareKindFromLinuxKind(const QString &kind)
         return HardwareKind::Memory;
     if (normalized == QStringLiteral("storage"))
         return HardwareKind::Storage;
+    if (normalized == QStringLiteral("network"))
+        return HardwareKind::Network;
 
     return HardwareKind::Unknown;
 }

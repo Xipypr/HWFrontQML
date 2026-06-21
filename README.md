@@ -4,7 +4,7 @@
 
 **HWFrontQML** is a Qt/QML application for monitoring hardware metrics from remote devices. The application lets you add devices by IP address, connect to metric sources on Windows and Linux, view available metrics on a customizable dashboard, and persist session state between launches.
 
-**Current version:** `1.6.0`.
+**Current version:** `1.6.1`.
 
 ## Contents
 
