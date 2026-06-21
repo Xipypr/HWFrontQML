@@ -10,8 +10,17 @@ namespace {
 
 ParsedSensorValue parseValueField(const QJsonObject &node, const QString &rawKey, const QString &displayKey)
 {
-    if (node.contains(rawKey))
-        return parseSensorValue(node.value(rawKey).toString());
+    if (node.contains(rawKey)) {
+        const QJsonValue rawValue = node.value(rawKey);
+        if (rawValue.isDouble()) {
+            ParsedSensorValue parsed;
+            parsed.value = static_cast<float>(rawValue.toDouble());
+            parsed.unit = Unit::None;
+            return parsed;
+        }
+
+        return parseSensorValue(rawValue.toString());
+    }
 
     return parseSensorValue(node.value(displayKey).toString());
 }

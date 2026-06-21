@@ -20,7 +20,8 @@ public:
         VariantRole,
         MetricIdRole,
         UnitRole,
-        ShowProgressBarRole
+        ShowProgressBarRole,
+        SecondaryValueRole
     };
     Q_ENUM(Roles)
 
@@ -61,6 +62,7 @@ private:
         QString deviceId;
         QString title;
         double value = 0.0;
+        double secondaryValue = 0.0;
         QString variant;
         Metrics::MetricId metricId = Metrics::MetricId::Unknown;
         QString unit;
@@ -83,6 +85,7 @@ private:
                         Metrics::MetricId metricId,
                         double value,
                         const QString &unit = QString());
+    bool setNetworkUploadValue(const QString &deviceId, double value);
     void syncInitialWidgetsWithMetrics();
     const MetricDescriptor *descriptorForMetric(const QString &deviceId,
                                                 Metrics::MetricId metricId) const;

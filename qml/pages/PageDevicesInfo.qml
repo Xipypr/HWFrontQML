@@ -112,6 +112,7 @@ Page {
                 height: 160
                 title: model.title
                 value: model.value
+                secondaryValue: model.secondaryValue
                 unit: model.unit
                 metricId: model.metricId
                 showProgressBar: model.showProgressBar

@@ -165,11 +165,27 @@ QList<DashboardMetricProfile::MetricRule> DashboardMetricProfile::rulesForDevice
                 true
             }
         };
+    case HardwareKind::Network:
+        return {
+            {
+                Metrics::MetricId::NetworkDownload,
+                MetricKind::Throughput,
+                QString(),
+                { QStringLiteral("/throughput/8") },
+                false
+            },
+            {
+                Metrics::MetricId::NetworkUpload,
+                MetricKind::Throughput,
+                QStringLiteral("Upload"),
+                { QStringLiteral("/throughput/7") },
+                false
+            }
+        };
     case HardwareKind::Unknown:
     case HardwareKind::Computer:
     case HardwareKind::Motherboard:
     case HardwareKind::MemoryModule:
-    case HardwareKind::Network:
         return {};
     }
 
