@@ -28,10 +28,10 @@ int main(int argc, char *argv[])
 
     QQmlApplicationEngine engine;
     QQmlContext * context = engine.rootContext();
-    LanguageManager languageManager(&engine);
-    SessionManager sessionManager;
-    if (sessionManager.persistSessionState()) {
-        sessionManager.restoreSessionsState();
+    auto *languageManager = new LanguageManager(&engine, &app);
+    auto *sessionManager = new SessionManager(&app);
+    if (sessionManager->persistSessionState()) {
+        sessionManager->restoreSessionsState();
     }
 
     qmlRegisterUncreatableMetaObject(SessionStateNs::staticMetaObject, "SessionState", 1, 0, "SessionState", "Session state enum");
@@ -43,8 +43,8 @@ int main(int argc, char *argv[])
                                      "Dashboard display mode enum");
     qmlRegisterType<DashboardMetricsModel>("DashboardModels", 1, 0, "DashboardMetricsModel");
 
-    context->setContextProperty("sessionManager", &sessionManager);
-    context->setContextProperty("languageManager", &languageManager);
+    context->setContextProperty("sessionManager", sessionManager);
+    context->setContextProperty("languageManager", languageManager);
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,
