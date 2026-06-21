@@ -185,7 +185,7 @@ Dialog {
                 onClicked: {
                     const deviceId = root.selectedDeviceId()
                     const metricId = root.selectedMetricId()
-                    if (!root.widgetsModel.addWidgetForMetric(deviceId, metricId, "segments"))
+                    if (!root.widgetsModel.addWidgetForMetric(deviceId, metricId))
                         root.addError = qsTr("The metric has already been added or is unavailable.")
                     else
                         root.addError = ""
