@@ -13,6 +13,7 @@ QList<DashboardMetricDefinition> DashboardMetricProfile::definitionsForSnapshot(
         for (const MetricRule &rule : rulesForDeviceKind(device.kind)) {
             DashboardMetricDefinition definition;
             definition.deviceId = device.id;
+            definition.hardwareKind = device.kind;
             definition.metricId = rule.metricId;
             definition.displayName = displayNameForDeviceMetric(device, rule);
             definition.unit = Metrics::metricUnit(rule.metricId);

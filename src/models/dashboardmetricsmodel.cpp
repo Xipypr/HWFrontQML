@@ -354,14 +354,6 @@ QString DashboardMetricsModel::makeWidgetId(const QString &deviceId, Metrics::Me
     return deviceId + QStringLiteral(":") + Metrics::metricIdToString(metricId);
 }
 
-bool DashboardMetricsModel::deviceIdContains(const MetricDescriptor &descriptor, const QString &text)
-{
-    if (text.isEmpty())
-        return true;
-
-    return descriptor.deviceId.contains(text, Qt::CaseInsensitive);
-}
-
 DashboardDisplay::Mode DashboardMetricsModel::defaultDisplayMode(Metrics::MetricId metricId)
 {
     if (metricId == Metrics::MetricId::NetworkDownload)
@@ -415,12 +407,12 @@ bool DashboardMetricsModel::addWidget(const MetricDescriptor &descriptor,
     return insertWidget(item);
 }
 
-bool DashboardMetricsModel::addFirstDefaultWidget(Metrics::MetricId metricId,
-                                                  const QString &deviceIdText,
+bool DashboardMetricsModel::addFirstDefaultWidget(HardwareKind hardwareKind,
+                                                  Metrics::MetricId metricId,
                                                   DashboardDisplay::Mode displayMode)
 {
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
-        if (descriptor.metricId == metricId && deviceIdContains(descriptor, deviceIdText))
+        if (descriptor.hardwareKind == hardwareKind && descriptor.metricId == metricId)
             return addWidget(descriptor, displayMode);
     }
 
@@ -527,26 +519,26 @@ void DashboardMetricsModel::syncInitialWidgetsWithMetrics()
     if (m_hasSeededInitialWidgets)
         return;
 
-    addFirstDefaultWidget(Metrics::MetricId::Loading,
-                          QStringLiteral("cpu"),
+    addFirstDefaultWidget(HardwareKind::Cpu,
+                          Metrics::MetricId::Loading,
                           DashboardDisplay::Mode::Arc180);
-    addFirstDefaultWidget(Metrics::MetricId::Temperature,
-                          QStringLiteral("cpu"),
+    addFirstDefaultWidget(HardwareKind::Cpu,
+                          Metrics::MetricId::Temperature,
                           DashboardDisplay::Mode::Segments);
-    addFirstDefaultWidget(Metrics::MetricId::Loading,
-                          QStringLiteral("gpu"),
+    addFirstDefaultWidget(HardwareKind::Gpu,
+                          Metrics::MetricId::Loading,
                           DashboardDisplay::Mode::Arc180);
-    addFirstDefaultWidget(Metrics::MetricId::Temperature,
-                          QStringLiteral("gpu"),
+    addFirstDefaultWidget(HardwareKind::Gpu,
+                          Metrics::MetricId::Temperature,
                           DashboardDisplay::Mode::Segments);
-    addFirstDefaultWidget(Metrics::MetricId::Loading,
-                          QStringLiteral("ram"),
+    addFirstDefaultWidget(HardwareKind::Memory,
+                          Metrics::MetricId::Loading,
                           DashboardDisplay::Mode::Segments);
-    addFirstDefaultWidget(Metrics::MetricId::BatteryLevel,
-                          QString(),
+    addFirstDefaultWidget(HardwareKind::Battery,
+                          Metrics::MetricId::BatteryLevel,
                           DashboardDisplay::Mode::Segments);
-    addFirstDefaultWidget(Metrics::MetricId::NetworkDownload,
-                          QStringLiteral("nic"),
+    addFirstDefaultWidget(HardwareKind::Network,
+                          Metrics::MetricId::NetworkDownload,
                           DashboardDisplay::Mode::NetworkVertical);
 
     if (!m_items.isEmpty())

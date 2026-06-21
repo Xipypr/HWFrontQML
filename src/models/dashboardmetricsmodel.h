@@ -78,13 +78,12 @@ private:
 
     static bool isMetricKeyValid(const QString &deviceId, Metrics::MetricId metricId);
     static QString makeWidgetId(const QString &deviceId, Metrics::MetricId metricId);
-    static bool deviceIdContains(const MetricDescriptor &descriptor, const QString &text);
     static DashboardDisplay::Mode defaultDisplayMode(Metrics::MetricId metricId);
     int widgetIndexById(const QString &widgetId) const;
     int widgetIndexForMetric(const QString &deviceId, Metrics::MetricId metricId) const;
     bool addWidget(const MetricDescriptor &descriptor, DashboardDisplay::Mode displayMode);
-    bool addFirstDefaultWidget(Metrics::MetricId metricId,
-                               const QString &deviceIdText,
+    bool addFirstDefaultWidget(HardwareKind hardwareKind,
+                               Metrics::MetricId metricId,
                                DashboardDisplay::Mode displayMode);
     bool insertWidget(const WidgetItem &item);
     bool removeWidgetAt(int index);
