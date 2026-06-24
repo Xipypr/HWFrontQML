@@ -31,8 +31,13 @@ DashboardMetricProfile::SnapshotMetricIndex DashboardMetricProfile::indexForSnap
 
 QList<DashboardMetricDefinition> DashboardMetricProfile::definitionsForSnapshot(const HardwareSnapshot &snapshot) const
 {
+    return definitionsForSnapshot(snapshot, indexForSnapshot(snapshot));
+}
+
+QList<DashboardMetricDefinition> DashboardMetricProfile::definitionsForSnapshot(const HardwareSnapshot &snapshot,
+                                                                                const SnapshotMetricIndex &index) const
+{
     QList<DashboardMetricDefinition> definitions;
-    const SnapshotMetricIndex index = indexForSnapshot(snapshot);
 
     for (const HardwareDevice &device : snapshot.devices) {
         if (device.id.isEmpty())
@@ -55,16 +60,14 @@ QList<DashboardMetricDefinition> DashboardMetricProfile::definitionsForSnapshot(
     return definitions;
 }
 
-std::optional<Measurement> DashboardMetricProfile::measurementForDefinition(
-    const HardwareSnapshot &snapshot,
-    const DashboardMetricDefinition &definition) const
+std::optional<Measurement> DashboardMetricProfile::measurementForDefinition(const HardwareSnapshot &snapshot,
+                                                                            const DashboardMetricDefinition &definition) const
 {
     return measurementForDefinition(indexForSnapshot(snapshot), definition);
 }
 
-std::optional<Measurement> DashboardMetricProfile::measurementForDefinition(
-    const SnapshotMetricIndex &index,
-    const DashboardMetricDefinition &definition) const
+std::optional<Measurement> DashboardMetricProfile::measurementForDefinition(const SnapshotMetricIndex &index,
+                                                                            const DashboardMetricDefinition &definition) const
 {
     if (definition.deviceId.isEmpty() || definition.metricId == Metrics::MetricId::Unknown)
         return std::nullopt;

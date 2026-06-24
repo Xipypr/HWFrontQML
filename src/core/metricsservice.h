@@ -27,8 +27,10 @@ signals:
                        double value);
 
 private:
-    void discoverMetrics(const HardwareSnapshot &snapshot);
-    void refreshMetricValues(const HardwareSnapshot &snapshot);
+    void discoverMetrics(const HardwareSnapshot &snapshot,
+                         const DashboardMetricProfile::SnapshotMetricIndex &index);
+
+    void refreshMetricValues(const DashboardMetricProfile::SnapshotMetricIndex &index);
 
     bool m_metricsDiscovered = false;
     QList<MetricDescriptor> m_availableMetrics;
