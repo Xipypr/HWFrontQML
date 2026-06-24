@@ -40,17 +40,21 @@ QList<MetricDescriptor> MetricsService::metricDescriptors() const
 
 void MetricsService::processSnapshot(const HardwareSnapshot &snapshot)
 {
-    if (!m_metricsDiscovered)
-        discoverMetrics(snapshot);
+    const DashboardMetricProfile::SnapshotMetricIndex index = m_metricProfile.indexForSnapshot(snapshot);
 
-    refreshMetricValues(snapshot);
+    if (!m_metricsDiscovered)
+        discoverMetrics(snapshot, index);
+
+    refreshMetricValues(index);
 }
 
-void MetricsService::discoverMetrics(const HardwareSnapshot &snapshot)
+void MetricsService::discoverMetrics(
+    const HardwareSnapshot &snapshot,
+    const DashboardMetricProfile::SnapshotMetricIndex &index)
 {
     m_availableMetrics.clear();
 
-    for (const DashboardMetricDefinition &definition : m_metricProfile.definitionsForSnapshot(snapshot)) {
+    for (const DashboardMetricDefinition &definition : m_metricProfile.definitionsForSnapshot(snapshot, index)) {
         m_availableMetrics.append({
             definition.deviceId,
             definition.hardwareKind,
@@ -65,10 +69,8 @@ void MetricsService::discoverMetrics(const HardwareSnapshot &snapshot)
     emit availableMetricsChanged(m_availableMetrics);
 }
 
-void MetricsService::refreshMetricValues(const HardwareSnapshot &snapshot)
+void MetricsService::refreshMetricValues(const DashboardMetricProfile::SnapshotMetricIndex &index)
 {
-    const DashboardMetricProfile::SnapshotMetricIndex index = m_metricProfile.indexForSnapshot(snapshot);
-
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
         const DashboardMetricDefinition definition {
             descriptor.deviceId,
