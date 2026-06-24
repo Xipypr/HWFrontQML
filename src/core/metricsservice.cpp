@@ -67,6 +67,8 @@ void MetricsService::discoverMetrics(const HardwareSnapshot &snapshot)
 
 void MetricsService::refreshMetricValues(const HardwareSnapshot &snapshot)
 {
+    const DashboardMetricProfile::SnapshotMetricIndex index = m_metricProfile.indexForSnapshot(snapshot);
+
     for (const MetricDescriptor &descriptor : m_availableMetrics) {
         const DashboardMetricDefinition definition {
             descriptor.deviceId,
@@ -76,7 +78,7 @@ void MetricsService::refreshMetricValues(const HardwareSnapshot &snapshot)
             descriptor.unit,
             descriptor.showProgressBar
         };
-        const std::optional<Measurement> measurement = m_metricProfile.measurementForDefinition(snapshot, definition);
+        const std::optional<Measurement> measurement = m_metricProfile.measurementForDefinition(index, definition);
         if (!measurement.has_value())
             continue;
 
