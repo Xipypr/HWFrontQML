@@ -19,6 +19,14 @@ QtObject {
     property color headerButtonPressed
     property color metricTrack
 
+    property color titleBarBackground
+    property color titleBarText
+    property color titleBarButtonHover
+    property color titleBarButtonPressed
+    property color titleBarCloseHover
+    property color titleBarClosePressed
+    property color titleBarCloseForeground
+
     property color valueOnly
     property color normal
     property color warning

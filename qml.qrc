@@ -21,6 +21,8 @@
         <file>qml/components/RawLayioutConnection.qml</file>
         <file>qml/controls/LinearBusyIndicator.qml</file>
         <file>qml/controls/StatusIndicator.qml</file>
+        <file>qml/controls/WindowTitleBar.qml</file>
+        <file>qml/controls/WindowResizeFrame.qml</file>
         <file>qml/dialogs/AliasInputDialog.qml</file>
         <file>qml/dialogs/DeviceSettingsDialog.qml</file>
         <file>qml/dialogs/NetworkDisplayModeDialog.qml</file>
