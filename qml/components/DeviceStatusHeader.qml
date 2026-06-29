@@ -17,9 +17,9 @@ ToolBar {
     signal clicked()
     signal homeClicked()
 
-    implicitHeight: 56
+    implicitHeight: 45
     horizontalPadding: 16
-    verticalPadding: 8
+    verticalPadding: 7
 
     background: Rectangle {
         color: headerTap.pressed ? root.pressedBackgroundColor : root.backgroundColor

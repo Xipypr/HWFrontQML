@@ -2,19 +2,47 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Controls.Material 2.15
 import QtQuick.Window 2.12
-import QtQuick.Layouts 1.3
 import "."
 import "pages"
 import "dialogs"
+import "controls"
 
 ApplicationWindow {
+    id: root
+
+    readonly property bool customTitleBar: Qt.platform.os !== "android"
+                                           && Qt.platform.os !== "ios"
+
+    function windowFlags() {
+        if (customTitleBar)
+            return Qt.Window | Qt.FramelessWindowHint
+
+        return Qt.Window
+    }
+
+    function materialTheme() {
+        if (Theme.isLight)
+            return Material.Light
+
+        return Material.Dark
+    }
+
+    function contentTopMargin() {
+        if (customTitleBar)
+            return titleBar.height
+
+        return 0
+    }
+
     width: 640
     height: 480
+    minimumWidth: 420
+    minimumHeight: 320
     visible: true
     title: qsTr("Hardware Monitor")
-    id: root
+    flags: root.windowFlags()
     color: Theme.background
-    Material.theme: Theme.isLight ? Material.Light : Material.Dark
+    Material.theme: root.materialTheme()
     Material.accent: Theme.accent
     Material.primary: Theme.headerBackground
     Material.background: Theme.background
@@ -24,14 +52,35 @@ ApplicationWindow {
         swipeView.currentIndex = 0
     }
 
+    WindowTitleBar {
+        id: titleBar
+        anchors.top: parent.top
+        anchors.left: parent.left
+        anchors.right: parent.right
+        window: root
+        visible: root.customTitleBar
+        z: 10
+    }
+
+    WindowResizeFrame {
+        anchors.fill: parent
+        window: root
+        enabled: root.customTitleBar
+        z: 100
+    }
+
     SwipeView {
         id: swipeView
-        anchors.fill: parent
+        anchors.top: parent.top
+        anchors.topMargin: root.contentTopMargin()
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
 
         PageAuthForm {
             id: pageAuth
             onSettingsRequested: settingsDialog.open()
-            onSessionSelected: (sessionId) => swipeToSessionPage(sessionId)
+            onSessionSelected: (sessionId) => root.swipeToSessionPage(sessionId)
         }
 
         Repeater {
@@ -63,4 +112,5 @@ ApplicationWindow {
 
         swipeView.currentIndex = sessionIndex + 1
     }
+
 }

@@ -19,6 +19,14 @@ BasePalette {
     headerButtonPressed: "#B4C3D2"
     metricTrack: "#C3CFDC"
 
+    titleBarBackground: "#D4DEE8"
+    titleBarText: "#50647B"
+    titleBarButtonHover: "#C5D1DD"
+    titleBarButtonPressed: "#B6C5D3"
+    titleBarCloseHover: "#C9364E"
+    titleBarClosePressed: "#AA2940"
+    titleBarCloseForeground: "#FFFFFF"
+
     valueOnly: "#287A9F"
     normal: "#15803D"
     warning: "#B45309"

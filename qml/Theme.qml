@@ -44,6 +44,14 @@ QtObject {
     readonly property color headerButtonPressed: palette.headerButtonPressed
     readonly property color metricTrack: palette.metricTrack
 
+    readonly property color titleBarBackground: palette.titleBarBackground
+    readonly property color titleBarText: palette.titleBarText
+    readonly property color titleBarButtonHover: palette.titleBarButtonHover
+    readonly property color titleBarButtonPressed: palette.titleBarButtonPressed
+    readonly property color titleBarCloseHover: palette.titleBarCloseHover
+    readonly property color titleBarClosePressed: palette.titleBarClosePressed
+    readonly property color titleBarCloseForeground: palette.titleBarCloseForeground
+
     readonly property color valueOnly: palette.valueOnly
     readonly property color normal: palette.normal
     readonly property color warning: palette.warning
