@@ -96,6 +96,8 @@ qt_add_executable(HWFrontQML
     src/app/main.cpp
     src/app/languagemanager.cpp
     src/app/languagemanager.h
+    src/app/thememanager.cpp
+    src/app/thememanager.h
 
     src/core/core.cpp
     src/core/core.h

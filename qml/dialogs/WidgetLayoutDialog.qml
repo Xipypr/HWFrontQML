@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import ".."
 
 Dialog {
     id: root
@@ -79,7 +80,7 @@ Dialog {
         Label {
             Layout.fillWidth: true
             text: qsTr("Widget layout")
-            color: "#E2E8F0"
+            color: Theme.textPrimary
             font.pixelSize: 18
             font.bold: true
             horizontalAlignment: Text.AlignHCenter
@@ -97,9 +98,9 @@ Dialog {
                 width: widgetsList.width
                 height: 52
                 radius: 8
-                color: "#1E293B"
+                color: Theme.surfaceRaised
                 border.width: 1
-                border.color: "#334155"
+                border.color: Theme.border
 
                 RowLayout {
                     anchors.fill: parent
@@ -113,14 +114,14 @@ Dialog {
                         Label {
                             Layout.fillWidth: true
                             text: model.title
-                            color: "#E2E8F0"
+                            color: Theme.textPrimary
                             elide: Text.ElideRight
                         }
 
                         Label {
                             Layout.fillWidth: true
                             text: model.metricId + (model.unit ? " · " + model.unit : "")
-                            color: "#94A3B8"
+                            color: Theme.textSecondary
                             font.pixelSize: 11
                             elide: Text.ElideRight
                         }
@@ -201,7 +202,7 @@ Dialog {
             Layout.fillWidth: true
             visible: root.addError.length > 0
             text: root.addError
-            color: "#F87171"
+            color: Theme.critical
             wrapMode: Text.WordWrap
             font.pixelSize: 12
         }

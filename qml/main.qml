@@ -1,7 +1,9 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Controls.Material 2.15
 import QtQuick.Window 2.12
 import QtQuick.Layouts 1.3
+import "."
 import "pages"
 import "dialogs"
 
@@ -11,6 +13,12 @@ ApplicationWindow {
     visible: true
     title: qsTr("Hardware Monitor")
     id: root
+    color: Theme.background
+    Material.theme: Theme.isLight ? Material.Light : Material.Dark
+    Material.accent: Theme.accent
+    Material.primary: Theme.headerBackground
+    Material.background: Theme.background
+    Material.foreground: Theme.textPrimary
 
     function goToStartPage() {
         swipeView.currentIndex = 0

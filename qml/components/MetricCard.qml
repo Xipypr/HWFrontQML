@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import DashboardDisplay 1.0
+import ".."
 
 DashboardCard {
     id: card
@@ -22,10 +23,10 @@ DashboardCard {
 
     readonly property int warningThreshold: 70
     readonly property int criticalThreshold: 90
-    readonly property color valueOnlyAccentColor: "#38BDF8"
-    readonly property color normalAccentColor: "#22C55E"
-    readonly property color warningAccentColor: "#F59E0B"
-    readonly property color criticalAccentColor: "#EF4444"
+    readonly property color valueOnlyAccentColor: Theme.valueOnly
+    readonly property color normalAccentColor: Theme.normal
+    readonly property color warningAccentColor: Theme.warning
+    readonly property color criticalAccentColor: Theme.critical
     readonly property int safeValue: Math.max(0, Math.min(100, value))
     readonly property bool useStatusColor: showProgressBar && metricId !== "batteryLevel"
     readonly property bool isCriticalValue: useStatusColor && safeValue >= criticalThreshold
@@ -138,7 +139,7 @@ DashboardCard {
 
             Text {
                 text: card.title
-                color: "#BFDBFE"
+                color: Theme.titleText
                 font.pixelSize: 14
                 font.bold: true
                 elide: Text.ElideRight
@@ -173,7 +174,7 @@ DashboardCard {
             visible: !card.showProgressBar
                      || (card.displayMode !== DashboardDisplay.Arc180
                          && card.displayMode !== DashboardDisplay.Ring)
-            color: "#F8FAFC"
+            color: Theme.textPrimary
             font.pixelSize: card.valueFontSize
             font.family: card.valueFontFamily
             font.bold: true
@@ -267,7 +268,7 @@ DashboardCard {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 10
                     radius: 3
-                    color: index < Math.ceil(card.safeValue / 10) ? card.accentColor : "#334155"
+                    color: index < Math.ceil(card.safeValue / 10) ? card.accentColor : Theme.metricTrack
                 }
             }
         }
@@ -279,7 +280,7 @@ DashboardCard {
         Rectangle {
             implicitHeight: 12
             radius: 6
-            color: "#334155"
+            color: Theme.metricTrack
 
             Rectangle {
                 width: parent.width * card.safeValue / 100
@@ -321,7 +322,7 @@ DashboardCard {
                     ctx.lineWidth = lineWidth;
                     ctx.lineCap = "round";
 
-                    ctx.strokeStyle = "#334155";
+                    ctx.strokeStyle = Theme.metricTrack;
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, radius, 0, Math.PI * 2, false);
                     ctx.stroke();
@@ -347,7 +348,7 @@ DashboardCard {
             Text {
                 anchors.centerIn: parent
                 text: card.formattedValue() + card.unit
-                color: "#F8FAFC"
+                color: Theme.textPrimary
                 width: card.compactValueTextWidth
                 horizontalAlignment: Text.AlignHCenter
                 font.family: card.valueFontFamily
@@ -388,7 +389,7 @@ DashboardCard {
                     ctx.clearRect(0, 0, width, height);
 
                     // Base 180° segment (ring segment)
-                    ctx.fillStyle = "#334155";
+                    ctx.fillStyle = Theme.metricTrack;
                     ctx.beginPath();
                     ctx.arc(centerX, centerY, outerRadius, startAngle, 0, false);
                     ctx.arc(centerX, centerY, innerRadius, 0, startAngle, true);
@@ -423,7 +424,7 @@ DashboardCard {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.verticalCenterOffset: 28
                 text: card.formattedValue() + card.unit
-                color: "#F8FAFC"
+                color: Theme.textPrimary
                 width: card.compactValueTextWidth
                 horizontalAlignment: Text.AlignHCenter
                 font.family: card.valueFontFamily

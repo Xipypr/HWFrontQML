@@ -1,6 +1,13 @@
 <RCC>
     <qresource prefix="/">
         <file>qml/main.qml</file>
+        <file>qml/qmldir</file>
+        <file>qml/Theme.qml</file>
+        <file>qml/themes/BasePalette.qml</file>
+        <file>qml/themes/NightPalette.qml</file>
+        <file>qml/themes/SoftLightPalette.qml</file>
+        <file>qml/themes/GraphitePalette.qml</file>
+        <file>qml/themes/OledPalette.qml</file>
         <file>qtquickcontrols2.conf</file>
         <file>qml/pages/PageAuthForm.qml</file>
         <file>qml/pages/PageDevicesInfo.qml</file>

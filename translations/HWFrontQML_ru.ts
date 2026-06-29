@@ -182,6 +182,26 @@
         <translation>Язык</translation>
     </message>
     <message>
+        <source>Theme</source>
+        <translation>Тема</translation>
+    </message>
+    <message>
+        <source>Night</source>
+        <translation>Ночная</translation>
+    </message>
+    <message>
+        <source>Soft Light</source>
+        <translation>Мягкая светлая</translation>
+    </message>
+    <message>
+        <source>Graphite</source>
+        <translation>Графитовая</translation>
+    </message>
+    <message>
+        <source>OLED</source>
+        <translation>OLED</translation>
+    </message>
+    <message>
         <location filename="../qml/dialogs/SettingsDialog.qml" line="68"/>
         <source>Save sessions and widget layout</source>
         <translation>Сохранять сессии и layout виджетов</translation>
