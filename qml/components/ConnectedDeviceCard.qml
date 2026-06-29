@@ -2,6 +2,7 @@ import QtQuick 2.15
 import QtQuick.Controls 2.15
 import SessionState 1.0
 import "../controls"
+import ".."
 
 Item {
     id: root
@@ -33,8 +34,8 @@ Item {
         anchors.fill: parent
         visible: root.connected
         radius: 6
-        color: "#2E3B52"
-        border.color: "#4E5D78"
+        color: Theme.surfaceRaised
+        border.color: Theme.border
         border.width: 1
         clip: true
 
@@ -44,7 +45,7 @@ Item {
             anchors.leftMargin: 12
             anchors.rightMargin: 28
             verticalAlignment: Text.AlignVCenter
-            color: "#FFFFFF"
+            color: Theme.textPrimary
             elide: Text.ElideRight
             text: root.deviceName
         }

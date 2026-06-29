@@ -8,6 +8,7 @@
 #include "hwconnector.h"
 
 #include "languagemanager.h"
+#include "thememanager.h"
 
 #include "../core/sessionmanager.h"
 #include "../core/sessionstate.h"
@@ -29,6 +30,7 @@ int main(int argc, char *argv[])
     QQmlApplicationEngine engine;
     QQmlContext * context = engine.rootContext();
     auto *languageManager = new LanguageManager(&engine, &app);
+    auto *themeManager = new ThemeManager(&app);
     auto *sessionManager = new SessionManager(&app);
     if (sessionManager->persistSessionState()) {
         sessionManager->restoreSessionsState();
@@ -45,6 +47,7 @@ int main(int argc, char *argv[])
 
     context->setContextProperty("sessionManager", sessionManager);
     context->setContextProperty("languageManager", languageManager);
+    context->setContextProperty("themeManager", themeManager);
 
     const QUrl url(QStringLiteral("qrc:/qml/main.qml"));
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated,

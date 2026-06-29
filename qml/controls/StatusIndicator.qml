@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import SessionState 1.0
+import ".."
 
 Rectangle {
     id: root
@@ -9,17 +10,17 @@ Rectangle {
     readonly property color indicatorColor: {
         switch (sessionState) {
         case SessionState.CONNECTED:
-            return "#22C55E"
+            return Theme.normal
         case SessionState.CONNECTING:
-            return "#3B82F6"
+            return Theme.connecting
         case SessionState.RECONNECTING:
-            return "#EAB308"
+            return Theme.reconnecting
         case SessionState.ERROR:
-            return "#EF4444"
+            return Theme.critical
         case SessionState.IDLE:
         case SessionState.DISCONNECTED:
         default:
-            return "#9CA3AF"
+            return Theme.inactive
         }
     }
 

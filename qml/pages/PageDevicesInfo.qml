@@ -6,6 +6,7 @@ import SessionState 1.0
 import DashboardModels 1.0
 import "../components"
 import "../dialogs"
+import ".."
 
 Page {
     id: root
@@ -153,7 +154,7 @@ Page {
             Layout.fillWidth: true
             Layout.fillHeight: true
             text: qsTr("Device unavailable")
-            color: "#CBD5E1"
+            color: Theme.textSecondary
             font.pixelSize: 18
             font.bold: true
             horizontalAlignment: Text.AlignHCenter

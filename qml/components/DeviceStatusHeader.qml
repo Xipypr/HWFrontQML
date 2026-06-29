@@ -3,14 +3,15 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import SessionState 1.0
 import "../controls"
+import ".."
 
 ToolBar {
     id: root
     property string headerText: ""
     property bool showIndicator: true
     property int sessionState: SessionState.IDLE
-    property color backgroundColor: "#17233A"
-    property color pressedBackgroundColor: "#223150"
+    property color backgroundColor: Theme.headerBackground
+    property color pressedBackgroundColor: Theme.headerPressed
     property bool showHomeButton: false
     property string headerIconSource: ""
     signal clicked()
@@ -42,8 +43,8 @@ ToolBar {
             onClicked: root.homeClicked()
             background: Rectangle {
                 radius: 8
-                color: homeButton.down ? "#2D3F61" : "#223150"
-                border.color: "#3A4B6B"
+                color: homeButton.down ? Theme.headerButtonPressed : Theme.headerButton
+                border.color: Theme.border
                 border.width: 1
             }
         }
@@ -56,7 +57,7 @@ ToolBar {
             icon.source: root.headerIconSource
             icon.width: 24
             icon.height: 24
-            icon.color: "#E2E8F0"
+            icon.color: Theme.textPrimary
             Layout.preferredWidth: 24
             Layout.preferredHeight: 24
             Layout.alignment: Qt.AlignVCenter
@@ -68,7 +69,7 @@ ToolBar {
             id: nameLabel
             Layout.fillWidth: true
             text: root.headerText
-            color: "#E2E8F0"
+            color: Theme.textPrimary
             font.pixelSize: 16
             font.bold: true
             elide: Text.ElideRight

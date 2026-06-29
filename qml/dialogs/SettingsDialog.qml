@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import ".."
 
 Dialog {
     id: root
@@ -16,6 +17,53 @@ Dialog {
 
     contentItem: ColumnLayout {
         spacing: 12
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 12
+
+            Label {
+                Layout.fillWidth: true
+                text: qsTr("Theme")
+                wrapMode: Text.WordWrap
+            }
+
+            ComboBox {
+                id: themeComboBox
+                Layout.preferredWidth: 150
+                textRole: "label"
+                model: [
+                    { code: "night", label: qsTr("Night") },
+                    { code: "light", label: qsTr("Soft Light") },
+                    { code: "graphite", label: qsTr("Graphite") },
+                    { code: "oled", label: qsTr("OLED") }
+                ]
+
+                function updateCurrentIndex() {
+                    for (let i = 0; i < model.length; ++i) {
+                        if (model[i].code === themeManager.currentTheme) {
+                            currentIndex = i
+                            return
+                        }
+                    }
+                    currentIndex = 0
+                }
+
+                Component.onCompleted: updateCurrentIndex()
+                onActivated: function(index) {
+                    const selectedTheme = model[index]
+                    if (selectedTheme)
+                        themeManager.currentTheme = selectedTheme.code
+                }
+
+                Connections {
+                    target: themeManager
+                    function onCurrentThemeChanged() {
+                        themeComboBox.updateCurrentIndex()
+                    }
+                }
+            }
+        }
 
         RowLayout {
             Layout.fillWidth: true

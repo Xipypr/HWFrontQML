@@ -1,6 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
+import ".."
 
 Dialog {
     id: root
@@ -23,7 +24,7 @@ Dialog {
         Label {
             Layout.fillWidth: true
             text: qsTr("Device settings")
-            color: "#E2E8F0"
+            color: Theme.textPrimary
             font.pixelSize: 18
             font.bold: true
             horizontalAlignment: Text.AlignHCenter

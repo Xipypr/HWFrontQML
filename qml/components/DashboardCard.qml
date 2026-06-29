@@ -1,14 +1,15 @@
 import QtQuick 2.15
+import ".."
 
 Rectangle {
     id: cardFrame
 
-    property color accentColor: "#38BDF8"
+    property color accentColor: Theme.valueOnly
 
     radius: 16
-    color: Qt.rgba(27 / 255, 36 / 255, 51 / 255, 0.86)
+    color: Theme.cardSurface
     border.width: 1
-    border.color: Qt.rgba(100 / 255, 116 / 255, 139 / 255, 0.55)
+    border.color: Theme.border
 
     Rectangle {
         anchors.fill: parent
@@ -19,6 +20,6 @@ Rectangle {
         border.color: Qt.rgba(cardFrame.accentColor.r,
                               cardFrame.accentColor.g,
                               cardFrame.accentColor.b,
-                              0.25)
+                              Theme.cardAccentOpacity)
     }
 }

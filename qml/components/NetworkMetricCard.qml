@@ -5,6 +5,7 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 1.3
 import "../dialogs"
 import DashboardDisplay 1.0
+import ".."
 
 DashboardCard {
     id: card
@@ -17,8 +18,8 @@ DashboardCard {
 
     signal displayModeSelected(int displayMode)
 
-    readonly property color downloadColor: "#93C5FD"
-    readonly property color uploadColor: "#C4B5FD"
+    readonly property color downloadColor: Theme.download
+    readonly property color uploadColor: Theme.upload
     readonly property string valueFontFamily: "Consolas"
     accentColor: downloadColor
 
@@ -39,7 +40,7 @@ DashboardCard {
         Text {
             Layout.fillWidth: true
             text: card.title
-            color: "#BFDBFE"
+            color: Theme.titleText
             font.pixelSize: 14
             font.bold: true
             elide: Text.ElideRight
@@ -90,7 +91,7 @@ DashboardCard {
             Rectangle {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 1
-                color: "#334155"
+                color: Theme.metricTrack
             }
 
             NetworkMetricRow {
@@ -124,7 +125,7 @@ DashboardCard {
                 Layout.fillHeight: true
                 Layout.topMargin: 4
                 Layout.bottomMargin: 4
-                color: "#334155"
+                color: Theme.metricTrack
             }
 
             NetworkMetricColumn {
@@ -163,7 +164,7 @@ DashboardCard {
 
         Text {
             text: parent.valueText
-            color: "#F8FAFC"
+            color: Theme.textPrimary
             font.pixelSize: 25
             font.family: card.valueFontFamily
             font.bold: true
@@ -202,7 +203,7 @@ DashboardCard {
         Text {
             Layout.alignment: Qt.AlignHCenter
             text: metricColumn.valueText
-            color: "#F8FAFC"
+            color: Theme.textPrimary
             font.pixelSize: 24
             font.family: card.valueFontFamily
             font.bold: true
